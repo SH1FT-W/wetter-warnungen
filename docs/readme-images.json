@@ -1,0 +1,131 @@
+{
+  "$comment": "Inhalt der README-Bilder. Karten: node sh1ft-w.github.io/theme/v1/readme-images/render.mjs <dieses Repo> cards. Das Titelbild docs/images/readme-title.webp (ein Bild für hell und dunkel) entsteht aus tools/readme-title.html; die Projektseite zeigt dasselbe Bild im Hero.",
+  "colors": {
+    "light": {
+      "bg": "#F2F6FC",
+      "bg2": "#E3ECF8",
+      "ink": "#0C1626",
+      "ink2": "#46566B",
+      "ink3": "#7B899C",
+      "accentText": "#1F6FE0",
+      "accent": "#3D8BFF",
+      "accent2": "#7CB2FF",
+      "glow1": "rgba(61,139,255,0.14)",
+      "glow2": "rgba(255,190,80,0.10)",
+      "frame": "rgba(5,20,50,0.10)",
+      "pillBg": "#ffffff",
+      "pillLine": "rgba(5,20,50,0.08)",
+      "win": "#07101E",
+      "bar": ""
+    },
+    "dark": {
+      "bg": "#07101E",
+      "bg2": "#0C182B",
+      "ink": "#EAF1FA",
+      "ink2": "rgba(214,226,242,0.84)",
+      "ink3": "rgba(214,226,242,0.52)",
+      "accentText": "#7CB2FF",
+      "accent": "#3D8BFF",
+      "accent2": "#7CB2FF",
+      "glow1": "rgba(61,139,255,0.20)",
+      "glow2": "rgba(255,190,80,0.08)",
+      "frame": "rgba(255,255,255,0.10)",
+      "pillBg": "rgba(255,255,255,0.06)",
+      "pillLine": "rgba(255,255,255,0.10)",
+      "win": "#07101E",
+      "bar": ""
+    }
+  },
+  "fonts": {
+    "display": "\"Archivo\", -apple-system, system-ui, sans-serif",
+    "body": "\"Inter\", -apple-system, system-ui, sans-serif",
+    "mono": "\"JetBrains Mono\", ui-monospace, Menlo, monospace",
+    "google": "https://fonts.googleapis.com/css2?family=Archivo:wght@700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap"
+  },
+  "cards": {
+    "features": [
+      {
+        "icon": "weather-partly-rainy",
+        "title": "DWD-Vorhersage",
+        "text": "MOSMIX-Vorhersage des Deutschen Wetterdienstes: stündlich für 48 Stunden, täglich für 8 Tage, mit Höchst- und Tiefstwert, Regenmenge, Regenrisiko, Wind, Böen und Bewölkung."
+      },
+      {
+        "icon": "thermometer",
+        "title": "Aktuelle Werte",
+        "text": "Gemessen an der nächsten DWD-Station. Lücken füllt die Vorhersage der laufenden Stunde."
+      },
+      {
+        "icon": "home-thermometer-outline",
+        "title": "Eigene Sensoren zuerst",
+        "text": "Temperatur, Luftfeuchte und Regen von einem Sensor in der Nähe (Ecowitt, Davis, Shelly, Netatmo und andere) gehen vor, solange sie höchstens eine Stunde alt sind."
+      },
+      {
+        "icon": "alert-outline",
+        "title": "Alle amtlichen Warnungen",
+        "text": "DWD-Warnungen für deine Gemeinde, dazu MoWaS, KATWARN, BIWAPP, Hochwasser und Polizei für deinen Kreis, alle 2 Minuten abgefragt."
+      },
+      {
+        "icon": "shield-check-outline",
+        "title": "Keine falsche Entwarnung",
+        "text": "Ist eine Quelle nicht erreichbar, bleiben ihre letzten Warnungen stehen. Abgelaufene Warnungen verschwinden trotzdem pünktlich."
+      },
+      {
+        "icon": "rocket-launch-outline",
+        "title": "Startet sofort",
+        "text": "Der letzte Stand kommt aus dem Speicher, frische Daten erst nach dem Start von Home Assistant. Ohne Konto, ohne Schlüssel, ohne zusätzliche Python-Pakete."
+      }
+    ],
+    "entities": [
+      {
+        "icon": "weather-partly-cloudy",
+        "title": "Wetter-Entität",
+        "text": "Aktuelles Wetter mit Vorhersage stündlich (48 Std.) und täglich (8 Tage) über weather.get_forecasts."
+      },
+      {
+        "icon": "thermometer-lines",
+        "title": "Messwerte",
+        "text": "Temperatur, Luftfeuchte, Taupunkt, Druck, Wind, Böen, Windrichtung, Niederschlag, Sichtweite, Bewölkung und Wetterzustand."
+      },
+      {
+        "icon": "umbrella-outline",
+        "title": "Regen und Sonne",
+        "text": "Regenwahrscheinlichkeit für diese Stunde und für heute, Sonneneinstrahlung in W/m² aus der Vorhersage."
+      },
+      {
+        "icon": "alert-circle-outline",
+        "title": "Warnungen",
+        "text": "Ein Zähler mit allen Warnungen als Attribut, die schlimmste zuerst, und Warnung 1 bis 5 mit denselben Attributen wie die NINA-Integration."
+      },
+      {
+        "icon": "map-marker-radius-outline",
+        "title": "Nachbarschaft",
+        "text": "Woher die aktuellen Werte kommen, dazu Bereich, Fläche, Abstand und ein Radius-Regler für einen Netatmo-Wetterbereich."
+      },
+      {
+        "icon": "stethoscope",
+        "title": "Diagnose",
+        "text": "Herunterladen mit geschwärzten Koordinaten und geschwärztem Warngebiet."
+      }
+    ],
+    "how": {
+      "cols": 3,
+      "items": [
+        {
+          "icon": "weather-cloudy-clock",
+          "title": "Bright Sky",
+          "text": "Vorhersage, Stationswerte und DWD-Warnungen aus der freien Bright-Sky-Schnittstelle für die offenen Daten des DWD, alle 10 Minuten."
+        },
+        {
+          "icon": "bullhorn-outline",
+          "title": "Warnsystem des Bundes",
+          "text": "Die übrigen amtlichen Warnungen für deinen Kreis von warnung.bund.de, dieselben Daten wie in der NINA-App, alle 2 Minuten."
+        },
+        {
+          "icon": "home-outline",
+          "title": "Deine Nachbarschaft",
+          "text": "Sensoren aus den Optionen gehen vor, solange sie frisch sind. Sonst gilt der Wert des DWD."
+        }
+      ]
+    }
+  }
+}

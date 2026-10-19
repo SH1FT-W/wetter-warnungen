@@ -1,0 +1,126 @@
+# Integration Quality Scale, selbst geprüft, nicht offiziell (keine Core-Integration).
+# Regeln: https://developers.home-assistant.io/docs/core/integration-quality-scale/rules
+rules:
+  # Bronze
+  action-setup:
+    status: exempt
+    comment: Keine eigenen Aktionen; Vorhersage über das Standard-weather.get_forecasts.
+  appropriate-polling:
+    status: done
+    comment: Wetter alle 10 Min. (MOSMIX/SYNOP ändern sich stündlich), Warnungen alle 2 Min. (Sicherheit, winzige Abfragen).
+  brands:
+    status: done
+    comment: Eigenes Logo in brand/.
+  common-modules:
+    status: done
+    comment: Koordinatoren in coordinator.py, Basis in entity.py, reine Auswertung in model.py/warnings.py, Abrufe in api.py.
+  config-flow-test-coverage: done
+  config-flow:
+    status: done
+    comment: Name + Ort (LocationSelector), data_description für alle Felder; Netatmo-Wetterbereich in der Nähe wird automatisch eingetragen.
+  dependency-transparency:
+    status: done
+    comment: Keine requirements; nur aiohttp aus Home Assistant.
+  docs-actions:
+    status: exempt
+    comment: Keine eigenen Aktionen.
+  docs-high-level-description: done
+  docs-installation-instructions: done
+  docs-removal-instructions: done
+  entity-event-setup:
+    status: done
+    comment: Zustandslistener der Nachbarschaftssensoren über entry.async_on_unload abgemeldet.
+  entity-unique-id:
+    status: done
+    comment: <entry_id>_<key>.
+  has-entity-name: done
+  runtime-data: done
+  test-before-configure:
+    status: done
+    comment: Einrichtung und Neu-Konfigurieren fragen Bright Sky für den Ort ab.
+  test-before-setup:
+    status: done
+    comment: Ohne gespeicherten Stand async_config_entry_first_refresh (ConfigEntryNotReady); mit Stand sofort bereit.
+  unique-config-entry:
+    status: done
+    comment: Kennung = Ort auf 3 Nachkommastellen.
+
+  # Silver
+  action-exceptions:
+    status: exempt
+    comment: Keine eigenen Aktionen.
+  config-entry-unloading: done
+  docs-configuration-parameters: done
+  docs-installation-parameters: done
+  entity-unavailable:
+    status: done
+    comment: >-
+      Wetter-Entitäten werden bei fehlgeschlagener Abfrage nicht verfügbar. Warn-Entitäten bleiben bewusst verfügbar
+      mit dem letzten Stand – sonst löst ein kurzer Ausfall eine falsche Entwarnung aus.
+  integration-owner: done
+  log-when-unavailable:
+    status: done
+    comment: DataUpdateCoordinator loggt Ausfall und Rückkehr je einmal; Teil-Ausfälle der Warnquellen nur DEBUG.
+  parallel-updates: done
+  reauthentication-flow:
+    status: exempt
+    comment: Keine Zugangsdaten.
+  test-coverage:
+    status: done
+    comment: 100 %.
+
+  # Gold
+  devices:
+    status: done
+    comment: Ein Dienst-Gerät je Ort.
+  diagnostics:
+    status: done
+    comment: Koordinaten und Warngebiet (Gemeinde) geschwärzt.
+  discovery-update-info:
+    status: exempt
+    comment: Cloud-Dienst, nichts zu entdecken.
+  discovery:
+    status: exempt
+    comment: Cloud-Dienst, nichts zu entdecken.
+  docs-data-update: done
+  docs-examples: done
+  docs-known-limitations: done
+  docs-supported-devices:
+    status: exempt
+    comment: Dienst ohne Geräte.
+  docs-supported-functions: done
+  docs-troubleshooting: done
+  docs-use-cases: done
+  dynamic-devices:
+    status: exempt
+    comment: Genau ein Dienst-Gerät je Eintrag.
+  entity-category:
+    status: done
+    comment: Quelle und Nachbarschaft als Diagnose, Radius-Regler als Konfiguration.
+  entity-device-class: done
+  entity-disabled-by-default:
+    status: exempt
+    comment: Alle Entitäten sind Teil der Wetterstation, die die DWD-Integration ersetzt (gleiche Sensoren aktiv).
+  entity-translations: done
+  exception-translations: done
+  icon-translations: done
+  reconfiguration-flow:
+    status: done
+    comment: Ort ändern über Neu konfigurieren.
+  repair-issues:
+    status: exempt
+    comment: Nichts, was der Nutzer reparieren müsste; Ausfälle heilen von selbst.
+  stale-devices:
+    status: exempt
+    comment: Genau ein Dienst-Gerät je Eintrag.
+
+  # Platinum
+  async-dependency:
+    status: done
+    comment: aiohttp.
+  inject-websession:
+    status: done
+    comment: async_get_clientsession für Bright Sky und NINA.
+  strict-typing:
+    status: done
+    comment: mypy --strict ohne Fehler.

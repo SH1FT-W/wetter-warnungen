@@ -1,0 +1,88 @@
+{
+  "entity": {
+    "sensor": {
+      "wind_gust": {
+        "default": "mdi:weather-windy-variant"
+      },
+      "wind_speed": {
+        "default": "mdi:weather-windy"
+      },
+      "wind_bearing": {
+        "default": "mdi:compass-outline"
+      },
+      "solar": {
+        "default": "mdi:white-balance-sunny"
+      },
+      "cloud_cover": {
+        "default": "mdi:cloud-percent-outline"
+      },
+      "visibility": {
+        "default": "mdi:eye-outline"
+      },
+      "precipitation": {
+        "default": "mdi:weather-rainy"
+      },
+      "warnings": {
+        "default": "mdi:alert-outline",
+        "range": {
+          "0": "mdi:shield-check-outline",
+          "1": "mdi:alert-outline"
+        }
+      },
+      "condition": {
+        "default": "mdi:weather-partly-cloudy",
+        "state": {
+          "clear-night": "mdi:weather-night",
+          "cloudy": "mdi:weather-cloudy",
+          "fog": "mdi:weather-fog",
+          "hail": "mdi:weather-hail",
+          "lightning-rainy": "mdi:weather-lightning-rainy",
+          "partlycloudy": "mdi:weather-partly-cloudy",
+          "pouring": "mdi:weather-pouring",
+          "rainy": "mdi:weather-rainy",
+          "snowy": "mdi:weather-snowy",
+          "snowy-rainy": "mdi:weather-snowy-rainy",
+          "sunny": "mdi:weather-sunny",
+          "windy": "mdi:weather-windy"
+        }
+      },
+      "source": {
+        "default": "mdi:map-marker-radius",
+        "state": {
+          "local": "mdi:home-map-marker",
+          "mixed": "mdi:map-marker-radius",
+          "dwd": "mdi:weather-cloudy-clock"
+        }
+      },
+      "neighbourhood_area": {
+        "default": "mdi:map-marker-radius-outline"
+      },
+      "neighbourhood_size": {
+        "default": "mdi:vector-square"
+      },
+      "neighbourhood_distance": {
+        "default": "mdi:map-marker-distance"
+      },
+      "precipitation_probability": {
+        "default": "mdi:weather-rainy"
+      },
+      "precipitation_probability_today": {
+        "default": "mdi:umbrella-outline"
+      }
+    },
+    "binary_sensor": {
+      "warning": {
+        "default": "mdi:alert",
+        "state": {
+          "off": "mdi:shield-check-outline",
+          "on": "mdi:alert"
+        }
+      }
+    },
+    "number": {
+      "neighbourhood_radius": {
+        "default": "mdi:radius-outline"
+      }
+    }
+  }
+}

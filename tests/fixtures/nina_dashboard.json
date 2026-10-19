@@ -1,0 +1,107 @@
+[
+ {
+  "id": "mow.DE-XX-MUS-W001-20260904-000",
+  "payload": {
+   "version": 19,
+   "type": "ALERT",
+   "id": "mow.DE-XX-MUS-W001-20260904-000",
+   "hash": "7af2f725c2be7120b31ad49ec8e36aeb1ba26788f6726bc6c51cb5562dbdc131",
+   "data": {
+    "headline": "1. AKTUALISIERUNG: Bakteriologische Beeinträchtigung des Trinkwassers - Chlorung - Nord und Süd,...",
+    "provider": "MOWAS",
+    "severity": "Minor",
+    "urgency": "Immediate",
+    "msgType": "Update",
+    "transKeys": {
+     "event": "BBK-EVC-069"
+    },
+    "area": {
+     "type": "ZGEM",
+     "data": "5981,100001"
+    },
+    "valid": true
+   }
+  },
+  "i18nTitle": {
+   "de": "1. AKTUALISIERUNG: Bakteriologische Beeinträchtigung des Trinkwassers - Chlorung - Nord und Süd - Gde. Musterstadt",
+   "en": "Contaminated drinking water",
+   "ar": "تلوث مياه الشرب",
+   "es": "Contaminación de agua potable",
+   "fr": "Pollution de l'eau potable",
+   "pl": "Zanieczyszczenie wody pitnej",
+   "ru": "Загрязнение питьевой воды",
+   "tr": "İçme suyu kirlenmesi"
+  },
+  "sent": "2026-09-04T13:05:28+02:00"
+ },
+ {
+  "id": "dwd.2.49.0.0.276.0.DWD.PVW.1792060000000.abc",
+  "payload": {
+   "version": 19,
+   "type": "ALERT",
+   "id": "mow.DE-XX-MUS-W001-20260904-000",
+   "hash": "7af2f725c2be7120b31ad49ec8e36aeb1ba26788f6726bc6c51cb5562dbdc131",
+   "data": {
+    "headline": "1. AKTUALISIERUNG: Bakteriologische Beeinträchtigung des Trinkwassers - Chlorung - Nord und Süd,...",
+    "provider": "DWD",
+    "severity": "Minor",
+    "urgency": "Immediate",
+    "msgType": "Update",
+    "transKeys": {
+     "event": "BBK-EVC-069"
+    },
+    "area": {
+     "type": "ZGEM",
+     "data": "5981,100001"
+    },
+    "valid": true
+   }
+  },
+  "i18nTitle": {
+   "de": "1. AKTUALISIERUNG: Bakteriologische Beeinträchtigung des Trinkwassers - Chlorung - Nord und Süd - Gde. Musterstadt",
+   "en": "Contaminated drinking water",
+   "ar": "تلوث مياه الشرب",
+   "es": "Contaminación de agua potable",
+   "fr": "Pollution de l'eau potable",
+   "pl": "Zanieczyszczenie wody pitnej",
+   "ru": "Загрязнение питьевой воды",
+   "tr": "İçme suyu kirlenmesi"
+  },
+  "sent": "2026-09-04T13:05:28+02:00"
+ },
+ {
+  "id": "mow.DE-NI-EL-W001-20261015-000",
+  "payload": {
+   "version": 19,
+   "type": "ALERT",
+   "id": "mow.DE-XX-MUS-W001-20260904-000",
+   "hash": "7af2f725c2be7120b31ad49ec8e36aeb1ba26788f6726bc6c51cb5562dbdc131",
+   "data": {
+    "headline": "1. AKTUALISIERUNG: Bakteriologische Beeinträchtigung des Trinkwassers - Chlorung - Nord und Süd,...",
+    "provider": "MOWAS",
+    "severity": "Minor",
+    "urgency": "Immediate",
+    "msgType": "Cancel",
+    "transKeys": {
+     "event": "BBK-EVC-069"
+    },
+    "area": {
+     "type": "ZGEM",
+     "data": "5981,100001"
+    },
+    "valid": true
+   }
+  },
+  "i18nTitle": {
+   "de": "1. AKTUALISIERUNG: Bakteriologische Beeinträchtigung des Trinkwassers - Chlorung - Nord und Süd - Gde. Musterstadt",
+   "en": "Contaminated drinking water",
+   "ar": "تلوث مياه الشرب",
+   "es": "Contaminación de agua potable",
+   "fr": "Pollution de l'eau potable",
+   "pl": "Zanieczyszczenie wody pitnej",
+   "ru": "Загрязнение питьевой воды",
+   "tr": "İçme suyu kirlenmesi"
+  },
+  "sent": "2026-09-04T13:05:28+02:00"
+ }
+]

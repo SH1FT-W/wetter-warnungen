@@ -1,0 +1,134 @@
+<!doctype html>
+<!-- README-Titelbild (docs/images/readme-title.webp), 1774 x 887 wie in den anderen SH1FT-W-Repos.
+     Rendern: chrome-headless-shell --screenshot --window-size=1774,887 --hide-scrollbars, danach verlustfrei als WebP ohne
+     Metadaten (cwebp -lossless -metadata none). Rechts ist alles hier gezeichnet (keine Fotos, keine fremden Marken); die Werte sind ausgedacht. -->
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@800;900&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  html, body { margin: 0; width: 1774px; height: 887px; overflow: hidden; }
+  body { display: grid; grid-template-columns: 705px 1fr; font-family: "Inter", system-ui, sans-serif; }
+  .left { position: relative; padding: 0 0 0 84px; display: flex; flex-direction: column; justify-content: center;
+    background: radial-gradient(80% 60% at 20% 15%, #ffffff 0%, rgba(255,255,255,0) 70%), linear-gradient(160deg, #F4F8FE 0%, #E3ECF8 100%); }
+  .logo { display: flex; align-items: center; gap: 30px; }
+  .logo img { width: 108px; height: 108px; border-radius: 26px; background: #fff; box-shadow: 0 2px 6px rgba(5,20,50,0.06), 0 22px 44px -18px rgba(5,20,50,0.35); padding: 8px; box-sizing: border-box; }
+  .name { font-family: "Archivo", sans-serif; font-weight: 900; font-size: 66px; line-height: 0.98; letter-spacing: -0.035em; color: #0C1626; }
+  .eyebrow { margin: 30px 0 0; font: 600 19px "JetBrains Mono", monospace; letter-spacing: 0.24em; color: #1F6FE0; }
+  h1 { margin: 34px 0 0; font-family: "Archivo", sans-serif; font-weight: 900; font-size: 49px; line-height: 1.05; letter-spacing: -0.035em; color: #0C1626; max-width: 610px; }
+  h1 em { font-style: normal; color: #1F6FE0; }
+  .sub { margin: 26px 0 0; font-size: 25px; line-height: 1.45; color: #46566B; max-width: 560px; }
+  .pills { display: flex; gap: 12px; margin-top: 40px; }
+  .pill { display: inline-flex; align-items: center; gap: 12px; padding: 0 18px; height: 46px; border-radius: 999px; background: #fff; white-space: nowrap;
+    box-shadow: 0 1px 2px rgba(5,20,50,0.06), 0 10px 24px -14px rgba(5,20,50,0.3); font-size: 19px; font-weight: 500; color: #0C1626; }
+  .pill i { width: 10px; height: 10px; border-radius: 50%; background: #3D8BFF; }
+  .pill.w i { background: #F5A524; }
+  .right { position: relative; overflow: hidden; }
+  .right svg.scene { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .card { position: absolute; border-radius: 26px; background: rgba(9,20,38,0.62); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+    border: 1px solid rgba(255,255,255,0.14); color: #EAF1FA; box-shadow: 0 30px 60px -24px rgba(0,0,0,0.55); }
+  .fc { left: 470px; top: 72px; width: 520px; padding: 26px 30px 28px; }
+  .fc .top { display: flex; align-items: baseline; justify-content: space-between; }
+  .fc .t { font-family: "Archivo", sans-serif; font-weight: 800; font-size: 72px; letter-spacing: -0.03em; line-height: 1; }
+  .fc .c { font-size: 20px; color: rgba(214,226,242,0.82); text-align: right; line-height: 1.45; }
+  .fc .c b { color: #fff; font-weight: 600; }
+  .days { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-top: 24px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.12); }
+  .day { display: grid; justify-items: center; gap: 8px; font-size: 17px; color: rgba(214,226,242,0.75); }
+  .day svg { width: 40px; height: 40px; }
+  .day b { font: 600 18px "JetBrains Mono", monospace; color: #fff; }
+  .day small { font: 500 15px "JetBrains Mono", monospace; color: #7CB2FF; }
+  .warn { left: 420px; top: 650px; width: 470px; padding: 22px 26px; display: grid; grid-template-columns: 58px 1fr; gap: 18px; align-items: center;
+    background: rgba(40,26,6,0.66); border-color: rgba(245,165,36,0.45); }
+  .warn .ic { width: 58px; height: 58px; border-radius: 18px; background: #F5A524; display: grid; place-items: center; }
+  .warn .ic svg { width: 32px; height: 32px; }
+  .warn b { display: block; font-family: "Archivo", sans-serif; font-weight: 800; font-size: 24px; color: #FFE2AE; letter-spacing: -0.01em; }
+  .warn span { display: block; margin-top: 4px; font-size: 18px; color: rgba(255,236,205,0.82); }
+  .rain { left: 660px; top: 430px; width: 330px; padding: 20px 24px; }
+  .rain .l { font-size: 17px; color: rgba(214,226,242,0.78); }
+  .rain .v { margin-top: 4px; font-family: "Archivo", sans-serif; font-weight: 800; font-size: 40px; }
+  .bars { display: flex; align-items: flex-end; gap: 6px; height: 58px; margin-top: 12px; }
+  .bars i { flex: 1; border-radius: 4px 4px 2px 2px; background: linear-gradient(#7CB2FF, #3D8BFF); }
+</style>
+</head>
+<body>
+  <div class="left">
+    <div class="logo"><img src="../custom_components/wetter/brand/icon@2x.png" alt=""><div class="name">Wetter &amp;<br>Warnungen</div></div>
+    <p class="eyebrow">FÜR HOME ASSISTANT</p>
+    <h1>Vorhersage und <em>alle amtlichen Warnungen.</em></h1>
+    <p class="sub">Die Vorhersage des Deutschen Wetterdienstes, die nächste Station und alle amtlichen Warnungen für Deutschland. Ohne Konto.</p>
+    <div class="pills"><span class="pill"><i></i>DWD-Vorhersage</span><span class="pill w"><i></i>NINA-Warnungen</span><span class="pill"><i></i>HACS</span></div>
+  </div>
+
+  <div class="right">
+    <svg class="scene" viewBox="0 0 1069 887" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+      <defs>
+        <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#1E4FA8"/><stop offset="0.45" stop-color="#3D8BFF"/><stop offset="0.8" stop-color="#9CC6FF"/><stop offset="1" stop-color="#FFD9A0"/>
+        </linearGradient>
+        <radialGradient id="sunglow" cx="0.5" cy="0.5" r="0.5">
+          <stop offset="0" stop-color="#FFE7A3" stop-opacity="0.95"/><stop offset="0.35" stop-color="#FFC94D" stop-opacity="0.55"/><stop offset="1" stop-color="#FFC94D" stop-opacity="0"/>
+        </radialGradient>
+        <linearGradient id="sun" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFE07A"/><stop offset="1" stop-color="#FFB21E"/></linearGradient>
+        <linearGradient id="cloud" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#D6E6FB"/></linearGradient>
+        <linearGradient id="dark" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6E86AD"/><stop offset="1" stop-color="#3D5682"/></linearGradient>
+        <linearGradient id="hill1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3E8E6B"/><stop offset="1" stop-color="#1F5C47"/></linearGradient>
+        <linearGradient id="hill2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2C7458"/><stop offset="1" stop-color="#143F31"/></linearGradient>
+        <linearGradient id="hill0" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7FB3C9"/><stop offset="1" stop-color="#5A8FA8"/></linearGradient>
+        <filter id="soft" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="2"/></filter>
+        <filter id="shadow" x="-20%" y="-20%" width="140%" height="160%"><feDropShadow dx="0" dy="14" stdDeviation="14" flood-color="#0B2350" flood-opacity="0.28"/></filter>
+      </defs>
+      <rect width="1069" height="887" fill="url(#sky)"/>
+      <!-- Sonne mit Wolke davor, wie im Icon -->
+      <circle cx="230" cy="190" r="190" fill="url(#sunglow)"/>
+      <circle cx="250" cy="170" r="74" fill="url(#sun)"/>
+      <path filter="url(#shadow)" fill="url(#cloud)" transform="translate(40 30) scale(0.72)" d="M120 400 h330 a70 70 0 0 0 0 -140 a10 10 0 0 0 -4 0 a110 110 0 0 0 -210 -20 a80 80 0 0 0 -116 160 z"/>
+      <!-- Regenwolke über dem Haus -->
+      <g stroke="#DCEAFF" stroke-width="5" stroke-linecap="round" opacity="0.7">
+        <line x1="150" y1="480" x2="134" y2="528"/><line x1="190" y1="488" x2="174" y2="536"/><line x1="230" y1="480" x2="214" y2="528"/>
+        <line x1="270" y1="488" x2="254" y2="536"/><line x1="170" y1="545" x2="158" y2="580"/><line x1="250" y1="545" x2="238" y2="580"/>
+      </g>
+      <path filter="url(#shadow)" fill="url(#dark)" transform="translate(-730 50)" d="M850 425 h230 v-10 a60 60 0 0 0 -60 -60 a85 85 0 0 0 -160 -10 a55 55 0 0 0 -60 55 a40 40 0 0 0 50 25 z"/>
+      <!-- Landschaft -->
+      <path fill="url(#hill0)" d="M0 700 C 160 640 300 650 460 680 S 760 640 1069 660 V887 H0 Z"/>
+      <path fill="url(#hill1)" d="M0 760 C 200 700 380 720 560 745 S 880 700 1069 730 V887 H0 Z"/>
+      <!-- Haus -->
+      <g transform="translate(130 600)">
+        <rect x="0" y="60" width="150" height="110" rx="6" fill="#F4F1EC"/>
+        <path d="M-14 66 L75 -6 L164 66 Z" fill="#B85C3C"/>
+        <rect x="20" y="88" width="34" height="34" rx="4" fill="#FFCF6B"/>
+        <rect x="96" y="88" width="34" height="34" rx="4" fill="#FFCF6B"/>
+        <rect x="60" y="118" width="30" height="52" rx="4" fill="#5B4636"/>
+        <rect x="112" y="4" width="16" height="36" fill="#8C4A33"/>
+      </g>
+      <path fill="url(#hill2)" d="M0 820 C 220 780 420 790 640 810 S 900 790 1069 800 V887 H0 Z"/>
+      <!-- Bäume -->
+      <g fill="#174A37"><circle cx="80" cy="770" r="26"/><rect x="76" y="780" width="8" height="30"/><circle cx="345" cy="765" r="30"/><rect x="341" y="777" width="8" height="34"/><circle cx="960" cy="775" r="24"/><rect x="956" y="785" width="8" height="28"/></g>
+    </svg>
+
+    <div class="card fc">
+      <div class="top">
+        <div class="t">18°</div>
+        <div class="c"><b>Teilweise bewölkt</b><br>Gefühlt 17° · Wind 14 km/h</div>
+      </div>
+      <div class="days">
+        <div class="day">Mo<svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="9" fill="#FFC23D"/><g stroke="#FFC23D" stroke-width="3" stroke-linecap="round"><path d="M20 4v4M20 32v4M4 20h4M32 20h4M8.7 8.7l2.8 2.8M28.5 28.5l2.8 2.8M8.7 31.3l2.8-2.8M28.5 11.5l2.8-2.8"/></g></svg><b>21°</b><small>0%</small></div>
+        <div class="day">Di<svg viewBox="0 0 40 40"><circle cx="15" cy="15" r="8" fill="#FFC23D"/><path d="M10 31h20a7 7 0 0 0 0-14 10 10 0 0 0-19 3 6 6 0 0 0-1 11z" fill="#fff"/></svg><b>19°</b><small>10%</small></div>
+        <div class="day">Mi<svg viewBox="0 0 40 40"><path d="M9 25h22a7 7 0 0 0 0-14 10 10 0 0 0-19 3 6 6 0 0 0-3 11z" fill="#C9D7EC"/><g stroke="#7CB2FF" stroke-width="3" stroke-linecap="round"><path d="M14 29l-2 6M21 29l-2 6M28 29l-2 6"/></g></svg><b>15°</b><small>80%</small></div>
+        <div class="day">Do<svg viewBox="0 0 40 40"><path d="M9 24h22a7 7 0 0 0 0-14 10 10 0 0 0-19 3 6 6 0 0 0-3 11z" fill="#9FB0C9"/><path d="M21 25l-5 8h5l-3 6 8-10h-5l3-4z" fill="#FFC23D"/></svg><b>14°</b><small>70%</small></div>
+        <div class="day">Fr<svg viewBox="0 0 40 40"><circle cx="15" cy="15" r="8" fill="#FFC23D"/><path d="M10 31h20a7 7 0 0 0 0-14 10 10 0 0 0-19 3 6 6 0 0 0-1 11z" fill="#fff"/></svg><b>17°</b><small>20%</small></div>
+      </div>
+    </div>
+
+    <div class="card rain">
+      <div class="l">Regenrisiko heute</div>
+      <div class="v">40%</div>
+      <div class="bars"><i style="height:18%"></i><i style="height:26%"></i><i style="height:40%"></i><i style="height:62%"></i><i style="height:85%"></i><i style="height:70%"></i><i style="height:44%"></i><i style="height:28%"></i><i style="height:16%"></i><i style="height:10%"></i></div>
+    </div>
+
+    <div class="card warn">
+      <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#3A2300" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg></div>
+      <div><b>Sturmböen</b><span>DWD · Stufe 2 · bis 18:00 Uhr</span></div>
+    </div>
+  </div>
+</body>
+</html>

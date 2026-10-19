@@ -1,0 +1,459 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Wetter &amp; Warnungen für Home Assistant</title>
+<script src="https://sh1ft-w.github.io/bar.js" data-project="wetter" defer></script>
+<meta name="description" content="Wetter &amp; Warnungen holt die Vorhersage des Deutschen Wetterdienstes, die nächste Station und alle amtlichen Warnungen für Deutschland (DWD, MoWaS, KATWARN, BIWAPP, Hochwasser, Polizei) nach Home Assistant. Ohne Konto, ohne Schlüssel.">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#F2F6FC" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#07101E" media="(prefers-color-scheme: dark)">
+<meta property="og:title" content="Wetter &amp; Warnungen für Home Assistant">
+<meta property="og:description" content="Vorhersage und alle amtlichen Warnungen für Deutschland in Home Assistant.">
+<meta property="og:locale" content="de_DE">
+<meta property="og:image" content="https://sh1ft-w.github.io/wetter-warnungen/logo.png">
+<link rel="icon" href="logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800;900&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<!-- Shared SH1FT-W design (tokens, glass navigation, light/dark, DE/EN, reveal) -->
+<link rel="stylesheet" href="https://sh1ft-w.github.io/theme/v1/theme.css">
+<script src="https://sh1ft-w.github.io/theme/v1/theme.js"></script>
+<style>
+/* Wetter-Palette: heller Himmel bei Tag, Nachthimmel im Dunkeln, Akzent #3D8BFF, Warnungen in Bernstein */
+:root {
+  --accent: #3D8BFF; --accent-ink: #1F6FE0; --on-accent: #ffffff;
+  --sea: #2F7FF5; --sea-tint: rgba(61,139,255,0.11); --sea-glow: rgba(61,139,255,0.32); --aqua: #7CB2FF; --amber: #F5A524; --amber-tint: rgba(245,165,36,0.14);
+  --ch-w: #8FA3B1; --ch-b: #2F7FD8; --ch-g: #2FA36A; --ch-r: #E0584A;
+  --font: "Inter", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --display: "Archivo", "Inter", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --bg: #F2F6FC; --bg-2: #E3ECF8; --card: #FFFFFF; --card-2: #EEF3FA;
+  --ink: #0B1424; --ink-2: #455569; --ink-3: rgba(11,20,36,0.56);
+  --line: rgba(5,20,50,0.11); --chip: rgba(5,20,50,0.06);
+  --glass: rgba(250,253,255,0.72); --glass-line: rgba(255,255,255,0.75);
+  --shadow: 0 1px 2px rgba(5,20,50,0.05), 0 12px 32px -14px rgba(5,20,50,0.22);
+  --shadow-lg: 0 2px 6px rgba(5,20,50,0.05), 0 48px 100px -36px rgba(5,20,50,0.40);
+  --radius: 26px; --radius-lg: 36px;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --accent: #3D8BFF; --accent-ink: #7CB2FF; --on-accent: #ffffff;
+  --sea: #2F7DFF; --sea-tint: rgba(61,139,255,0.14); --sea-glow: rgba(61,139,255,0.30);
+  --ch-w: #DCE6EC;
+  --bg: #07101E; --bg-2: #0C182B; --card: #0F1D33; --card-2: #15253F;
+  --ink: #EAF1FA; --ink-2: rgba(214,226,242,0.84); --ink-3: rgba(214,226,242,0.54);
+  --line: rgba(234,241,250,0.1); --chip: rgba(234,241,250,0.07);
+  --glass: rgba(10,21,38,0.62); --glass-line: rgba(255,255,255,0.08);
+  --shadow: 0 14px 34px -16px rgba(0,0,0,0.6); --shadow-lg: 0 48px 100px -36px rgba(0,0,0,0.85);
+} }
+:root[data-theme="dark"] {
+  --accent: #3D8BFF; --accent-ink: #7CB2FF; --on-accent: #ffffff;
+  --sea: #2F7DFF; --sea-tint: rgba(61,139,255,0.14); --sea-glow: rgba(61,139,255,0.30);
+  --ch-w: #DCE6EC;
+  --bg: #07101E; --bg-2: #0C182B; --card: #0F1D33; --card-2: #15253F;
+  --ink: #EAF1FA; --ink-2: rgba(214,226,242,0.84); --ink-3: rgba(214,226,242,0.54);
+  --line: rgba(234,241,250,0.1); --chip: rgba(234,241,250,0.07);
+  --glass: rgba(10,21,38,0.62); --glass-line: rgba(255,255,255,0.08);
+  --shadow: 0 14px 34px -16px rgba(0,0,0,0.6); --shadow-lg: 0 48px 100px -36px rgba(0,0,0,0.85);
+}
+body { background: var(--bg); color: var(--ink); }
+
+a { color: var(--accent-ink); text-decoration: none; }
+a:hover { text-decoration: underline; text-underline-offset: 3px; }
+.wrap { max-width: var(--max); margin: 0 auto; padding: 0 var(--gutter); }
+.narrow { max-width: 780px; }
+p { margin: 0; }
+.muted { color: var(--ink-2); }
+.center { text-align: center; }
+.center .lead { margin-left: auto; margin-right: auto; max-width: 680px; }
+code, .k { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.brand { font-family: var(--display); font-weight: 800; }
+.brand img { border-radius: 8px; }
+
+/* Knöpfe */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 48px; padding: 0 24px; border-radius: 999px;
+  font-family: inherit; font-size: 15px; font-weight: 600; line-height: 1; background: var(--sea); color: var(--on-accent); border: 0; cursor: pointer;
+  box-shadow: 0 12px 28px -12px var(--sea-glow); transition: transform .2s ease, filter .2s ease;
+}
+.btn:hover { text-decoration: none; filter: brightness(1.1); transform: translateY(-1px); }
+.btn.ghost { background: var(--card); color: var(--ink); box-shadow: var(--shadow); }
+.btn.small { height: 36px; padding: 0 16px; font-size: 14px; }
+
+/* Schrift */
+.eyebrow { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-ink); margin: 0 0 18px; }
+.eyebrow::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--aqua); box-shadow: 0 0 0 4px var(--sea-tint); }
+h1, h2, h3 { margin: 0; color: var(--ink); font-family: var(--display); font-weight: 800; text-wrap: balance; }
+h1 { font-size: clamp(44px, 8vw, 100px); line-height: 0.96; letter-spacing: -0.04em; font-weight: 900; }
+h1 em, h2 em { font-style: normal; color: var(--accent-ink); }
+h2 { font-size: clamp(34px, 5vw, 60px); line-height: 1.03; letter-spacing: -0.035em; }
+h3 { font-size: 20px; line-height: 1.2; letter-spacing: -0.015em; font-weight: 700; }
+.lead { font-size: clamp(18px, 2vw, 22px); line-height: 1.5; color: var(--ink-2); margin: 22px 0 0; }
+.lead strong { color: var(--ink); font-weight: 600; }
+
+section { padding: clamp(72px, 9vw, 120px) 0; position: relative; }
+section.tint { background: var(--bg-2); }
+.head { margin-bottom: clamp(36px, 5vw, 60px); }
+.cap { margin-top: 20px; font-size: 15px; color: var(--ink-3); text-align: center; }
+
+/* Hero */
+.hero { padding: clamp(56px, 9vw, 112px) 0 clamp(64px, 8vw, 104px); text-align: center; overflow: hidden; }
+.hero .glow { position: absolute; inset: -20% -10% auto; height: 90%; pointer-events: none;
+  background: radial-gradient(40% 36% at 30% 30%, rgba(61,139,255,0.20), transparent 70%), radial-gradient(36% 34% at 72% 24%, rgba(255,190,80,0.12), transparent 70%);
+  filter: blur(50px); }
+.hero .wrap { position: relative; }
+.hero .lead { max-width: 660px; margin-left: auto; margin-right: auto; }
+.cta { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-top: 34px; }
+.meta { margin-top: 22px; font-size: 14px; color: var(--ink-3); display: flex; flex-wrap: wrap; gap: 8px 14px; justify-content: center; align-items: center; }
+.pill { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 999px; background: var(--card); box-shadow: var(--shadow); font-weight: 600; color: var(--ink-2); font-size: 13px; }
+.pill i { width: 7px; height: 7px; border-radius: 50%; background: var(--aqua); display: inline-block; }
+
+/* Bühne: nur das Titelbild */
+.stage { position: relative; margin: clamp(48px, 7vw, 84px) auto 0; max-width: 1100px; }
+.stage .photo { display: block; width: 100%; height: auto; aspect-ratio: 2 / 1; border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); }
+/* Bento: Gerade neu */
+.bento { display: grid; grid-template-columns: repeat(12, 1fr); gap: 16px; }
+.b { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); padding: 26px 28px 28px; min-width: 0; }
+.b .tag { display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent-ink); background: var(--sea-tint); padding: 4px 10px; border-radius: 999px; margin-bottom: 14px; }
+.b h3 { margin-bottom: 8px; }
+.b p { color: var(--ink-2); font-size: 16px; }
+.b code { font-size: 14px; background: var(--chip); padding: 2px 6px; border-radius: 6px; color: var(--ink); }
+.b.s4 { grid-column: span 4; } .b.s6 { grid-column: span 6; } .b.s8 { grid-column: span 8; }
+
+/* Funktionen */
+.grid3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.tile { background: var(--card); border-radius: var(--radius); padding: 28px; box-shadow: var(--shadow); min-width: 0; }
+.tile h3 { margin-bottom: 8px; }
+.tile p { color: var(--ink-2); font-size: 16px; }
+.tile code { font-size: 14px; background: var(--chip); padding: 2px 6px; border-radius: 6px; }
+.tile .ico { width: 46px; height: 46px; border-radius: 15px; background: var(--sea-tint); color: var(--accent-ink); display: grid; place-items: center; margin-bottom: 18px; }
+.tile .ico svg { width: 23px; height: 23px; }
+
+/* Profil-Illustration */
+.split { display: grid; grid-template-columns: 1fr 1.05fr; gap: clamp(36px, 6vw, 80px); align-items: center; }
+.points { list-style: none; padding: 0; margin: 26px 0 0; display: grid; gap: 16px; }
+.points li { display: grid; gap: 2px; }
+.points b { font-family: var(--display); font-size: 17px; font-weight: 700; color: var(--ink); }
+.points span { color: var(--ink-2); font-size: 16px; }
+.prof { background: var(--card); border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); padding: clamp(22px, 4vw, 36px); min-width: 0; }
+.prof-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+.prof-head b { font-family: var(--display); font-size: 18px; }
+.days { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 16px; }
+.days > span { font-size: 12px; font-weight: 600; padding: 6px 11px; border-radius: 999px; background: var(--chip); color: var(--ink-2); }
+.days > span.on { background: var(--sea); color: var(--on-accent); }
+.curve { display: block; width: 100%; height: auto; margin-top: 22px; }
+.curve .grid { stroke: var(--line); stroke-width: 1; }
+.curve .ax { fill: var(--ink-3); font: 500 11px var(--mono); }
+.curve .now { stroke: var(--accent-ink); stroke-width: 1.5; stroke-dasharray: 4 4; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 12px; font-size: 13px; color: var(--ink-2); }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+.prof-foot { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 22px; }
+.prof-foot div { background: var(--card-2); border-radius: 16px; padding: 12px 14px; min-width: 0; }
+.prof-foot > div > span { display: block; font-size: 12px; color: var(--ink-3); }
+.prof-foot b { font-weight: 600; font-size: 15px; }
+
+/* Entitäten-Tabelle */
+.tbl { width: 100%; border-collapse: separate; border-spacing: 0; background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; font-size: 15px; }
+.tbl th, .tbl td { text-align: left; padding: 14px 18px; border-top: 1px solid var(--line); vertical-align: top; }
+.tbl thead th { border-top: 0; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent-ink); background: var(--card-2); }
+.tbl td:first-child { font-weight: 600; white-space: nowrap; }
+.tbl code { font-size: 13px; background: var(--chip); padding: 2px 6px; border-radius: 6px; overflow-wrap: anywhere; }
+.tbl td:last-child { color: var(--ink-2); }
+
+/* Wie es funktioniert */
+.flow { display: grid; gap: 12px; max-width: 900px; margin: 0 auto; }
+.lane { display: grid; grid-template-columns: 1fr auto 1fr; gap: 16px; align-items: center; background: var(--card); border-radius: 22px; box-shadow: var(--shadow); padding: 18px 22px; }
+.lane .end b { display: block; font-family: var(--display); font-size: 16px; }
+.lane .end span { font-size: 14px; color: var(--ink-2); }
+.lane .end.r { text-align: right; }
+.arrow { display: grid; justify-items: center; gap: 4px; font: 500 12px/1.2 var(--mono); color: var(--accent-ink); text-align: center; }
+.arrow svg { width: 120px; height: 14px; }
+
+/* Installation */
+.install { display: grid; grid-template-columns: 1.2fr 1fr; gap: 20px; }
+.panel { background: var(--card); border-radius: var(--radius); padding: clamp(26px, 4vw, 42px); box-shadow: var(--shadow); min-width: 0; }
+.panel h3 { margin-bottom: 6px; }
+.panel code { font-size: 14px; background: var(--chip); padding: 2px 6px; border-radius: 6px; overflow-wrap: anywhere; }
+.repo { margin-top: 10px; display: flex; align-items: center; gap: 8px; background: var(--chip); border-radius: 18px; padding: 8px 8px 8px 18px; }
+.repo code { flex: 1; min-width: 0; font-size: 15px; background: none; padding: 0; color: var(--ink); overflow-wrap: anywhere; }
+.copy { flex: none; height: 34px; padding: 0 14px; border-radius: 999px; border: 0; background: var(--card); color: var(--ink); font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.12); }
+.steps { list-style: none; padding: 0; margin: 28px 0 0; display: grid; gap: 20px; counter-reset: s; }
+.steps li { position: relative; padding-left: 50px; color: var(--ink-2); }
+.steps li::before { counter-increment: s; content: counter(s); position: absolute; left: 0; top: -3px; width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; background: var(--sea-tint); color: var(--accent-ink); font-weight: 700; font-size: 15px; }
+.steps li b { color: var(--ink); font-weight: 600; }
+.req { list-style: none; padding: 0; margin: 20px 0 0; }
+.req li { display: flex; gap: 14px; align-items: baseline; padding: 14px 0; border-top: 1px solid var(--line); font-size: 16px; }
+.req li:first-child { border-top: 0; padding-top: 6px; }
+.req .name { color: var(--ink); font-weight: 600; flex: 1; min-width: 0; }
+.tg { flex: none; font-size: 12px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; padding: 4px 10px; border-radius: 999px; background: var(--sea-tint); color: var(--accent-ink); }
+.tg.opt { background: var(--chip); color: var(--ink-3); }
+.note { margin-top: 20px; font-size: 14px; color: var(--ink-3); }
+.full { grid-column: 1 / -1; }
+
+/* Warnquellen */
+.src { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.src .tile .ico.w { background: var(--amber-tint); color: #B26B00; }
+:root[data-theme="dark"] .src .tile .ico.w { color: var(--amber); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .src .tile .ico.w { color: var(--amber); } }
+.tile .who { margin-top: 12px; font: 500 13px/1.4 var(--mono); color: var(--ink-3); }
+@media (max-width: 960px) { .src { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 640px) { .src { grid-template-columns: 1fr; } }
+
+/* FAQ */
+.faq { display: grid; gap: 10px; }
+.faq details { background: var(--card); border-radius: 20px; box-shadow: var(--shadow); padding: 0 22px; }
+.faq summary { cursor: pointer; list-style: none; padding: 18px 0; font-family: var(--display); font-weight: 700; font-size: 17px; display: flex; gap: 12px; align-items: center; }
+.faq summary::-webkit-details-marker { display: none; }
+.faq summary::after { content: "+"; margin-left: auto; font-size: 22px; color: var(--accent-ink); font-weight: 600; }
+.faq details[open] summary::after { content: "\2212"; }
+.faq details p { padding: 0 0 18px; color: var(--ink-2); font-size: 16px; }
+.faq code { font-size: 13px; background: var(--chip); padding: 2px 6px; border-radius: 6px; }
+
+/* Schluss, Fuß */
+.finale { text-align: center; }
+.finale h2 { font-size: clamp(40px, 6.5vw, 84px); }
+footer { border-top: 1px solid var(--line); padding: 44px 0 56px; font-size: 14px; color: var(--ink-3); }
+footer .wrap { display: flex; flex-wrap: wrap; gap: 20px 32px; align-items: center; }
+footer nav { display: flex; flex-wrap: wrap; gap: 8px 26px; }
+footer nav a { color: var(--ink-2); font-weight: 500; }
+footer .fine { flex-basis: 100%; line-height: 1.6; }
+
+@media (max-width: 960px) {
+  .split, .install { grid-template-columns: 1fr; }
+  .grid3 { grid-template-columns: 1fr 1fr; }
+  .b.s4, .b.s8 { grid-column: span 6; }
+}
+@media (max-width: 640px) {
+  body { font-size: 16px; }
+  :root { --radius: 22px; --radius-lg: 28px; }
+  .nav { padding: 0 8px 0 14px; }
+  .nav .btn { margin-left: auto; }
+  .grid3 { grid-template-columns: 1fr; }
+  .b.s4, .b.s6, .b.s8 { grid-column: span 12; }
+  .tile, .b { padding: 24px; }
+  .panel { padding: 24px 20px; }
+  .repo { flex-wrap: wrap; padding: 12px 14px; gap: 10px; }
+  .repo code { flex-basis: 100%; font-size: clamp(12px, 3.4vw, 14px); }
+  .copy { margin-left: auto; }
+  .prof-foot { grid-template-columns: 1fr 1fr; }
+  .lane { grid-template-columns: 1fr; gap: 8px; text-align: left; }
+  .lane .end.r { text-align: left; }
+  .arrow { justify-items: start; text-align: left; }
+  .arrow svg { width: 80px; }
+  .tbl, .tbl tbody, .tbl tr, .tbl td { display: block; }
+  .tbl thead { display: none; }
+  .tbl tr { border-top: 1px solid var(--line); padding: 12px 16px; }
+  .tbl tr:first-child { border-top: 0; }
+  .tbl td { border: 0; padding: 2px 0; }
+  .tbl td:first-child { white-space: normal; }
+}
+</style>
+</head>
+<body>
+
+<div class="navwrap">
+  <nav class="nav" aria-label="Seite">
+    <a class="brand" href="#top"><img src="logo.png" alt="">Wetter &amp; Warnungen</a>
+    <div class="nav-links">
+      <a href="#features">Funktionen</a>
+      <a href="#warnings">Warnungen</a>
+      <a href="#install">Einrichtung</a>
+      <a href="#faq" class="opt">Gut zu wissen</a>
+      <a href="https://github.com/SH1FT-W/wetter-warnungen">GitHub</a>
+    </div>
+    <button class="iconbtn" id="theme" type="button" aria-label="Hell oder dunkel">
+      <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+      <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+    </button>
+    <a class="btn small" href="#install">Installieren</a>
+  </nav>
+</div>
+
+<section class="hero" id="top">
+  <div class="glow" aria-hidden="true"></div>
+  <div class="wrap">
+    <p class="eyebrow reveal">Wetter für Deutschland in Home Assistant</p>
+    <h1 class="reveal d1">Wetter und<br><em>jede amtliche Warnung.</em></h1>
+    <p class="lead reveal d2">Wetter &amp; Warnungen holt <strong>die Vorhersage des Deutschen Wetterdienstes, die nächste Station und alle amtlichen Warnungen</strong> nach Home Assistant: DWD für deine Gemeinde, MoWaS, KATWARN, BIWAPP, Hochwasser und Polizei für deinen Kreis. Startet sofort, ohne Konto, ohne Schlüssel.</p>
+    <div class="cta reveal d3">
+      <a class="btn" href="#install">Mit HACS installieren</a>
+      <a class="btn ghost" href="https://github.com/SH1FT-W/wetter-warnungen#readme">Zur Anleitung</a>
+    </div>
+    <p class="meta reveal d3">
+      <span class="pill"><i></i><span id="hl-version">Version 26.10.7</span></span>
+      Home Assistant 2026.9 oder neuer &middot; Deutsch und Englisch &middot; Apache 2.0
+    </p>
+
+    <div class="stage reveal d3">
+      <img class="photo" src="images/readme-title.webp" width="1774" height="887" alt="Wetter &amp; Warnungen: Vorhersage und alle amtlichen Warnungen für Deutschland.">
+    </div>
+  </div>
+</section>
+
+<section id="features" class="tint">
+  <div class="wrap">
+    <div class="head center reveal">
+      <p class="eyebrow">Was sie kann</p>
+      <h2>Die DWD-Vorhersage.<br>Direkt in Home Assistant.</h2>
+      <p class="lead">Über Bright Sky, eine freie Schnittstelle für die offenen Daten des Deutschen Wetterdienstes. Keine riesigen Vorhersagedateien, kein Warten beim Start.</p>
+    </div>
+    <div class="grid3">
+      <div class="tile reveal"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19H9a7 7 0 1 1 6.7-9h1.8a4.5 4.5 0 1 1 0 9z"/></svg></div><h3>Vorhersage</h3><p>Stündlich für 48 Stunden, täglich für 8 Tage: Höchst- und Tiefstwert, Regenmenge, Regenrisiko, Wind, Böen und Bewölkung.</p></div>
+      <div class="tile reveal d1"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 14.8V4a2 2 0 0 0-4 0v10.8a4 4 0 1 0 4 0z"/></svg></div><h3>Aktuelle Werte</h3><p>Von der nächsten DWD-Station: Temperatur, Luftfeuchte, Taupunkt, Druck, Wind, Regen, Sichtweite und Bewölkung.</p></div>
+      <div class="tile reveal d2"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg></div><h3>Eigene Sensoren zuerst</h3><p>Temperatur, Luftfeuchte und Regen von einem Sensor in deiner Nähe gehen vor, solange sie höchstens eine Stunde alt sind.</p></div>
+      <div class="tile reveal"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14.9A7 7 0 1 1 15.7 8h1.8a4.5 4.5 0 0 1 2.5 8.2M16 14v6M8 14v6M12 16v6"/></svg></div><h3>Regenrisiko</h3><p>Regenwahrscheinlichkeit für diese Stunde und für heute, der 6-Stunden-Wert der DWD-Vorhersage.</p></div>
+      <div class="tile reveal d1"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg></div><h3>Sonneneinstrahlung</h3><p>W/m² für die laufende Stunde aus der Vorhersage, gemacht für Jalousien und Beschattung.</p></div>
+      <div class="tile reveal d2"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h9l-1 8 10-12h-9z"/></svg></div><h3>Startet sofort</h3><p>Der letzte Stand kommt aus dem Speicher, frische Daten erst nach dem Start von Home Assistant. Keine zusätzlichen Python-Pakete.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="warnings">
+  <div class="wrap">
+    <div class="head center reveal">
+      <p class="eyebrow">Amtliche Warnungen</p>
+      <h2>Jede Warnung.<br>Keine falsche Entwarnung.</h2>
+      <p class="lead">Alle 2 Minuten abgefragt. Ist eine Quelle nicht erreichbar, bleiben ihre letzten Warnungen stehen; abgelaufene verschwinden trotzdem pünktlich.</p>
+    </div>
+    <div class="src">
+      <div class="tile reveal"><div class="ico w"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19H9a7 7 0 1 1 6.7-9h1.8a4.5 4.5 0 1 1 0 9z"/></svg></div><h3>Wetterwarnungen</h3><p>Sturm, Gewitter, Starkregen, Schnee, Glätte, Frost und Hitze, genau für deine Gemeinde.</p><p class="who">DWD &middot; Bright Sky</p></div>
+      <div class="tile reveal d1"><div class="ico w"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11v2a1 1 0 0 0 1 1h3l5 4V6L7 10H4a1 1 0 0 0-1 1zM16 9a4 4 0 0 1 0 6M19 6a8 8 0 0 1 0 12"/></svg></div><h3>Bevölkerungsschutz</h3><p>MoWaS, KATWARN und BIWAPP: Brände, Gefahrstoffe, Trinkwasser, Stromausfälle und mehr, für deinen Kreis.</p><p class="who">warnung.bund.de &middot; NINA</p></div>
+      <div class="tile reveal d2"><div class="ico w"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12c2-2 4-2 6 0s4 2 6 0 4-2 6 0M2 18c2-2 4-2 6 0s4 2 6 0 4-2 6 0M12 2v6M9 5l3 3 3-3"/></svg></div><h3>Hochwasser und Polizei</h3><p>Hochwasserwarnungen der Länder (LHP) und Polizeimeldungen, für deinen Kreis.</p><p class="who">warnung.bund.de &middot; NINA</p></div>
+    </div>
+    <p class="cap reveal">Ein Sensor <strong>Warnungen</strong> listet alle, die schlimmste zuerst. <strong>Warnung 1 bis 5</strong> tragen dieselben Attribute wie die NINA-Integration, vorhandene Karten und Automationen laufen weiter.</p>
+  </div>
+</section>
+
+<section id="neighbourhood" class="tint">
+  <div class="wrap narrow">
+    <div class="head center reveal">
+      <p class="eyebrow">Nachbarschaft</p>
+      <h2>Näher als<br>die nächste Station.</h2>
+      <p class="lead">Die DWD-Station kann weit weg sein. Wähle in den Optionen Sensoren in deiner Nähe, sie gehen vor, solange sie frisch sind.</p>
+    </div>
+    <table class="tbl reveal">
+      <thead><tr><th>Wert</th><th>Aus der Nachbarschaft</th></tr></thead>
+      <tbody>
+        <tr><td>Temperatur, Luftfeuchte</td><td>Jeder Sensor: eigene Wetterstation (Ecowitt, Davis, Shelly, Netatmo-Außenmodul, …), ein Außenthermometer oder ein Netatmo-Wetterbereich</td></tr>
+        <tr><td>Niederschlag</td><td>Regen der letzten Stunde; Regen vor Ort korrigiert auch das Wettersymbol</td></tr>
+        <tr><td>Druck, Wind</td><td>Möglich, aber nur mit Druck auf Meereshöhe und frei stehendem Windmesser</td></tr>
+        <tr><td>Netatmo-Wetterbereich</td><td>Wird beim Einrichten automatisch vorgeschlagen. Ein Radius-Regler legt den Bereich als Quadrat um dein Zuhause neu an und schreibt ihn in die Netatmo-Optionen</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="install">
+  <div class="wrap">
+    <div class="head center reveal">
+      <p class="eyebrow">Installation</p>
+      <h2>Kein Konto.<br>Drei Schritte.</h2>
+    </div>
+    <div class="install">
+      <div class="panel reveal">
+        <h3>Mit HACS</h3>
+        <p class="muted">Als benutzerdefiniertes Repository.</p>
+        <ol class="steps">
+          <li>Füge in HACS ein benutzerdefiniertes Repository vom Typ <b>Integration</b> hinzu:</li>
+        </ol>
+        <div class="repo"><code id="repo">https://github.com/SH1FT-W/wetter-warnungen</code><button class="copy" type="button" data-copy="repo">Kopieren</button></div>
+        <ol class="steps" style="counter-reset: s 1">
+          <li><b>Lade Wetter &amp; Warnungen herunter</b> und starte Home Assistant neu.</li>
+          <li><b>Integration hinzufügen.</b> Einstellungen, Geräte &amp; Dienste, Integration hinzufügen, Wetter &amp; Warnungen: ein Name und der Ort, vorbelegt mit deinem Zuhause.</li>
+        </ol>
+        <p class="note">Nachbarschaftssensoren stellst du danach über Konfigurieren ein.</p>
+      </div>
+      <div class="panel reveal d1">
+        <h3>Was du brauchst</h3>
+        <p class="muted">Kein Cloud-Konto, kein Schlüssel, kein YAML.</p>
+        <ul class="req">
+          <li><span class="name">Home Assistant 2026.9+</span><span class="tg">Nötig</span></li>
+          <li><span class="name">Ein Ort in Deutschland</span><span class="tg">Nötig</span></li>
+          <li><span class="name">Sensoren in deiner Nähe</span><span class="tg opt">Optional</span></li>
+          <li><span class="name">Ein Netatmo-Wetterbereich</span><span class="tg opt">Optional</span></li>
+        </ul>
+        <p class="note">Beim Einrichten fragt die Integration einmal bei Bright Sky nach, ob es für den Ort Daten gibt.</p>
+      </div>
+      <div class="panel full reveal">
+        <h3>Ohne HACS</h3>
+        <p class="muted">Lade das <a href="https://github.com/SH1FT-W/wetter-warnungen/releases/latest">neueste Release</a> herunter, kopiere den Ordner <code>custom_components/wetter</code> nach <code>/config/custom_components/</code>, starte Home Assistant neu und füge die Integration hinzu.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="faq" class="tint">
+  <div class="wrap narrow">
+    <div class="head center reveal">
+      <p class="eyebrow">Gut zu wissen</p>
+      <h2>Bevor du fragst.</h2>
+    </div>
+    <div class="faq reveal">
+      <details open><summary>Geht das auch außerhalb Deutschlands?</summary><p>Nein. Vorhersage, Stationen und Warnungen kommen vom Deutschen Wetterdienst und dem Warnsystem des Bundes.</p></details>
+      <details><summary>Ersetzt sie die DWD- und NINA-Integration?</summary><p>Dafür ist sie gebaut: Vorhersage, Stationswerte und alle Warnungen in einer Integration. Die Warnplätze tragen dieselben Attribute wie die NINA-Integration.</p></details>
+      <details><summary>Wie genau ist die Vorhersage?</summary><p>Sie gilt für den nächsten DWD-Vorhersagepunkt, meist wenige Kilometer entfernt. Kreis-Meldungen gelten für den ganzen Kreis, DWD-Warnungen für deine Gemeinde.</p></details>
+      <details><summary>Ersetzt sie die NINA-App?</summary><p>Nein. Nutze sie für Automationen und Dashboards; für deine Sicherheit bleiben die offiziellen Warnwege (NINA-App, Radio, Sirenen).</p></details>
+      <details><summary>Wie melde ich einen Fehler?</summary><p>Ein <a href="https://github.com/SH1FT-W/wetter-warnungen/issues">GitHub-Issue</a> mit der Diagnose öffnen. Koordinaten und Warngebiet sind darin geschwärzt.</p></details>
+    </div>
+  </div>
+</section>
+
+<section class="finale">
+  <div class="wrap narrow reveal">
+    <p class="eyebrow">Wetter &amp; Warnungen</p>
+    <h2>Wetter.<br><em>Jede Warnung.</em></h2>
+    <p class="lead">Die DWD-Vorhersage und alle amtlichen Warnungen, eine Integration, ohne Konto.</p>
+    <div class="cta">
+      <a class="btn" href="#install">Wetter &amp; Warnungen installieren</a>
+      <a class="btn ghost" href="https://github.com/SH1FT-W/wetter-warnungen/releases">Releases</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span class="brand"><img src="logo.png" alt="">Wetter &amp; Warnungen</span>
+    <nav>
+      <a href="https://github.com/SH1FT-W/wetter-warnungen#readme">README</a>
+      <a href="https://github.com/SH1FT-W/wetter-warnungen/blob/main/CHANGELOG.md">Changelog</a>
+      <a href="https://github.com/SH1FT-W/wetter-warnungen/releases">Releases</a>
+      <a href="https://github.com/SH1FT-W/wetter-warnungen/issues">Fehler melden</a>
+      <a href="https://hacs.xyz">HACS</a>
+      <a href="https://github.com/SH1FT-W/wetter-warnungen">GitHub</a>
+      <a href="https://github.com/SH1FT-W/wetter-warnungen/blob/main/LICENSE">Apache-2.0-Lizenz</a>
+    </nav>
+    <p class="fine">Wetter &amp; Warnungen ist ein unabhängiges Projekt und gehört weder zum Deutschen Wetterdienst, zum Bundesamt für Bevölkerungsschutz und Katastrophenhilfe (BBK), zu Bright Sky, Home Assistant noch Nabu Casa und wird von ihnen nicht unterstützt. Wetterdaten und DWD-Warnungen: Quelle Deutscher Wetterdienst, CC BY 4.0, über Bright Sky. Übrige Warnungen: warnung.bund.de. Ersetzt nicht die offiziellen Warnwege.</p>
+  </div>
+</footer>
+
+<script>
+  // Kopieren der Repo-Adresse
+  document.querySelectorAll('[data-copy]').forEach(function (b) {
+    var label = b.innerHTML;
+    b.addEventListener('click', function () {
+      var t = document.getElementById(b.dataset.copy).textContent;
+      (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(function () {
+        b.innerHTML = 'Kopiert';
+        setTimeout(function () { b.innerHTML = label; }, 1600);
+      }, function () {});
+    });
+  });
+
+  // Versionszeile: manifest.json aus dem Repo, sonst das letzte GitHub-Release; der Text oben ist der Fallback.
+  (function () {
+    var el = document.getElementById('hl-version');
+    function show(v) { if (v && el) el.textContent = 'Version ' + v; }
+    fetch('https://raw.githubusercontent.com/SH1FT-W/wetter-warnungen/main/custom_components/wetter/manifest.json', { cache: 'no-store' })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (j) { if (j && j.version) show(String(j.version)); else throw 0; })
+      .catch(function () {
+        fetch('https://api.github.com/repos/SH1FT-W/wetter-warnungen/releases/latest')
+          .then(function (r) { return r.ok ? r.json() : null; })
+          .then(function (j) { show(j && String(j.tag_name || '').replace(/^v/, '')); })
+          .catch(function () {});
+      });
+  })();
+</script>
+</body>
+</html>

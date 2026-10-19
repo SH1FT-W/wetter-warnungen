@@ -1,0 +1,12 @@
+{
+  "domain": "wetter",
+  "name": "Wetter & Warnungen",
+  "codeowners": ["@SH1FT-W"],
+  "config_flow": true,
+  "documentation": "https://github.com/SH1FT-W/wetter-warnungen",
+  "integration_type": "service",
+  "iot_class": "cloud_polling",
+  "issue_tracker": "https://github.com/SH1FT-W/wetter-warnungen/issues",
+  "requirements": [],
+  "version": "26.10.8"
+}

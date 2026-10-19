@@ -1,0 +1,45 @@
+Wetter & Warnungen für Home Assistant
+Copyright 2026 SH1FT-W
+
+Lizenziert unter der Apache License, Version 2.0 (siehe LICENSE).
+
+Das Repository enthält keinen fremden Code. Zur Laufzeit holt die Integration Daten von den
+unten genannten Diensten; diese Daten sind nicht Teil des Repositorys und bleiben unter den
+Bedingungen ihrer Anbieter.
+
+Wetterdaten und DWD-Warnungen
+-----------------------------
+
+Quelle: Deutscher Wetterdienst (DWD). Vorhersagen (MOSMIX), Stationsmessungen (SYNOP) und
+Wetterwarnungen sind offene Daten des DWD und dürfen unter der Lizenz Creative Commons
+Namensnennung 4.0 International (CC BY 4.0) mit dem Quellenvermerk „Deutscher Wetterdienst“
+weiterverwendet werden.
+Einzelheiten: https://www.dwd.de/copyright und https://creativecommons.org/licenses/by/4.0/deed.de
+
+Die Daten kommen über Bright Sky (https://brightsky.dev), eine freie JSON-Schnittstelle für die
+offenen Daten des DWD. Der Quellcode von Bright Sky steht unter der MIT-Lizenz
+(https://github.com/jdemaeyer/brightsky). Wetter & Warnungen ruft nur die öffentliche
+Schnittstelle auf und enthält keinen Code daraus.
+
+Home Assistant zeigt den Quellenvermerk als Attribution jeder Entität.
+
+Übrige amtliche Warnungen
+-------------------------
+
+Warnungen des Modularen Warnsystems (MoWaS), von KATWARN, BIWAPP, den Hochwasserportalen der
+Länder (LHP) und der Polizei kommen aus der öffentlichen Warn-Schnittstelle des Bundesamts für
+Bevölkerungsschutz und Katastrophenhilfe (BBK, https://warnung.bund.de), dieselben Daten wie in
+der NINA-App. Die Warnungen bleiben Inhalt der ausgebenden Stellen.
+
+Testdaten
+---------
+
+Warntexte, Orte, Koordinaten und Stationen in tests/ sind ausgedacht.
+
+Marken und Zugehörigkeit
+------------------------
+
+Wetter & Warnungen ist ein unabhängiges Projekt. Es gehört weder zum Deutschen Wetterdienst, zum
+BBK, zu Bright Sky, Netatmo, Home Assistant noch Nabu Casa und wird von ihnen nicht unterstützt.
+Die angezeigten amtlichen Warnungen ersetzen nicht die offiziellen Warnwege (NINA-App, Radio,
+Sirenen). NINA ist die Warn-App des BBK.

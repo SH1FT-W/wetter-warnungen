@@ -1,0 +1,273 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Wetter & Warnungen einrichten",
+        "description": "Vorhersage und Messwerte des Deutschen Wetterdienstes für einen Ort (über Bright Sky, ohne Konto).",
+        "data": {
+          "name": "Name",
+          "location": "Ort"
+        },
+        "data_description": {
+          "name": "Name des Geräts, z. B. Wetterstation",
+          "location": "Für diesen Punkt wird vorhergesagt; gemessen wird an der nächsten DWD-Station."
+        }
+      },
+      "reconfigure": {
+        "title": "Ort ändern",
+        "description": "Neuer Ort für Vorhersage und Warnungen. Entitäten, Optionen und Verlauf bleiben erhalten.",
+        "data": {
+          "location": "Ort"
+        },
+        "data_description": {
+          "location": "Für diesen Punkt wird vorhergesagt; gemessen wird an der nächsten DWD-Station."
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Bright Sky ist nicht erreichbar oder hat für diesen Ort keine Daten."
+    },
+    "abort": {
+      "already_configured": "Dieser Ort ist schon eingerichtet.",
+      "reconfigure_successful": "Der Ort wurde geändert."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Werte aus der Nachbarschaft",
+        "description": "Sensoren in deiner Nähe (z. B. ein Netatmo-Wetterbereich) gehen vor den Messwerten der DWD-Station, solange sie höchstens eine Stunde alt sind. Leer lassen = DWD.",
+        "data": {
+          "local_temperature": "Temperatur",
+          "local_humidity": "Luftfeuchtigkeit",
+          "local_precipitation": "Niederschlag (letzte Stunde)",
+          "local_pressure": "Luftdruck (Meereshöhe)",
+          "local_wind_speed": "Windgeschwindigkeit",
+          "local_wind_gust": "Windböen"
+        },
+        "data_description": {
+          "local_temperature": "Sensor mit der Temperatur aus deiner Nähe, z. B. ein Netatmo-Wetterbereich.",
+          "local_humidity": "Sensor mit der relativen Luftfeuchte aus deiner Nähe.",
+          "local_precipitation": "Sensor mit dem Regen der letzten Stunde (mm oder mm/h); Regen vor Ort ändert auch das Wettersymbol.",
+          "local_pressure": "Nur mit Luftdruck auf Meereshöhe (wie der DWD); Netatmo-Bereiche liefern den nicht zuverlässig.",
+          "local_wind_speed": "Nur mit frei stehendem Windmesser; geschützte Stationen messen deutlich zu wenig.",
+          "local_wind_gust": "Wie Windgeschwindigkeit, für Böen."
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "temperature": {
+        "name": "Temperatur",
+        "state_attributes": {
+          "source": {
+            "name": "Quelle"
+          }
+        }
+      },
+      "humidity": {
+        "name": "Relative Luftfeuchtigkeit",
+        "state_attributes": {
+          "source": {
+            "name": "Quelle"
+          }
+        }
+      },
+      "dew_point": {
+        "name": "Taupunkt"
+      },
+      "pressure": {
+        "name": "Druck",
+        "state_attributes": {
+          "source": {
+            "name": "Quelle"
+          }
+        }
+      },
+      "wind_speed": {
+        "name": "Windgeschwindigkeit",
+        "state_attributes": {
+          "source": {
+            "name": "Quelle"
+          }
+        }
+      },
+      "wind_gust": {
+        "name": "Windböen",
+        "state_attributes": {
+          "source": {
+            "name": "Quelle"
+          }
+        }
+      },
+      "wind_bearing": {
+        "name": "Windrichtung"
+      },
+      "precipitation": {
+        "name": "Niederschlag",
+        "state_attributes": {
+          "source": {
+            "name": "Quelle"
+          }
+        }
+      },
+      "solar": {
+        "name": "Sonneneinstrahlung"
+      },
+      "visibility": {
+        "name": "Sichtweite"
+      },
+      "cloud_cover": {
+        "name": "Bewölkungsgrad"
+      },
+      "warnings": {
+        "name": "Warnungen",
+        "state_attributes": {
+          "area": {
+            "name": "Warngebiet"
+          },
+          "highest_severity": {
+            "name": "Höchste Stufe"
+          },
+          "warnings": {
+            "name": "Warnungen"
+          },
+          "stale": {
+            "name": "Quellen ausgefallen"
+          }
+        }
+      },
+      "condition": {
+        "name": "Wetterzustand",
+        "state": {
+          "clear-night": "Klar, Nacht",
+          "cloudy": "Bewölkt",
+          "fog": "Nebel",
+          "hail": "Hagel",
+          "lightning-rainy": "Gewitter",
+          "partlycloudy": "Teilweise bewölkt",
+          "pouring": "Starkregen",
+          "rainy": "Regen",
+          "snowy": "Schnee",
+          "snowy-rainy": "Schneeregen",
+          "sunny": "Sonnig",
+          "windy": "Windig"
+        }
+      },
+      "source": {
+        "name": "Quelle",
+        "state": {
+          "local": "Nachbarschaft",
+          "mixed": "Gemischt",
+          "dwd": "DWD"
+        },
+        "state_attributes": {
+          "temperature": {
+            "name": "Temperatur"
+          },
+          "humidity": {
+            "name": "Luftfeuchtigkeit"
+          },
+          "precipitation": {
+            "name": "Niederschlag"
+          },
+          "pressure": {
+            "name": "Druck"
+          },
+          "wind_speed": {
+            "name": "Windgeschwindigkeit"
+          },
+          "wind_gust": {
+            "name": "Windböen"
+          }
+        }
+      },
+      "neighbourhood_area": {
+        "name": "Nachbarschaftsbereich",
+        "state": {
+          "none": "Keiner"
+        },
+        "state_attributes": {
+          "width_km": {
+            "name": "Breite (km)"
+          },
+          "height_km": {
+            "name": "Höhe (km)"
+          }
+        }
+      },
+      "neighbourhood_size": {
+        "name": "Nachbarschaft Fläche"
+      },
+      "neighbourhood_distance": {
+        "name": "Nachbarschaft Abstand"
+      },
+      "precipitation_probability": {
+        "name": "Regenwahrscheinlichkeit"
+      },
+      "precipitation_probability_today": {
+        "name": "Regenwahrscheinlichkeit heute"
+      }
+    },
+    "binary_sensor": {
+      "warning": {
+        "name": "Warnung {slot}",
+        "state_attributes": {
+          "headline": {
+            "name": "Überschrift"
+          },
+          "provider": {
+            "name": "Anbieter"
+          },
+          "event": {
+            "name": "Ereignis"
+          },
+          "description": {
+            "name": "Beschreibung"
+          },
+          "recommended_actions": {
+            "name": "Handlungsempfehlung"
+          },
+          "severity": {
+            "name": "Stufe"
+          },
+          "sender": {
+            "name": "Absender"
+          },
+          "sent": {
+            "name": "Gesendet"
+          },
+          "start": {
+            "name": "Beginn"
+          },
+          "expires": {
+            "name": "Ende"
+          },
+          "more_info_url": {
+            "name": "Weitere Informationen"
+          },
+          "id": {
+            "name": "Kennung"
+          },
+          "region": {
+            "name": "Warngebiet"
+          }
+        }
+      }
+    },
+    "number": {
+      "neighbourhood_radius": {
+        "name": "Nachbarschaft Radius"
+      }
+    }
+  },
+  "exceptions": {
+    "update_failed": {
+      "message": "Wetter konnte nicht geladen werden: {error}"
+    },
+    "warnings_failed": {
+      "message": "Warnungen konnten weder vom DWD noch von NINA geladen werden."
+    }
+  }
+}
