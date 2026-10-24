@@ -48,7 +48,8 @@ manifest-Version. HA/HACS vergleichen per AwesomeVersion: `26.10.x` gilt als neu
 - Jede Änderung in `CHANGELOG.md` unter „Unveröffentlicht“ eintragen, beim Release in die Versionsüberschrift.
 - GitHub Actions: `.github/workflows/pruefung.yml` und `.github/workflows/hacs.yml` (HACS-Prüfung, läuft nur im
   öffentlichen Repo).
-- README-Bilder: Karten aus `docs/readme-images.json`, gerendert mit `theme/v1/readme-images/render.mjs <repo> cards`
-  aus sh1ft-w.github.io. Titelbild `docs/images/readme-title.webp` (ein Bild für hell und dunkel) aus
-  `tools/readme-title.html` (selbst gezeichnet, Werte ausgedacht; Rendern siehe Kommentar dort). Die Projektseite
-  `docs/index.html` (nur Deutsch) zeigt dasselbe Bild im Hero, Versionszeile liest die manifest.json.
+- README-Bilder: Titelbild und Karten aus `docs/readme-images.json` mit `theme/v1/readme-images/render.mjs <repo>`
+  aus sh1ft-w.github.io: Titel als `docs/images/readme-title-{light,dark}.webp` (2560 × 1280, Fenster zeigt
+  `docs/images/title-shot-*.png`, den Funktionsblock der Projektseite mit 2× aufgenommen) plus `readme-title-social.png`
+  für die GitHub-Vorschau; die Karten stehen als Markdown-Tabellen zwischen `<!-- cards:… -->` im README, Icons in
+  `docs/images/icons/`. Die Projektseite `docs/index.html` (nur Deutsch) zeigt das Titelbild im Hero, Versionszeile liest die manifest.json.

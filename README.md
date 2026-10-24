@@ -1,6 +1,9 @@
 <div align="center">
 
-<img src="docs/images/readme-title.webp" alt="Wetter &amp; Warnungen für Home Assistant: Vorhersage und alle amtlichen Warnungen für Deutschland." />
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/images/readme-title-dark.webp" />
+  <img src="docs/images/readme-title-light.webp" alt="Wetter & Warnungen: Vorhersage und jede amtliche Warnung. Die Funktionsübersicht der Projektseite in einem Fenster." />
+</picture>
 
 <p>Die Vorhersage des <b>Deutschen Wetterdienstes</b>, die nächste Station und <b>alle amtlichen Warnungen</b> in Home Assistant.<br/>
 Startet sofort. Ohne Konto, ohne Schlüssel, ohne zusätzliche Pakete.</p>
@@ -28,10 +31,13 @@ Schnell und schlank: Beim Start ist der letzte Stand sofort da, frische Daten ko
 <a id="funktionen"></a>
 ## Funktionen
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/images/readme-cards-features-dark.png" />
-  <img src="docs/images/readme-cards-features-light.png" alt="DWD-Vorhersage: MOSMIX-Vorhersage des Deutschen Wetterdienstes, stündlich für 48 Stunden, täglich für 8 Tage, mit Höchst- und Tiefstwert, Regenmenge, Regenrisiko, Wind, Böen und Bewölkung. Aktuelle Werte: gemessen an der nächsten DWD-Station, Lücken füllt die Vorhersage der laufenden Stunde. Eigene Sensoren zuerst: Temperatur, Luftfeuchte und Regen von einem Sensor in der Nähe gehen vor, solange sie höchstens eine Stunde alt sind. Alle amtlichen Warnungen: DWD-Warnungen für deine Gemeinde, dazu MoWaS, KATWARN, BIWAPP, Hochwasser und Polizei für deinen Kreis, alle 2 Minuten abgefragt. Keine falsche Entwarnung: ist eine Quelle nicht erreichbar, bleiben ihre letzten Warnungen stehen, abgelaufene verschwinden trotzdem pünktlich. Startet sofort: der letzte Stand kommt aus dem Speicher, ohne Konto, ohne Schlüssel, ohne zusätzliche Python-Pakete." />
-</picture>
+<!-- cards:features -->
+<table>
+<tr><td width="34" valign="top"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/icons/weather-partly-rainy-dark.svg"><img src="docs/images/icons/weather-partly-rainy-light.svg" width="26" height="26" alt=""></picture></td><td width="46%" valign="top"><b>DWD-Vorhersage</b><br>MOSMIX-Vorhersage des Deutschen Wetterdienstes: stündlich für 48 Stunden, täglich für 8 Tage, mit Höchst- und Tiefstwert, Regenmenge, Regenrisiko, Wind, Böen und Bewölkung.</td><td width="34" valign="top"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/icons/thermometer-dark.svg"><img src="docs/images/icons/thermometer-light.svg" width="26" height="26" alt=""></picture></td><td width="46%" valign="top"><b>Aktuelle Werte</b><br>Gemessen an der nächsten DWD-Station. Lücken füllt die Vorhersage der laufenden Stunde.</td></tr>
+<tr><td width="34" valign="top"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/icons/home-thermometer-outline-dark.svg"><img src="docs/images/icons/home-thermometer-outline-light.svg" width="26" height="26" alt=""></picture></td><td width="46%" valign="top"><b>Eigene Sensoren zuerst</b><br>Temperatur, Luftfeuchte und Regen von einem Sensor in der Nähe (Ecowitt, Davis, Shelly, Netatmo und andere) gehen vor, solange sie höchstens eine Stunde alt sind.</td><td width="34" valign="top"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/icons/alert-outline-dark.svg"><img src="docs/images/icons/alert-outline-light.svg" width="26" height="26" alt=""></picture></td><td width="46%" valign="top"><b>Alle amtlichen Warnungen</b><br>DWD-Warnungen für deine Gemeinde, dazu MoWaS, KATWARN, BIWAPP, Hochwasser und Polizei für deinen Kreis, alle 2 Minuten abgefragt.</td></tr>
+<tr><td width="34" valign="top"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/icons/shield-check-outline-dark.svg"><img src="docs/images/icons/shield-check-outline-light.svg" width="26" height="26" alt=""></picture></td><td width="46%" valign="top"><b>Keine falsche Entwarnung</b><br>Ist eine Quelle nicht erreichbar, bleiben ihre letzten Warnungen stehen. Abgelaufene Warnungen verschwinden trotzdem pünktlich.</td><td width="34" valign="top"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/icons/rocket-launch-outline-dark.svg"><img src="docs/images/icons/rocket-launch-outline-light.svg" width="26" height="26" alt=""></picture></td><td width="46%" valign="top"><b>Startet sofort</b><br>Der letzte Stand kommt aus dem Speicher, frische Daten erst nach dem Start von Home Assistant. Ohne Konto, ohne Schlüssel, ohne zusätzliche Python-Pakete.</td></tr>
+</table>
+<!-- /cards:features -->
 
 - **Vorhersage** des Deutschen Wetterdienstes (MOSMIX) über Bright Sky: stündlich für 48 Stunden, täglich für 8 Tage (Höchst- und Tiefstwert, Regenmenge, Regenrisiko, Wind, Böen, Bewölkung).
 - **Aktuelle Werte** der nächsten DWD-Station. Temperatur, Luftfeuchte und Regen können stattdessen von **eigenen Sensoren in der Nähe** kommen, zum Beispiel von einer Wetterstation oder einem Netatmo-Wetterbereich, solange diese Werte frisch sind.
@@ -43,10 +49,13 @@ Schnell und schlank: Beim Start ist der letzte Stand sofort da, frische Daten ko
 <a id="entitaeten"></a>
 ## Entitäten
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/images/readme-cards-entities-dark.png" />
-  <img src="docs/images/readme-cards-entities-light.png" alt="Wetter-Entität: aktuelles Wetter mit Vorhersage stündlich (48 Std.) und täglich (8 Tage) über weather.get_forecasts. Messwerte: Temperatur, Luftfeuchte, Taupunkt, Druck, Wind, Böen, Windrichtung, Niederschlag, Sichtweite, Bewölkung und Wetterzustand. Regen und Sonne: Regenwahrscheinlichkeit für diese Stunde und für heute, Sonneneinstrahlung in W/m² aus der Vorhersage. Warnungen: ein Zähler mit allen Warnungen als Attribut, die schlimmste zuerst, und Warnung 1 bis 5 mit denselben Attributen wie die NINA-Integration. Nachbarschaft: woher die aktuellen Werte kommen, dazu Bereich, Fläche, Abstand und ein Radius-Regler für einen Netatmo-Wetterbereich. Diagnose: herunterladen mit geschwärzten Koordinaten und geschwärztem Warngebiet." />
-</picture>
+<!-- cards:entities -->
+<table>
+<tr><td width="34" valign="top"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/icons/weather-partly-cloudy-dark.svg"><img src="docs/images/icons/weather-partly-cloudy-light.svg" width="26" height="26" alt=""></picture></td><td width="46%" valign="top"><b>Wetter-Entität</b><br>Aktuelles Wetter mit Vorhersage stündlich (48 Std.) und täglich (8 Tage) über weather.get_forecasts.</td><td width="34" valign="top"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/icons/thermometer-lines-dark.svg"><img src="docs/images/icons/thermometer-lines-light.svg" width="26" height="26" alt=""></picture></td><td width="46%" valign="top"><b>Messwerte</b><br>Temperatur, Luftfeuchte, Taupunkt, Druck, Wind, Böen, Windrichtung, Niederschlag, Sichtweite, Bewölkung und Wetterzustand.</td></tr>
+<tr><td width="34" valign="top"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/icons/umbrella-outline-dark.svg"><img src="docs/images/icons/umbrella-outline-light.svg" width="26" height="26" alt=""></picture></td><td width="46%" valign="top"><b>Regen und Sonne</b><br>Regenwahrscheinlichkeit für diese Stunde und für heute, Sonneneinstrahlung in W/m² aus der Vorhersage.</td><td width="34" valign="top"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/icons/alert-circle-outline-dark.svg"><img src="docs/images/icons/alert-circle-outline-light.svg" width="26" height="26" alt=""></picture></td><td width="46%" valign="top"><b>Warnungen</b><br>Ein Zähler mit allen Warnungen als Attribut, die schlimmste zuerst, und Warnung 1 bis 5 mit denselben Attributen wie die NINA-Integration.</td></tr>
+<tr><td width="34" valign="top"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/icons/map-marker-radius-outline-dark.svg"><img src="docs/images/icons/map-marker-radius-outline-light.svg" width="26" height="26" alt=""></picture></td><td width="46%" valign="top"><b>Nachbarschaft</b><br>Woher die aktuellen Werte kommen, dazu Bereich, Fläche, Abstand und ein Radius-Regler für einen Netatmo-Wetterbereich.</td><td width="34" valign="top"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/icons/stethoscope-dark.svg"><img src="docs/images/icons/stethoscope-light.svg" width="26" height="26" alt=""></picture></td><td width="46%" valign="top"><b>Diagnose</b><br>Herunterladen mit geschwärzten Koordinaten und geschwärztem Warngebiet.</td></tr>
+</table>
+<!-- /cards:entities -->
 
 Alle Entitäten gehören zu einem Dienst-Gerät je Ort. Die Beispiele gelten für den vorgegebenen Namen **Wetter** auf einer deutschen Installation (`weather.wetter`, `sensor.wetter_temperatur`, …).
 
@@ -198,10 +207,11 @@ Wenn du ein [Issue](https://github.com/SH1FT-W/wetter-warnungen/issues) öffnest
 
 ## So funktioniert es
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/images/readme-cards-how-dark.png" />
-  <img src="docs/images/readme-cards-how-light.png" alt="Bright Sky: Vorhersage, Stationswerte und DWD-Warnungen aus der freien Bright-Sky-Schnittstelle für die offenen Daten des DWD, alle 10 Minuten. Warnsystem des Bundes: die übrigen amtlichen Warnungen für deinen Kreis von warnung.bund.de, dieselben Daten wie in der NINA-App, alle 2 Minuten. Deine Nachbarschaft: Sensoren aus den Optionen gehen vor, solange sie frisch sind, sonst gilt der Wert des DWD." />
-</picture>
+<!-- cards:how -->
+<table>
+<tr><td width="34" valign="top"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/icons/weather-cloudy-clock-dark.svg"><img src="docs/images/icons/weather-cloudy-clock-light.svg" width="26" height="26" alt=""></picture></td><td width="29%" valign="top"><b>Bright Sky</b><br>Vorhersage, Stationswerte und DWD-Warnungen aus der freien Bright-Sky-Schnittstelle für die offenen Daten des DWD, alle 10 Minuten.</td><td width="34" valign="top"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/icons/bullhorn-outline-dark.svg"><img src="docs/images/icons/bullhorn-outline-light.svg" width="26" height="26" alt=""></picture></td><td width="29%" valign="top"><b>Warnsystem des Bundes</b><br>Die übrigen amtlichen Warnungen für deinen Kreis von warnung.bund.de, dieselben Daten wie in der NINA-App, alle 2 Minuten.</td><td width="34" valign="top"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/icons/home-outline-dark.svg"><img src="docs/images/icons/home-outline-light.svg" width="26" height="26" alt=""></picture></td><td width="29%" valign="top"><b>Deine Nachbarschaft</b><br>Sensoren aus den Optionen gehen vor, solange sie frisch sind. Sonst gilt der Wert des DWD.</td></tr>
+</table>
+<!-- /cards:how -->
 
 Vorhersage, aktuelle Werte und DWD-Warnungen kommen von [Bright Sky](https://brightsky.dev), einer freien JSON-Schnittstelle für die offenen Daten des Deutschen Wetterdienstes. Die übrigen Warnungen kommen aus der öffentlichen Warn-Schnittstelle des BBK ([warnung.bund.de](https://warnung.bund.de)); der Kreis ergibt sich aus der DWD-Warnzelle der Gemeinde, DWD-Meldungen aus NINA werden übersprungen, weil sie schon von Bright Sky kommen. Datenquellen und ihre Bedingungen stehen in [`NOTICE`](NOTICE).
 
