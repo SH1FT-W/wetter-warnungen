@@ -1,5 +1,9 @@
 # Changelog
 
+## 26.10.10 (unveröffentlicht)
+
+- **Gefühlte Temperatur:** Neuer Sensor und Wert in der Wetter-Entität (`apparent_temperature`), auch in der stündlichen Vorhersage. Gerechnet nach der Steadman-Formel (wie Open-Meteo) aus Temperatur, Luftfeuchte und Wind; Nachbarschaftswerte zählen mit. Der DWD liefert den Wert nicht selbst.
+
 ## 26.10.9 (25.10.2026)
 
 - **Warnungen nur, wenn sie das Zuhause treffen:** Kreis-Meldungen aus NINA (Hochwasser, MoWaS, KATWARN …) werden gegen ihr echtes Warngebiet (GeoJSON der Meldung) geprüft. Berührt das Gebiet nur einen anderen Zipfel des Kreises, etwa eine Sturmflutwarnung für die Küste, die im Tidebereich noch den Kreis streift, erscheint sie nicht mehr. Gut 1 km Rand zählt noch als betroffen. Ohne ladbare Geometrie gilt wie bisher der ganze Kreis.

@@ -1,6 +1,9 @@
 {
   "entity": {
     "sensor": {
+      "apparent_temperature": {
+        "default": "mdi:thermometer-lines"
+      },
       "wind_gust": {
         "default": "mdi:weather-windy-variant"
       },

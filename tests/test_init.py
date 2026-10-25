@@ -48,6 +48,10 @@ async def test_entities(hass: HomeAssistant, brightsky: AiohttpClientMocker, ent
     assert w is not None and w.state == "cloudy"
     assert w.attributes["temperature"] == CURRENT["temperature"]
     assert w.attributes["humidity"] == CURRENT["relative_humidity"]
+    assert w.attributes["apparent_temperature"] == model.apparent_temperature(
+        CURRENT["temperature"], CURRENT["relative_humidity"], CURRENT["wind_speed_10"]
+    )
+    assert hass.states.get("sensor.wetter_gefuhlte_temperatur").state == str(w.attributes["apparent_temperature"])
     assert w.attributes["attribution"] == "Deutscher Wetterdienst (über Bright Sky)"
     assert hass.states.get("sensor.wetter_temperatur").state == str(CURRENT["temperature"])
     assert hass.states.get("sensor.wetter_temperatur").attributes["source"] == "dwd"
@@ -106,6 +110,8 @@ async def test_forecasts(hass: HomeAssistant, brightsky: AiohttpClientMocker, en
         fc = resp[WEATHER]["forecast"]  # type: ignore[index]
         assert len(fc) == count
         assert fc[0]["temperature"] is not None
+        if kind == "hourly":
+            assert fc[0]["apparent_temperature"] is not None
     daily = resp  # noqa: F841 – Aufbau für die Tagesübersicht: temperature, templow, precipitation_probability
     resp = await hass.services.async_call(
         WEATHER_DOMAIN,
@@ -142,6 +148,10 @@ async def test_local_values_take_precedence(
     assert source.attributes["temperature"] == "sensor.umgebung_temperatur"
     assert source.attributes["humidity"] == "dwd", "nicht eingetragen → DWD"
     assert hass.states.get(WEATHER).attributes["temperature"] == 15.2
+    w = hass.states.get(WEATHER).attributes
+    assert w["apparent_temperature"] == model.apparent_temperature(15.2, w["humidity"], w["wind_speed"]), (
+        "gefühlt mit der Nachbarschafts-Temperatur"
+    )
 
     hass.states.async_set("sensor.umgebung_niederschlagsmenge", "1.2")
     await hass.async_block_till_done()

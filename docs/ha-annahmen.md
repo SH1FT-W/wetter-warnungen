@@ -17,6 +17,7 @@ Worauf sich dieses Repo bei Home Assistant verlässt. Bei jeder Änderung am Cod
 | `Store(hass, 1, key)` mit `async_delay_save`, Schlüssel frei wählbar | `coordinator.py` beide Coordinators | `tests/test_init.py::test_start_from_saved_state` |
 | `UpdateFailed(translation_domain, translation_key, translation_placeholders)` übersetzt den Fehler | `coordinator.py` `_async_update_data` | `tests/test_init.py` Ausfall-Tests |
 | `WeatherEntityFeature.FORECAST_DAILY/HOURLY` + `async_forecast_*` liefern `weather.get_forecasts` | `weather.py` | `tests/test_init.py::test_forecasts` |
+| `WeatherEntity.native_apparent_temperature` und Forecast-Schlüssel `native_apparent_temperature` werden in `apparent_temperature` umgerechnet | `weather.py`, `model.py` `_forecast_hour` | `tests/test_init.py::test_entities`, `::test_forecasts` |
 | `BinarySensorDeviceClass.SAFETY`: An = Problem (Warnung), aus = sicher | `binary_sensor.py` | `tests/test_init.py` Warnungs-Tests |
 | `async_redact_data` schwärzt genannte Schlüssel in der Diagnose | `diagnostics.py` | `tests/test_init.py::test_diagnostics_hide_location` |
 | `LocationSelector` liefert `{latitude, longitude}` unter `CONF_LOCATION`; `start_reconfigure_flow` + `async_update_reload_and_abort` | `config_flow.py` | `tests/test_init.py::test_reconfigure` |

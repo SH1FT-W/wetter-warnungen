@@ -156,6 +156,11 @@ class WetterCoordinator(DataUpdateCoordinator[dict[str, Any]]):
                 out[key] = round(local, 1)
                 sources[key] = self.local[key]
         out["local_sources"] = sources
+        if sources.keys() & {"temperature", "humidity", "wind_speed"}:
+            # Gefühlte Temperatur aus den Werten, die jetzt gelten (auch aus der Nachbarschaft)
+            out["apparent_temperature"] = model.apparent_temperature(
+                out["temperature"], out["humidity"], out["wind_speed"]
+            )
         if "precipitation" in sources:
             # Regen vor Ort ändert auch das Symbol (die Station kann trocken melden, während es hier regnet)
             out["condition"] = self._condition_with_local_rain(out)

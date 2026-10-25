@@ -82,6 +82,9 @@ def _source_attrs(c: WetterCoordinator, now: dict[str, Any]) -> dict[str, Any]:
 SENSORS: tuple[WetterSensorDescription, ...] = (
     _measurement("temperature", SensorDeviceClass.TEMPERATURE, UnitOfTemperature.CELSIUS, local=True),
     _measurement("humidity", SensorDeviceClass.HUMIDITY, PERCENTAGE, local=True),
+    _measurement(
+        "apparent_temperature", SensorDeviceClass.TEMPERATURE, UnitOfTemperature.CELSIUS, suggested_display_precision=1
+    ),
     _measurement("dew_point", SensorDeviceClass.TEMPERATURE, UnitOfTemperature.CELSIUS),
     _measurement("pressure", SensorDeviceClass.ATMOSPHERIC_PRESSURE, UnitOfPressure.HPA, local=True),
     _measurement("wind_speed", SensorDeviceClass.WIND_SPEED, UnitOfSpeed.KILOMETERS_PER_HOUR, local=True),

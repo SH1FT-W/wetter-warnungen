@@ -35,6 +35,15 @@ def test_condition(icon: str | None, rain: float | None, expected: str | None) -
     assert model.condition(icon, rain) == expected
 
 
+def test_apparent_temperature() -> None:
+    """Steadman-Formel: Feuchte wärmt, Wind kühlt, ohne Wind gilt Windstille."""
+    assert model.apparent_temperature(30.0, 70.0, 0.0) == 35.8
+    assert model.apparent_temperature(5.0, 80.0, 36.0) == -3.7, "36 km/h = 10 m/s"
+    assert model.apparent_temperature(20.0, 50.0, None) == model.apparent_temperature(20.0, 50.0, 0.0)
+    assert model.apparent_temperature(None, 50.0, 0.0) is None
+    assert model.apparent_temperature(20.0, None, 0.0) is None
+
+
 def test_humidity_from_dew_point() -> None:
     assert model.humidity_from_dew_point(20.0, 20.0) == 100
     assert model.humidity_from_dew_point(20.0, 10.0) == 53
@@ -58,6 +67,9 @@ def test_now_values_from_station_and_forecast() -> None:
     assert now["visibility"] == round(CURRENT["visibility"] / 1000, 1)
     assert now["condition"] == "cloudy"
     assert now["precipitation_probability"] is not None, "aus der Vorhersage der laufenden Stunde"
+    assert now["apparent_temperature"] == model.apparent_temperature(
+        now["temperature"], now["humidity"], now["wind_speed"]
+    )
     # Sonne: Station misst keine → Vorhersage der laufenden Stunde (Stempel 10:00 = Stunde 09–10 Uhr UTC)
     hour = next(h for h in HOURLY if h["timestamp"] == "2026-10-15T10:00:00+00:00")
     assert now["solar"] == round(hour["solar"] * 1000)
@@ -96,6 +108,7 @@ def test_hourly_forecast() -> None:
     assert fc[0]["native_temperature"] == first["temperature"]
     assert fc[0]["precipitation_probability"] == first["precipitation_probability"]
     assert all(f["humidity"] is not None for f in fc), "Feuchte aus dem Taupunkt, wenn sie fehlt"
+    assert all(f["native_apparent_temperature"] is not None for f in fc), "gefühlt aus Temperatur, Feuchte, Wind"
     assert model.hourly_forecast([{"timestamp": "x"}, *HOURLY], NOW, 1)[0]["datetime"] == fc[0]["datetime"]
 
 

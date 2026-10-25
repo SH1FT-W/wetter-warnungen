@@ -74,6 +74,9 @@
           }
         }
       },
+      "apparent_temperature": {
+        "name": "Apparent temperature"
+      },
       "dew_point": {
         "name": "Dew point"
       },

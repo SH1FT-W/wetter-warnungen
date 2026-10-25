@@ -74,6 +74,9 @@
           }
         }
       },
+      "apparent_temperature": {
+        "name": "Gefühlte Temperatur"
+      },
       "dew_point": {
         "name": "Taupunkt"
       },

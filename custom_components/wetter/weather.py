@@ -57,6 +57,10 @@ class WetterWeather(WetterEntity, WeatherEntity):
         return cast(float | None, self._now.get("temperature"))
 
     @property
+    def native_apparent_temperature(self) -> float | None:
+        return cast(float | None, self._now.get("apparent_temperature"))
+
+    @property
     def native_dew_point(self) -> float | None:
         return cast(float | None, self._now.get("dew_point"))
 

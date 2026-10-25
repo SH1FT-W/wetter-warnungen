@@ -68,6 +68,19 @@ def humidity_from_dew_point(temperature: Any, dew_point: Any) -> float | None:
     return round(max(0.0, min(100.0, 100 * vapour(dew_point) / vapour(temperature))), 0)
 
 
+def apparent_temperature(temperature: Any, humidity: Any, wind_speed: Any) -> float | None:
+    """Gefühlte Temperatur nach Steadman (Australian Bureau of Meteorology), wie bei Open-Meteo.
+
+    Temperatur in °C, relative Feuchte in %, Wind in km/h (10 m). Fehlt der Wind, gilt Windstille: dann wirkt
+    nur die Feuchte, das ist näher an der Wahrheit als gar kein Wert. Ohne Temperatur oder Feuchte kein Wert.
+    """
+    if not isinstance(temperature, int | float) or not isinstance(humidity, int | float):
+        return None
+    wind_ms = wind_speed / 3.6 if isinstance(wind_speed, int | float) else 0.0
+    vapour_hpa = humidity / 100 * 6.105 * math.exp(17.27 * temperature / (237.7 + temperature))
+    return round(temperature + 0.33 * vapour_hpa - 0.70 * wind_ms - 4.0, 1)
+
+
 def _num(value: Any) -> float | None:
     return float(value) if isinstance(value, int | float) and not isinstance(value, bool) else None
 
@@ -112,12 +125,14 @@ def now_values(current: dict[str, Any] | None, hourly: list[dict[str, Any]], now
         # erst wenn auch die Vorhersage keine Feuchte hat (0 % ist ein Wert, kein Fehlen)
         humidity = humidity_from_dew_point(temperature, dew_point)
     icon = obs.get("icon") if isinstance(obs.get("icon"), str) else fc.get("icon")
+    wind_speed = fallback(pick("wind_speed_10", "wind_speed_30", "wind_speed_60"), "wind_speed")
     return {
         "temperature": temperature,
+        "apparent_temperature": apparent_temperature(temperature, humidity, wind_speed),
         "dew_point": dew_point,
         "humidity": humidity,
         "pressure": fallback(pick("pressure_msl"), "pressure_msl"),
-        "wind_speed": fallback(pick("wind_speed_10", "wind_speed_30", "wind_speed_60"), "wind_speed"),
+        "wind_speed": wind_speed,
         "wind_bearing": fallback(pick("wind_direction_10", "wind_direction_30", "wind_direction_60"), "wind_direction"),
         "wind_gust": fallback(
             pick("wind_gust_speed_10", "wind_gust_speed_30", "wind_gust_speed_60"), "wind_gust_speed"
@@ -137,16 +152,20 @@ def now_values(current: dict[str, Any] | None, hourly: list[dict[str, Any]], now
 def _forecast_hour(hour: dict[str, Any], ts: datetime) -> dict[str, Any]:
     temperature, dew_point = _num(hour.get("temperature")), _num(hour.get("dew_point"))
     humidity = _num(hour.get("relative_humidity"))
+    if humidity is None:
+        humidity = humidity_from_dew_point(temperature, dew_point)
+    wind_speed = _num(hour.get("wind_speed"))
     return {
         "datetime": ts.isoformat(),
         "condition": condition(hour.get("icon"), hour.get("precipitation")),
         "native_temperature": temperature,
+        "native_apparent_temperature": apparent_temperature(temperature, humidity, wind_speed),
         "native_dew_point": dew_point,
-        "humidity": humidity if humidity is not None else humidity_from_dew_point(temperature, dew_point),
+        "humidity": humidity,
         "native_precipitation": _num(hour.get("precipitation")),
         "precipitation_probability": _num(hour.get("precipitation_probability")),
         "native_pressure": _num(hour.get("pressure_msl")),
-        "native_wind_speed": _num(hour.get("wind_speed")),
+        "native_wind_speed": wind_speed,
         "native_wind_gust_speed": _num(hour.get("wind_gust_speed")),
         "wind_bearing": _num(hour.get("wind_direction")),
         "cloud_coverage": _num(hour.get("cloud_cover")),
