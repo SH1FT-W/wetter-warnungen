@@ -1,6 +1,6 @@
 # Changelog
 
-## Unveröffentlicht
+## 26.10.9 (25.10.2026)
 
 - **Warnungen nur, wenn sie das Zuhause treffen:** Kreis-Meldungen aus NINA (Hochwasser, MoWaS, KATWARN …) werden gegen ihr echtes Warngebiet (GeoJSON der Meldung) geprüft. Berührt das Gebiet nur einen anderen Zipfel des Kreises, etwa eine Sturmflutwarnung für die Küste, die im Tidebereich noch den Kreis streift, erscheint sie nicht mehr. Gut 1 km Rand zählt noch als betroffen. Ohne ladbare Geometrie gilt wie bisher der ganze Kreis.
 ## 26.10.8 (19.10.2026)
