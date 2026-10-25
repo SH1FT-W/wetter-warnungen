@@ -30,7 +30,7 @@ from custom_components.wetter.const import (
     NINA_URL,
 )
 
-from .conftest import ARS, LAT, LON, MOWAS_ID, WARN_CELL, load
+from .conftest import ARS, FAR_AWAY, LAT, LON, MOWAS_ID, WARN_CELL, load
 
 WEATHER = "weather.wetter"
 CURRENT = load("current.json")["weather"]
@@ -310,8 +310,8 @@ async def test_start_from_saved_state(
     hass.set_state(CoreState.running)
     hass.bus.async_fire("homeassistant_started")
     await hass.async_block_till_done(wait_background_tasks=True)
-    # Messung + Vorhersage, DWD-Warnungen + NINA-Kreis + Volltext der MoWaS-Meldung
-    assert brightsky.call_count == calls + 5, "nach dem Start frisch"
+    # Messung + Vorhersage, DWD-Warnungen + NINA-Kreis + Volltext und Warngebiet der MoWaS-Meldung
+    assert brightsky.call_count == calls + 6, "nach dem Start frisch"
 
 
 async def test_not_ready_when_bright_sky_down(
@@ -445,6 +445,44 @@ async def test_nina_detail_missing(hass: HomeAssistant, brightsky: AiohttpClient
     slot = hass.states.get("binary_sensor.wetter_warnung_1")
     assert slot.state == "on" and "Trinkwasser" in slot.attributes["headline"]
     assert slot.attributes["description"] is None and slot.attributes["severity"] == "Minor"
+
+
+async def test_nina_warning_elsewhere_in_district(
+    hass: HomeAssistant, brightsky: AiohttpClientMocker, entry: MockConfigEntry
+) -> None:
+    """Warngebiet trifft das Zuhause nicht (anderer Zipfel des Kreises) → Meldung weg; ohne Geometrie bleibt sie."""
+    brightsky.clear_requests()
+    brightsky.get(f"{API_URL}/current_weather", json=load("current.json"))
+    brightsky.get(f"{API_URL}/weather", json=load("weather.json"))
+    brightsky.get(f"{API_URL}/alerts", json={"alerts": [], "location": {"warn_cell_id": WARN_CELL}})
+    brightsky.get(f"{NINA_URL}/dashboard/{ARS}.json", json=load("nina_dashboard.json"))
+    brightsky.get(f"{NINA_URL}/warnings/{MOWAS_ID}.json", json=load("nina_warning.json"))
+    brightsky.get(f"{NINA_URL}/warnings/{MOWAS_ID}.geojson", json=FAR_AWAY)
+    await _setup(hass, entry)
+    assert hass.states.get("sensor.wetter_warnungen").state == "0"
+    assert hass.states.get("binary_sensor.wetter_warnung_1").state == "off"
+
+    # Geometrie nicht ladbar → Kreis-Meldung wie bisher anzeigen
+    brightsky.clear_requests()
+    brightsky.get(f"{API_URL}/current_weather", json=load("current.json"))
+    brightsky.get(f"{API_URL}/weather", json=load("weather.json"))
+    brightsky.get(f"{API_URL}/alerts", json={"alerts": [], "location": {"warn_cell_id": WARN_CELL}})
+    brightsky.get(f"{NINA_URL}/dashboard/{ARS}.json", json=load("nina_dashboard.json"))
+    brightsky.get(f"{NINA_URL}/warnings/{MOWAS_ID}.json", json=load("nina_warning.json"))
+    brightsky.get(f"{NINA_URL}/warnings/{MOWAS_ID}.geojson", status=500)
+    other = MockConfigEntry(
+        domain=DOMAIN,
+        title="Zweitwohnung",
+        unique_id="52.520,13.420",
+        data={CONF_LATITUDE: 52.52, CONF_LONGITUDE: 13.42},
+    )
+    other.add_to_hass(hass)
+    await _setup(hass, other)
+    assert hass.states.get("sensor.zweitwohnung_warnungen").state == "1"
+
+    brightsky.get(f"{NINA_URL}/warnings/x.geojson", json=["kein", "geojson"])
+    with pytest.raises(WetterError):
+        await NinaClient(async_get_clientsession(hass)).geometry("x")
 
 
 async def test_reconfigure(hass: HomeAssistant, brightsky: AiohttpClientMocker, entry: MockConfigEntry) -> None:

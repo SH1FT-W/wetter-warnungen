@@ -10,6 +10,7 @@ Die Felder heißen wie die Attribute der NINA-Integration, damit Dashboards/Auto
 from __future__ import annotations
 
 from datetime import datetime
+import math
 import re
 from typing import Any
 
@@ -110,6 +111,68 @@ def from_nina(item: dict[str, Any], detail: dict[str, Any] | None) -> dict[str, 
         "expires": info.get("expires"),
         "more_info_url": web if isinstance(web, str) and web.startswith("http") else None,
     }
+
+
+# Rand-Toleranz um die Warnpolygone in Grad (gut 1 km): Zuhause knapp außerhalb zählt noch als betroffen
+_EDGE_TOLERANCE = 0.01
+
+
+def _in_ring(lon: float, lat: float, ring: list[Any], tol: float) -> bool:
+    """Punkt im Ring (Strahlverfahren) oder höchstens `tol` Grad (Länge um cos(Breite) gestaucht) von einer Kante."""
+    pts = [(float(c[0]), float(c[1])) for c in ring if isinstance(c, (list, tuple)) and len(c) >= 2]
+    if len(pts) < 3:
+        return False
+    inside = False
+    kx = math.cos(math.radians(lat))
+    j = len(pts) - 1
+    for i, (xi, yi) in enumerate(pts):
+        xj, yj = pts[j]
+        if (yi > lat) != (yj > lat) and lon < (xj - xi) * (lat - yi) / (yj - yi) + xi:
+            inside = not inside
+        # Abstand zur Kante i–j in gestauchten Grad
+        dx, dy = (xj - xi) * kx, yj - yi
+        px, py = (lon - xi) * kx, lat - yi
+        t = 0.0 if dx == dy == 0 else max(0.0, min(1.0, (px * dx + py * dy) / (dx * dx + dy * dy)))
+        if math.hypot(px - t * dx, py - t * dy) <= tol:
+            return True
+        j = i
+    return inside
+
+
+def _polygons(geojson: Any) -> list[list[Any]]:
+    """Alle Polygone (je Liste von Ringen) aus einer GeoJSON-FeatureCollection/Feature/Geometry."""
+    if not isinstance(geojson, dict):
+        return []
+    kind = geojson.get("type")
+    if kind == "FeatureCollection":
+        return [p for f in geojson.get("features") or [] for p in _polygons(f)]
+    if kind == "Feature":
+        return _polygons(geojson.get("geometry"))
+    coords = geojson.get("coordinates")
+    if kind == "Polygon" and isinstance(coords, list):
+        return [coords]
+    if kind == "MultiPolygon" and isinstance(coords, list):
+        return [p for p in coords if isinstance(p, list)]
+    return []
+
+
+def covers(geojson: Any, latitude: float, longitude: float) -> bool | None:
+    """Liegt das Zuhause im Warngebiet? None, wenn die Geometrie fehlt oder unbrauchbar ist (dann gilt der Kreis).
+
+    NINA liefert Kreis-Meldungen für den ganzen Kreis, auch wenn das Warngebiet (z. B. die Nordseeküste bis in den
+    Tidebereich) nur einen Zipfel davon berührt. Das GeoJSON der Meldung zeigt die echten Flächen; Löcher gelten.
+    """
+    polygons = _polygons(geojson)
+    rings = [r for p in polygons for r in p if isinstance(r, list)]
+    if not rings:
+        return None
+    for poly in polygons:
+        rings = [r for r in poly if isinstance(r, list)]
+        if not rings or not _in_ring(longitude, latitude, rings[0], _EDGE_TOLERANCE):
+            continue
+        if not any(_in_ring(longitude, latitude, hole, -1.0) for hole in rings[1:]):
+            return True
+    return False
 
 
 def drop_expired(warnings: list[dict[str, Any]], now: datetime) -> list[dict[str, Any]]:

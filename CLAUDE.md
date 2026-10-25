@@ -28,7 +28,9 @@ manifest-Version. HA/HACS vergleichen per AwesomeVersion: `26.10.x` gilt als neu
 - Netatmo-Bereich: nur Temperatur/Feuchte/Regen sinnvoll (Druck nicht auf Meereshöhe, Wind zu geschützt).
 - Warnungen (`warnings.py` rein, `WarningsCoordinator` alle 2 Min.): DWD Gemeinde-genau aus Bright Sky + alle übrigen
   Anbieter (MoWaS, KATWARN, BIWAPP, LHP, Polizei) für den Kreis aus NINA (`warnung.bund.de/api31`, Kreis-ARS aus der
-  DWD-Warnzelle 8+Gemeindeschlüssel). NINA-DWD-Meldungen und „Cancel“ werden übersprungen. Fällt eine Quelle aus,
+  DWD-Warnzelle 8+Gemeindeschlüssel). NINA-DWD-Meldungen und „Cancel“ werden übersprungen. Kreis-Meldungen nur,
+  wenn ihr GeoJSON-Warngebiet (`/warnings/<id>.geojson`) die Heimkoordinaten trifft (`warnings.covers`, Rand 0,01°);
+  ohne Geometrie gilt der Kreis. Fällt eine Quelle aus,
   bleiben ihre letzten Warnungen (keine falsche Entwarnung), Warn-Entitäten bleiben immer verfügbar.
   `binary_sensor.<gerät>_warnung_1..5` mit denselben Attributen wie die NINA-Integration (Casora/Automationen).
 - Bright-Sky-Zeitstempel = Ende der Stunde; `solar` kWh/m² der Stunde → ×1000 = W/m².

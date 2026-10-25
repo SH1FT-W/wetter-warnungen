@@ -24,6 +24,22 @@ WARN_CELL = 812345678
 MOWAS_ID = "mow.DE-XX-MUS-W001-20260904-000"
 
 
+# Warngebiet weit weg vom Zuhause (anderer Zipfel des Kreises)
+FAR_AWAY = {
+    "type": "FeatureCollection",
+    "features": [
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [[[7.0, 53.5], [7.5, 53.5], [7.5, 53.9], [7.0, 53.9], [7.0, 53.5]]],
+            },
+            "properties": {},
+        }
+    ],
+}
+
+
 def load(name: str) -> dict[str, Any]:
     return json.loads((FIXTURES / name).read_text())
 
@@ -72,6 +88,7 @@ def brightsky(aioclient_mock: AiohttpClientMocker) -> AiohttpClientMocker:
     )
     aioclient_mock.get(f"{NINA_URL}/dashboard/{ARS}.json", json=load("nina_dashboard.json"))
     aioclient_mock.get(f"{NINA_URL}/warnings/{MOWAS_ID}.json", json=load("nina_warning.json"))
+    aioclient_mock.get(f"{NINA_URL}/warnings/{MOWAS_ID}.geojson", json=load("nina_warning.geojson"))
     return aioclient_mock
 
 

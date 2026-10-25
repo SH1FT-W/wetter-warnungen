@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 import logging
@@ -193,8 +194,10 @@ class WarningsCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         self.client = client
         self.nina = NinaClient(async_get_clientsession(hass))
         self._store: Store[dict[str, Any]] = Store(hass, 1, f"{DOMAIN}.{entry.entry_id}.warnings")
-        # Volltexte der NINA-Meldungen je Kennung+Version (ändern sich nur mit neuer Version)
+        self._latitude, self._longitude = float(entry.data[CONF_LATITUDE]), float(entry.data[CONF_LONGITUDE])
+        # Volltexte und Warngebiete der NINA-Meldungen je Kennung+Version (ändern sich nur mit neuer Version)
         self._details: dict[str, dict[str, Any]] = {}
+        self._geometry: dict[str, dict[str, Any]] = {}
 
     async def async_restore(self) -> bool:
         stored = await self._store.async_load()
@@ -248,20 +251,40 @@ class WarningsCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         return data
 
     async def _nina(self, ars: str) -> list[dict[str, Any]] | None:
-        """Nicht-DWD-Meldungen des Kreises mit Volltext; None, wenn NINA nicht erreichbar ist."""
+        """Nicht-DWD-Meldungen des Kreises mit Volltext, deren Warngebiet das Zuhause trifft; None bei NINA-Ausfall."""
         try:
             items = warnings.nina_items(await self.nina.dashboard(ars))
         except WetterError as err:
             _LOGGER.debug("NINA nicht erreichbar, behalte die letzten Meldungen: %s", err)
             return None
-        missing = [i for i in items if warnings.item_key(i) not in self._details]
-        results = await asyncio.gather(*(self.nina.warning(str(i["id"])) for i in missing), return_exceptions=True)
-        for item, result in zip(missing, results, strict=True):
-            if isinstance(result, dict):
-                self._details[warnings.item_key(item)] = result
-            else:
-                # Meldung ohne Volltext anzeigen, beim nächsten Durchlauf erneut versuchen
-                _LOGGER.debug("NINA-Volltext für %s fehlt: %s", item.get("id"), result)
+        await self._fetch(items, self._details, self.nina.warning, "Volltext")
+        await self._fetch(items, self._geometry, self.nina.geometry, "Warngebiet")
         keys = {warnings.item_key(i) for i in items}
         self._details = {k: v for k, v in self._details.items() if k in keys}
-        return [warnings.from_nina(i, self._details.get(warnings.item_key(i))) for i in items]
+        self._geometry = {k: v for k, v in self._geometry.items() if k in keys}
+        out = []
+        for item in items:
+            key = warnings.item_key(item)
+            # Warngebiet bekannt und Zuhause liegt nicht darin → Meldung gilt nur für einen anderen Teil des Kreises
+            if warnings.covers(self._geometry.get(key), self._latitude, self._longitude) is False:
+                _LOGGER.debug("NINA-Meldung %s trifft das Zuhause nicht, übersprungen", item.get("id"))
+                continue
+            out.append(warnings.from_nina(item, self._details.get(key)))
+        return out
+
+    async def _fetch(
+        self,
+        items: list[dict[str, Any]],
+        cache: dict[str, dict[str, Any]],
+        getter: Callable[[str], Awaitable[dict[str, Any]]],
+        what: str,
+    ) -> None:
+        """Fehlende Zusatzdaten (Volltext/Warngebiet) für neue oder geänderte Meldungen nachladen."""
+        missing = [i for i in items if warnings.item_key(i) not in cache]
+        results = await asyncio.gather(*(getter(str(i["id"])) for i in missing), return_exceptions=True)
+        for item, result in zip(missing, results, strict=True):
+            if isinstance(result, dict):
+                cache[warnings.item_key(item)] = result
+            else:
+                # Meldung ohne diese Zusatzdaten anzeigen, beim nächsten Durchlauf erneut versuchen
+                _LOGGER.debug("NINA-%s für %s fehlt: %s", what, item.get("id"), result)

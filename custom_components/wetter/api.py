@@ -96,3 +96,10 @@ class NinaClient:
         if not isinstance(data, dict):
             raise WetterError(f"NINA: Meldung {warning_id} unlesbar")
         return data
+
+    async def geometry(self, warning_id: str) -> dict[str, Any]:
+        """Warngebiet einer Meldung als GeoJSON (FeatureCollection mit den echten Flächen)."""
+        data = await self._get(f"/warnings/{warning_id}.geojson")
+        if not isinstance(data, dict):
+            raise WetterError(f"NINA: Warngebiet {warning_id} unlesbar")
+        return data

@@ -41,7 +41,7 @@ Schnell und schlank: Beim Start ist der letzte Stand sofort da, frische Daten ko
 
 - **Vorhersage** des Deutschen Wetterdienstes (MOSMIX) über Bright Sky: stündlich für 48 Stunden, täglich für 8 Tage (Höchst- und Tiefstwert, Regenmenge, Regenrisiko, Wind, Böen, Bewölkung).
 - **Aktuelle Werte** der nächsten DWD-Station. Temperatur, Luftfeuchte und Regen können stattdessen von **eigenen Sensoren in der Nähe** kommen, zum Beispiel von einer Wetterstation oder einem Netatmo-Wetterbereich, solange diese Werte frisch sind.
-- **Alle amtlichen Warnungen**: DWD genau für die Gemeinde, dazu Bevölkerungsschutz (MoWaS), KATWARN, BIWAPP, Hochwasser (LHP) und Polizei für den Kreis aus dem Warnsystem des Bundes (NINA).
+- **Alle amtlichen Warnungen**: DWD genau für die Gemeinde, dazu Bevölkerungsschutz (MoWaS), KATWARN, BIWAPP, Hochwasser (LHP) und Polizei für den Kreis aus dem Warnsystem des Bundes (NINA). Kreis-Meldungen erscheinen nur, wenn ihr Warngebiet das Zuhause wirklich trifft (gut 1 km Rand eingerechnet).
 - **Keine falsche Entwarnung**: Ist eine Quelle nicht erreichbar, bleiben ihre letzten Warnungen stehen. Abgelaufene Warnungen verschwinden trotzdem pünktlich.
 - **Start ohne Warten**: letzter Stand sofort aus dem Speicher, frische Daten erst, wenn Home Assistant fertig gestartet ist.
 - Kein Konto, kein Schlüssel, keine zusätzlichen Python-Pakete. Deutsch und Englisch.
@@ -77,7 +77,7 @@ Alle Entitäten gehören zu einem Dienst-Gerät je Ort. Die Beispiele gelten fü
 **Aktualisierung:**
 
 - Wetter alle **10 Minuten**: aktuelle Messung und stündliche Vorhersage (zusammen etwa 80 KB, etwa 0,1 s).
-- Warnungen alle **2 Minuten**: DWD-Warnungen der Gemeinde (Bright Sky) und Meldungen für den Kreis (NINA). Volltexte nur für neue oder geänderte Meldungen.
+- Warnungen alle **2 Minuten**: DWD-Warnungen der Gemeinde (Bright Sky) und Meldungen für den Kreis (NINA). Volltexte und Warngebiete nur für neue oder geänderte Meldungen.
 - Gespeichert wird der Stand nur, wenn sich Messung, Vorhersage oder Warnungen geändert haben.
 - Nachbarschaftswerte sofort bei jeder Änderung des Sensors.
 - Beim Start: letzter gespeicherter Stand sofort, Abfragen erst nach dem Start von Home Assistant.
@@ -180,7 +180,7 @@ Typische Einsätze: Jalousien bei starker Sonne (*Sonneneinstrahlung* über 300 
 
 - Die Vorhersage gilt für den nächsten DWD-Vorhersagepunkt (meist wenige Kilometer entfernt), nicht genau für die Adresse.
 - Die DWD-Messstation kann weit weg sein; dafür gibt es die Nachbarschaftswerte.
-- Meldungen für den Kreis (MoWaS und andere) gelten für den ganzen Kreis, DWD-Warnungen für die Gemeinde.
+- Meldungen für den Kreis (MoWaS und andere) kommen kreisweise aus NINA; angezeigt werden nur die, deren Warngebiet das Zuhause trifft (gut 1 km Rand zählt mit). Lässt sich das Gebiet nicht laden, gilt der ganze Kreis. DWD-Warnungen gelten für die Gemeinde.
 - Keine Pollen, kein Regenradar, keine Luftqualität.
 - **Nur Deutschland** (DWD und Warnsystem des Bundes).
 
