@@ -1,6 +1,6 @@
 # Changelog
 
-## 26.10.10 (unveröffentlicht)
+## 26.10.10 (25.10.2026)
 
 - **Gefühlte Temperatur:** Neuer Sensor und Wert in der Wetter-Entität (`apparent_temperature`), auch in der stündlichen Vorhersage. Gerechnet nach der Steadman-Formel (wie Open-Meteo) aus Temperatur, Luftfeuchte und Wind; Nachbarschaftswerte zählen mit. Der DWD liefert den Wert nicht selbst.
 
