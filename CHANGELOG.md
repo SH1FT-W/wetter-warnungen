@@ -3,6 +3,7 @@
 ## 26.10.9 (25.10.2026)
 
 - **Warnungen nur, wenn sie das Zuhause treffen:** Kreis-Meldungen aus NINA (Hochwasser, MoWaS, KATWARN …) werden gegen ihr echtes Warngebiet (GeoJSON der Meldung) geprüft. Berührt das Gebiet nur einen anderen Zipfel des Kreises, etwa eine Sturmflutwarnung für die Küste, die im Tidebereich noch den Kreis streift, erscheint sie nicht mehr. Gut 1 km Rand zählt noch als betroffen. Ohne ladbare Geometrie gilt wie bisher der ganze Kreis.
+
 ## 26.10.8 (19.10.2026)
 
 - **Öffentlich als „Wetter & Warnungen“** (Repo SH1FT-W/wetter-warnungen): Lizenz Apache 2.0, `NOTICE` mit den Datenquellen (DWD, CC BY 4.0, über Bright Sky; Warn-Schnittstelle des Bundes), neue README und Projektseite, HACS-Prüfung. Domain `wetter` und Ordner bleiben, bestehende Installationen laufen weiter.
