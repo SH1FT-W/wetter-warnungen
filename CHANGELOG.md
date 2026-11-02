@@ -1,6 +1,6 @@
 # Changelog
 
-## 26.11.1 (unveröffentlicht)
+## 26.11.1 (02.11.2026)
 
 - **Pollenflug und UV-Index:** Neue Sensoren *Pollen Ambrosia, Beifuß, Birke, Erle, Esche, Gräser, Hasel, Roggen* (Pollenflug-Gefahrenindex des DWD, 0 bis 3 in halben Stufen, Attribute `today`, `tomorrow`, `day_after_tomorrow`, `region`) und *UV-Index*, *UV-Index morgen* (nächster der 38 DWD-Orte ohne Bergstationen, Attribut `city`). Die Pollenregion ergibt sich einmalig aus dem Ort (Geodienst des DWD) und bleibt gespeichert. Eigener Takt: stündliche Prüfung, Download nur, wenn neue Dateien fällig sind; um Mitternacht rückt morgen auf heute. Fehler und leere Antworten lassen die letzten Werte stehen und stören Wetter und Warnungen nicht; ein Ort ohne Pollenregion wird gemerkt und nicht stündlich neu gefragt. „Heute“ ist der deutsche Kalendertag der DWD-Dateien. In den Optionen abschaltbar (Entitäten werden dann entfernt).
 - **Regen in X Minuten:** Sensor *Regen in* (Minuten bis zum nächsten Niederschlag aus der stündlichen Vorhersage, 0 bei gemessenem Regen vor Ort oder an der Station) und *Regen in der nächsten Stunde*. Auflösung eine Stunde, Regen gilt ab Beginn der ersten Stunde mit mindestens 0,1 mm; ohne Regen in 48 Stunden unbekannt. Grenzen im README.
