@@ -1,5 +1,9 @@
 # Changelog
 
+## 26.11.1 (unveröffentlicht)
+
+- **Fix Warnungen:** Ließ sich das Warngebiet (GeoJSON) einer NINA-Meldung nicht laden, etwa nach einer Aktualisierung der Meldung oder nach einem Neustart, galt sie für einen Durchlauf im ganzen Kreis: Eine Meldung für einen anderen Teil des Kreises (z. B. Sturmflut an der Küste) tauchte kurz auf, samt Push und Entwarnung. Jetzt bleibt bei unbekanntem Warngebiet die letzte Entscheidung für diese Meldung stehen, auch über Neustarts. Eine ganz neue Meldung ohne ladbares Warngebiet wird bis zu 5 Minuten zurückgehalten (neue Versuche alle 2 Minuten) und gilt danach für den ganzen Kreis, lieber eine Warnung zu viel als eine verschwiegene. Ein geladenes Warngebiet ohne Flächen gilt wie bisher sofort für den Kreis.
+
 ## 26.10.10 (25.10.2026)
 
 - **Gefühlte Temperatur:** Neuer Sensor und Wert in der Wetter-Entität (`apparent_temperature`), auch in der stündlichen Vorhersage. Gerechnet nach der Steadman-Formel (wie Open-Meteo) aus Temperatur, Luftfeuchte und Wind; Nachbarschaftswerte zählen mit. Der DWD liefert den Wert nicht selbst.

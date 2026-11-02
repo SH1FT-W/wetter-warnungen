@@ -21,7 +21,15 @@ from homeassistant.util import dt as dt_util
 
 from . import model, netatmo, warnings
 from .api import BrightSkyClient, NinaClient, WetterError
-from .const import DOMAIN, FORECAST_DAYS, LOCAL_KEYS, LOCAL_MAX_AGE, UPDATE_INTERVAL, WARNINGS_INTERVAL
+from .const import (
+    DOMAIN,
+    FORECAST_DAYS,
+    LOCAL_KEYS,
+    LOCAL_MAX_AGE,
+    NINA_AREA_WAIT,
+    UPDATE_INTERVAL,
+    WARNINGS_INTERVAL,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -203,11 +211,19 @@ class WarningsCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         # Volltexte und Warngebiete der NINA-Meldungen je Kennung+Version (ändern sich nur mit neuer Version)
         self._details: dict[str, dict[str, Any]] = {}
         self._geometry: dict[str, dict[str, Any]] = {}
+        # Last decision per NINA message id (does its area hit the home?), kept across versions and restarts,
+        # so a failed GeoJSON download never flips a message on for one run (push + all-clear).
+        self._hits: dict[str, bool] = {}
+        # First time a new message was seen without a loadable area
+        self._unknown_since: dict[str, datetime] = {}
 
     async def async_restore(self) -> bool:
         stored = await self._store.async_load()
         if not isinstance(stored, dict) or not isinstance(stored.get("warnings"), list):
             return False
+        hits = stored.get("nina_hits")
+        if isinstance(hits, dict):
+            self._hits = {str(k): bool(v) for k, v in hits.items()}
         self.async_set_updated_data(stored)
         return True
 
@@ -246,6 +262,7 @@ class WarningsCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             "area": area,
             "ars": ars,
             "stale": stale,
+            "nina_hits": dict(self._hits),
         }
         changed = _changed(old, data)
         if dwd is None and others is None and not changed:
@@ -265,17 +282,36 @@ class WarningsCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         await self._fetch(items, self._details, self.nina.warning, "Volltext")
         await self._fetch(items, self._geometry, self.nina.geometry, "Warngebiet")
         keys = {warnings.item_key(i) for i in items}
+        ids = {str(i.get("id")) for i in items}
         self._details = {k: v for k, v in self._details.items() if k in keys}
         self._geometry = {k: v for k, v in self._geometry.items() if k in keys}
+        self._hits = {k: v for k, v in self._hits.items() if k in ids}
+        self._unknown_since = {k: v for k, v in self._unknown_since.items() if k in ids}
+        now = dt_util.utcnow()
         out = []
         for item in items:
-            key = warnings.item_key(item)
-            # Warngebiet bekannt und Zuhause liegt nicht darin → Meldung gilt nur für einen anderen Teil des Kreises
-            if warnings.covers(self._geometry.get(key), self._latitude, self._longitude) is False:
-                _LOGGER.debug("NINA-Meldung %s trifft das Zuhause nicht, übersprungen", item.get("id"))
+            if not self._affected(item, now):
+                _LOGGER.debug("NINA-Meldung %s trifft das Zuhause nicht (oder Warngebiet noch offen)", item.get("id"))
                 continue
-            out.append(warnings.from_nina(item, self._details.get(key)))
+            out.append(warnings.from_nina(item, self._details.get(warnings.item_key(item))))
         return out
+
+    def _affected(self, item: dict[str, Any], now: datetime) -> bool:
+        """Does the message's area hit the home? Unknown area (download failed) never flips an earlier decision."""
+        key, wid = warnings.item_key(item), str(item.get("id"))
+        if key in self._geometry:
+            # Area loaded: it decides. A loaded area without usable polygons counts for the whole district.
+            self._hits[wid] = warnings.covers(self._geometry[key], self._latitude, self._longitude) is not False
+            return self._hits[wid]
+        if wid in self._hits:
+            # Area of this version (or after a restart) not loadable: keep the decision for this message
+            return self._hits[wid]
+        # Brand-new message without area: wait a few retries (usually the next one works), then warn for the
+        # whole district rather than stay silent
+        if now - self._unknown_since.setdefault(wid, now) < NINA_AREA_WAIT:
+            return False
+        self._hits[wid] = True
+        return True
 
     async def _fetch(
         self,

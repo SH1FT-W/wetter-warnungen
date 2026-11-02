@@ -30,7 +30,8 @@ manifest-Version. HA/HACS vergleichen per AwesomeVersion: `26.10.x` gilt als neu
   Anbieter (MoWaS, KATWARN, BIWAPP, LHP, Polizei) für den Kreis aus NINA (`warnung.bund.de/api31`, Kreis-ARS aus der
   DWD-Warnzelle 8+Gemeindeschlüssel). NINA-DWD-Meldungen und „Cancel“ werden übersprungen. Kreis-Meldungen nur,
   wenn ihr GeoJSON-Warngebiet (`/warnings/<id>.geojson`) die Heimkoordinaten trifft (`warnings.covers`, Rand 0,01°);
-  ohne Geometrie gilt der Kreis. Fällt eine Quelle aus,
+  geladen ohne Flächen gilt der Kreis. Nicht ladbar: letzte Entscheidung je Meldungs-ID (`nina_hits` im Store),
+  ganz neue Meldung bis `NINA_AREA_WAIT` (5 Min.) zurückhalten, dann Kreis. Fällt eine Quelle aus,
   bleiben ihre letzten Warnungen (keine falsche Entwarnung), Warn-Entitäten bleiben immer verfügbar.
   `binary_sensor.<gerät>_warnung_1..5` mit denselben Attributen wie die NINA-Integration (Casora/Automationen).
 - Bright-Sky-Zeitstempel = Ende der Stunde; `solar` kWh/m² der Stunde → ×1000 = W/m².

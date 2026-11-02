@@ -451,6 +451,7 @@ async def test_nina_detail_missing(hass: HomeAssistant, brightsky: AiohttpClient
     brightsky.get(f"{API_URL}/alerts", json={"alerts": [], "location": {"warn_cell_id": WARN_CELL}})
     brightsky.get(f"{NINA_URL}/dashboard/{ARS}.json", json=load("nina_dashboard.json"))
     brightsky.get(f"{NINA_URL}/warnings/{MOWAS_ID}.json", status=404)
+    brightsky.get(f"{NINA_URL}/warnings/{MOWAS_ID}.geojson", json=load("nina_warning.geojson"))
     await _setup(hass, entry)
     slot = hass.states.get("binary_sensor.wetter_warnung_1")
     assert slot.state == "on" and "Trinkwasser" in slot.attributes["headline"]
@@ -460,7 +461,7 @@ async def test_nina_detail_missing(hass: HomeAssistant, brightsky: AiohttpClient
 async def test_nina_warning_elsewhere_in_district(
     hass: HomeAssistant, brightsky: AiohttpClientMocker, entry: MockConfigEntry
 ) -> None:
-    """Warngebiet trifft das Zuhause nicht (anderer Zipfel des Kreises) → Meldung weg; ohne Geometrie bleibt sie."""
+    """Warngebiet trifft das Zuhause nicht (anderer Zipfel des Kreises) → Meldung weg; ohne Flächen gilt der Kreis."""
     brightsky.clear_requests()
     brightsky.get(f"{API_URL}/current_weather", json=load("current.json"))
     brightsky.get(f"{API_URL}/weather", json=load("weather.json"))
@@ -472,14 +473,14 @@ async def test_nina_warning_elsewhere_in_district(
     assert hass.states.get("sensor.wetter_warnungen").state == "0"
     assert hass.states.get("binary_sensor.wetter_warnung_1").state == "off"
 
-    # Geometrie nicht ladbar → Kreis-Meldung wie bisher anzeigen
+    # GeoJSON geladen, aber ohne Flächen → Kreis-Meldung sofort anzeigen (nicht ladbar: siehe Wartezeit-Test)
     brightsky.clear_requests()
     brightsky.get(f"{API_URL}/current_weather", json=load("current.json"))
     brightsky.get(f"{API_URL}/weather", json=load("weather.json"))
     brightsky.get(f"{API_URL}/alerts", json={"alerts": [], "location": {"warn_cell_id": WARN_CELL}})
     brightsky.get(f"{NINA_URL}/dashboard/{ARS}.json", json=load("nina_dashboard.json"))
     brightsky.get(f"{NINA_URL}/warnings/{MOWAS_ID}.json", json=load("nina_warning.json"))
-    brightsky.get(f"{NINA_URL}/warnings/{MOWAS_ID}.geojson", status=500)
+    brightsky.get(f"{NINA_URL}/warnings/{MOWAS_ID}.geojson", json={"type": "FeatureCollection", "features": []})
     other = MockConfigEntry(
         domain=DOMAIN,
         title="Zweitwohnung",
@@ -572,3 +573,107 @@ async def test_nina_bad_answers(hass: HomeAssistant, brightsky: AiohttpClientMoc
     brightsky.get(f"{NINA_URL}/warnings/x.json", json=["keine", "meldung"])
     with pytest.raises(WetterError):
         await NinaClient(async_get_clientsession(hass)).warning("x")
+
+
+def _nina_version(version: int) -> list[dict[str, Any]]:
+    """NINA dashboard with the MoWaS message in another version (an update of the same message)."""
+    dashboard = load("nina_dashboard.json")
+    for item in dashboard:
+        item["payload"] = {**item["payload"], "version": version}
+    return dashboard
+
+
+async def test_nina_area_unknown_keeps_last_decision(
+    hass: HomeAssistant, brightsky: AiohttpClientMocker, entry: MockConfigEntry, freezer: Any
+) -> None:
+    """Warngebiet trifft das Zuhause nicht; scheitert beim Update der Meldung das GeoJSON, bleibt sie draußen.
+
+    Vorher galt dann für einen Durchlauf der ganze Kreis: Meldung kurz da, Push, Entwarnung.
+    """
+
+    async def run(version: int, **geometry: Any) -> None:
+        brightsky.clear_requests()
+        brightsky.get(f"{API_URL}/current_weather", json=load("current.json"))
+        brightsky.get(f"{API_URL}/weather", json=load("weather.json"))
+        brightsky.get(f"{API_URL}/alerts", json={"alerts": [], "location": {"warn_cell_id": WARN_CELL}})
+        brightsky.get(f"{NINA_URL}/dashboard/{ARS}.json", json=_nina_version(version))
+        brightsky.get(f"{NINA_URL}/warnings/{MOWAS_ID}.json", json=load("nina_warning.json"))
+        brightsky.get(f"{NINA_URL}/warnings/{MOWAS_ID}.geojson", **geometry)
+        if entry.state is ConfigEntryState.LOADED:
+            freezer.tick(timedelta(minutes=3))
+            async_fire_time_changed(hass)
+            await hass.async_block_till_done(wait_background_tasks=True)
+
+    await run(19, json=FAR_AWAY)
+    await _setup(hass, entry)
+    assert hass.states.get("sensor.wetter_warnungen").state == "0", "Warngebiet anderswo im Kreis"
+
+    await run(20, status=500)
+    assert hass.states.get("sensor.wetter_warnungen").state == "0", "Warngebiet unbekannt → letzte Entscheidung"
+    assert hass.states.get("binary_sensor.wetter_warnung_1").state == "off", "kein Push, keine Entwarnung"
+
+    await run(20, json=FAR_AWAY)
+    assert hass.states.get("sensor.wetter_warnungen").state == "0"
+
+
+async def test_nina_area_unknown_after_restart(
+    hass: HomeAssistant, brightsky: AiohttpClientMocker, entry: MockConfigEntry
+) -> None:
+    """Nach einem Neustart fehlt der Geometrie-Zwischenspeicher; die gespeicherte Entscheidung gilt weiter."""
+    brightsky.clear_requests()
+    brightsky.get(f"{API_URL}/current_weather", json=load("current.json"))
+    brightsky.get(f"{API_URL}/weather", json=load("weather.json"))
+    brightsky.get(f"{API_URL}/alerts", json={"alerts": [], "location": {"warn_cell_id": WARN_CELL}})
+    brightsky.get(f"{NINA_URL}/dashboard/{ARS}.json", json=load("nina_dashboard.json"))
+    brightsky.get(f"{NINA_URL}/warnings/{MOWAS_ID}.json", json=load("nina_warning.json"))
+    brightsky.get(f"{NINA_URL}/warnings/{MOWAS_ID}.geojson", json=FAR_AWAY)
+    await _setup(hass, entry)
+    assert hass.states.get("sensor.wetter_warnungen").state == "0"
+    assert await hass.config_entries.async_unload(entry.entry_id)
+    async_fire_time_changed(hass, dt_util.utcnow() + timedelta(seconds=10))
+    await hass.async_block_till_done()
+
+    brightsky.clear_requests()
+    brightsky.get(f"{API_URL}/current_weather", json=load("current.json"))
+    brightsky.get(f"{API_URL}/weather", json=load("weather.json"))
+    brightsky.get(f"{API_URL}/alerts", json={"alerts": [], "location": {"warn_cell_id": WARN_CELL}})
+    brightsky.get(f"{NINA_URL}/dashboard/{ARS}.json", json=load("nina_dashboard.json"))
+    brightsky.get(f"{NINA_URL}/warnings/{MOWAS_ID}.json", json=load("nina_warning.json"))
+    brightsky.get(f"{NINA_URL}/warnings/{MOWAS_ID}.geojson", status=500)
+    await _setup(hass, entry)
+    await hass.async_block_till_done(wait_background_tasks=True)
+    assert brightsky.call_count == 6, "nach dem Start frisch abgefragt"
+    assert hass.states.get("sensor.wetter_warnungen").state == "0", "gespeicherte Entscheidung, kein Kreis-Alarm"
+
+
+async def test_new_nina_message_without_area_waits_briefly(
+    hass: HomeAssistant, brightsky: AiohttpClientMocker, entry: MockConfigEntry, freezer: Any
+) -> None:
+    """Neue Meldung, GeoJSON nicht ladbar: kurz zurückhalten (meist klappt der nächste Abruf), dann gilt der Kreis."""
+    brightsky.clear_requests()
+    brightsky.get(f"{API_URL}/current_weather", json=load("current.json"))
+    brightsky.get(f"{API_URL}/weather", json=load("weather.json"))
+    brightsky.get(f"{API_URL}/alerts", json={"alerts": [], "location": {"warn_cell_id": WARN_CELL}})
+    brightsky.get(f"{NINA_URL}/dashboard/{ARS}.json", json=load("nina_dashboard.json"))
+    brightsky.get(f"{NINA_URL}/warnings/{MOWAS_ID}.json", json=load("nina_warning.json"))
+    brightsky.get(f"{NINA_URL}/warnings/{MOWAS_ID}.geojson", status=500)
+    await _setup(hass, entry)
+    assert hass.states.get("sensor.wetter_warnungen").state == "0", "erster Versuch gescheitert → noch warten"
+
+    async def tick(minutes: int) -> None:
+        freezer.tick(timedelta(minutes=minutes))
+        async_fire_time_changed(hass)
+        await hass.async_block_till_done(wait_background_tasks=True)
+
+    await tick(3)
+    assert hass.states.get("sensor.wetter_warnungen").state == "0", "noch in der Wartezeit"
+    await tick(3)
+    assert hass.states.get("sensor.wetter_warnungen").state == "1", "Wartezeit um → lieber warnen: ganzer Kreis"
+
+    # geometry arrives later and misses the home: the message goes (no flicker back afterwards)
+    brightsky.clear_requests()
+    brightsky.get(f"{API_URL}/alerts", json={"alerts": [], "location": {"warn_cell_id": WARN_CELL}})
+    brightsky.get(f"{NINA_URL}/dashboard/{ARS}.json", json=load("nina_dashboard.json"))
+    brightsky.get(f"{NINA_URL}/warnings/{MOWAS_ID}.geojson", json=FAR_AWAY)
+    await tick(3)
+    assert hass.states.get("sensor.wetter_warnungen").state == "0"

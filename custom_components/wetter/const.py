@@ -14,6 +14,9 @@ UPDATE_INTERVAL: Final = timedelta(minutes=10)
 # Warnungen des Bundes (NINA): DWD, Bevölkerungsschutz (MoWaS), KATWARN, BIWAPP, Hochwasser, Polizei
 NINA_URL: Final = "https://warnung.bund.de/api31"
 WARNINGS_INTERVAL: Final = timedelta(minutes=2)
+# A new district message whose area (GeoJSON) cannot be loaded is held back this long (a few retries), then it
+# counts for the whole district: better a warning too many than a concealed one.
+NINA_AREA_WAIT: Final = timedelta(minutes=5)
 # so viele Warn-Sensoren (wie die Plätze bei NINA)
 WARNING_SLOTS: Final = 5
 
