@@ -234,6 +234,8 @@ class WarningsCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         self._hits: dict[str, bool] = {}
         # First time a new message was seen without a loadable area
         self._unknown_since: dict[str, datetime] = {}
+        # Since when a message with a decision is missing from the dashboard (decision kept for a grace time)
+        self._gone: dict[str, datetime] = {}
         # Warnings already announced by event (id → event data), kept across restarts: each warning exactly once
         self._announced: dict[str, dict[str, Any]] = {}
         # Announced warnings missing from the answers since (id → ISO time); they end after WARNING_END_GRACE
@@ -358,9 +360,16 @@ class WarningsCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         ids = {str(i.get("id")) for i in items}
         self._details = {k: v for k, v in self._details.items() if k in keys}
         self._geometry = {k: v for k, v in self._geometry.items() if k in keys}
-        self._hits = {k: v for k, v in self._hits.items() if k in ids}
-        self._unknown_since = {k: v for k, v in self._unknown_since.items() if k in ids}
         now = dt_util.utcnow()
+        # A message missing from one dashboard answer keeps its decision for WARNING_END_GRACE (like a warning's
+        # end): otherwise it would start from scratch on its return and, without loadable area, count for the
+        # whole district after NINA_AREA_WAIT although its area does not hit the home.
+        self._gone = {k: v for k, v in self._gone.items() if k in self._hits and k not in ids}
+        for wid in self._hits.keys() - ids:
+            self._gone.setdefault(wid, now)
+        self._hits = {k: v for k, v in self._hits.items() if k in ids or now - self._gone[k] < WARNING_END_GRACE}
+        self._gone = {k: v for k, v in self._gone.items() if k in self._hits}
+        self._unknown_since = {k: v for k, v in self._unknown_since.items() if k in ids}
         out = []
         for item in items:
             if not self._affected(item, now):

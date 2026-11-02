@@ -617,6 +617,44 @@ async def test_nina_area_unknown_keeps_last_decision(
     assert hass.states.get("sensor.wetter_warnungen").state == "0"
 
 
+async def test_nina_dashboard_gap_keeps_decision(
+    hass: HomeAssistant, brightsky: AiohttpClientMocker, entry: MockConfigEntry, freezer: Any
+) -> None:
+    """Fehlt die Meldung einmal im Kreis-Dashboard, bleibt ihre Entscheidung „trifft nicht“ erhalten.
+
+    Vorher wurde sie dabei gelöscht; scheiterte danach das GeoJSON, galt die Meldung nach 5 Min. für den ganzen
+    Kreis (Neu-Ereignis, Push, später Entwarnung) für ein Gebiet, das das Zuhause nicht trifft.
+    """
+
+    async def run(dashboard: Any, **geometry: Any) -> None:
+        brightsky.clear_requests()
+        brightsky.get(f"{API_URL}/current_weather", json=load("current.json"))
+        brightsky.get(f"{API_URL}/weather", json=load("weather.json"))
+        brightsky.get(f"{API_URL}/alerts", json={"alerts": [], "location": {"warn_cell_id": WARN_CELL}})
+        brightsky.get(f"{NINA_URL}/dashboard/{ARS}.json", json=dashboard)
+        brightsky.get(f"{NINA_URL}/warnings/{MOWAS_ID}.json", json=load("nina_warning.json"))
+        brightsky.get(f"{NINA_URL}/warnings/{MOWAS_ID}.geojson", **geometry)
+        if entry.state is ConfigEntryState.LOADED:
+            freezer.tick(timedelta(minutes=3))
+            async_fire_time_changed(hass)
+            await hass.async_block_till_done(wait_background_tasks=True)
+
+    await run(load("nina_dashboard.json"), json=FAR_AWAY)
+    await _setup(hass, entry)
+    assert hass.states.get("sensor.wetter_warnungen").state == "0", "Warngebiet anderswo im Kreis"
+
+    await run([], json=FAR_AWAY)
+    for _ in range(4):
+        await run(load("nina_dashboard.json"), status=503)
+    assert hass.states.get("sensor.wetter_warnungen").state == "0", "Entscheidung über die Lücke hinweg behalten"
+
+    # gone for longer than the grace time: the decision is forgotten (the dict does not grow forever)
+    await run([], json=FAR_AWAY)
+    for _ in range(4):
+        await run([], json=FAR_AWAY)
+    assert MOWAS_ID not in entry.runtime_data.warnings._hits
+
+
 async def test_nina_area_unknown_after_restart(
     hass: HomeAssistant, brightsky: AiohttpClientMocker, entry: MockConfigEntry
 ) -> None:
