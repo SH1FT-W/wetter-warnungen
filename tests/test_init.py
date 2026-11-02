@@ -716,3 +716,48 @@ async def test_new_nina_message_without_area_waits_briefly(
     brightsky.get(f"{NINA_URL}/warnings/{MOWAS_ID}.geojson", json=FAR_AWAY)
     await tick(3)
     assert hass.states.get("sensor.wetter_warnungen").state == "0"
+
+
+@pytest.mark.parametrize(("level", "shown"), [("Extreme", "1"), ("Severe", "0"), ("Moderate", "0")])
+async def test_extreme_nina_message_without_area_shows_at_once(
+    hass: HomeAssistant, brightsky: AiohttpClientMocker, entry: MockConfigEntry, level: str, shown: str
+) -> None:
+    """Höchste Stufe („Extreme“ nach CAP, wie NINA/MoWaS kodieren) ohne ladbares Warngebiet: sofort für den Kreis.
+
+    Niedrigere Stufen warten weiter bis zu NINA_AREA_WAIT auf das Warngebiet.
+    """
+    dashboard = load("nina_dashboard.json")
+    for item in dashboard:
+        item["payload"]["data"]["severity"] = level
+    detail = load("nina_warning.json")
+    for info in detail["info"]:
+        info["severity"] = level
+    brightsky.clear_requests()
+    brightsky.get(f"{API_URL}/current_weather", json=load("current.json"))
+    brightsky.get(f"{API_URL}/weather", json=load("weather.json"))
+    brightsky.get(f"{API_URL}/alerts", json={"alerts": [], "location": {"warn_cell_id": WARN_CELL}})
+    brightsky.get(f"{NINA_URL}/dashboard/{ARS}.json", json=dashboard)
+    brightsky.get(f"{NINA_URL}/warnings/{MOWAS_ID}.json", json=detail)
+    brightsky.get(f"{NINA_URL}/warnings/{MOWAS_ID}.geojson", status=500)
+    await _setup(hass, entry)
+    assert hass.states.get("sensor.wetter_warnungen").state == shown
+    if shown == "1":
+        assert hass.states.get("binary_sensor.wetter_warnung_1").attributes["severity"] == "Extreme"
+
+
+async def test_extreme_nina_message_severity_from_dashboard(
+    hass: HomeAssistant, brightsky: AiohttpClientMocker, entry: MockConfigEntry
+) -> None:
+    """Volltext auch nicht ladbar: die Stufe aus der Kreis-Übersicht reicht."""
+    dashboard = load("nina_dashboard.json")
+    for item in dashboard:
+        item["payload"]["data"]["severity"] = "Extreme"
+    brightsky.clear_requests()
+    brightsky.get(f"{API_URL}/current_weather", json=load("current.json"))
+    brightsky.get(f"{API_URL}/weather", json=load("weather.json"))
+    brightsky.get(f"{API_URL}/alerts", json={"alerts": [], "location": {"warn_cell_id": WARN_CELL}})
+    brightsky.get(f"{NINA_URL}/dashboard/{ARS}.json", json=dashboard)
+    brightsky.get(f"{NINA_URL}/warnings/{MOWAS_ID}.json", status=500)
+    brightsky.get(f"{NINA_URL}/warnings/{MOWAS_ID}.geojson", status=500)
+    await _setup(hass, entry)
+    assert hass.states.get("sensor.wetter_warnungen").state == "1"

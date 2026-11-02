@@ -1,5 +1,9 @@
 # Changelog
 
+## Unveröffentlicht
+
+- **Warnungen höchster Stufe sofort:** Eine neue NINA-Meldung der höchsten Stufe (*Extreme*, etwa MoWaS bei Lebensgefahr) erscheint ohne Wartezeit für den ganzen Kreis, wenn sich ihr Warngebiet nicht laden lässt. Bisher wartete auch sie bis zu 5 Minuten auf das Warngebiet. Die Stufe kommt aus dem Volltext, sonst aus der Kreis-Übersicht. Niedrigere Stufen warten wie bisher; trifft das später geladene Warngebiet das Zuhause nicht, verschwindet die Meldung wieder.
+
 ## 26.11.1 (02.11.2026)
 
 - **Pollenflug und UV-Index:** Neue Sensoren *Pollen Ambrosia, Beifuß, Birke, Erle, Esche, Gräser, Hasel, Roggen* (Pollenflug-Gefahrenindex des DWD, 0 bis 3 in halben Stufen, Attribute `today`, `tomorrow`, `day_after_tomorrow`, `region`) und *UV-Index*, *UV-Index morgen* (nächster der 38 DWD-Orte ohne Bergstationen, Attribut `city`). Die Pollenregion ergibt sich einmalig aus dem Ort (Geodienst des DWD) und bleibt gespeichert. Eigener Takt: stündliche Prüfung, Download nur, wenn neue Dateien fällig sind; um Mitternacht rückt morgen auf heute. Fehler und leere Antworten lassen die letzten Werte stehen und stören Wetter und Warnungen nicht; ein Ort ohne Pollenregion wird gemerkt und nicht stündlich neu gefragt. „Heute“ ist der deutsche Kalendertag der DWD-Dateien. In den Optionen abschaltbar (Entitäten werden dann entfernt).

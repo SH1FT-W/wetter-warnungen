@@ -31,7 +31,7 @@ manifest-Version. HA/HACS vergleichen per AwesomeVersion: `26.10.x` gilt als neu
   DWD-Warnzelle 8+Gemeindeschlüssel). NINA-DWD-Meldungen und „Cancel“ werden übersprungen. Kreis-Meldungen nur,
   wenn ihr GeoJSON-Warngebiet (`/warnings/<id>.geojson`) die Heimkoordinaten trifft (`warnings.covers`, Rand 0,01°);
   geladen ohne Flächen gilt der Kreis. Nicht ladbar: letzte Entscheidung je Meldungs-ID (`nina_hits` im Store),
-  ganz neue Meldung bis `NINA_AREA_WAIT` (5 Min.) zurückhalten, dann Kreis. Fehlt eine Meldung im Dashboard,
+  ganz neue Meldung bis `NINA_AREA_WAIT` (5 Min.) zurückhalten, dann Kreis; Stufe „Extreme“ (`warnings.nina_severity`) sofort Kreis. Fehlt eine Meldung im Dashboard,
   bleibt ihre Entscheidung `WARNING_END_GRACE` (10 Min.) erhalten (`_gone`). Fällt eine Quelle aus,
   bleiben ihre letzten Warnungen (keine falsche Entwarnung), Warn-Entitäten bleiben immer verfügbar.
   `binary_sensor.<gerät>_warnung_1..5` mit denselben Attributen wie die NINA-Integration (Casora/Automationen).

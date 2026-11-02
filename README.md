@@ -234,7 +234,7 @@ Die DWD-Vorhersage ist **stündlich**. Daraus folgt:
 
 - Die Vorhersage gilt für den nächsten DWD-Vorhersagepunkt (meist wenige Kilometer entfernt), nicht genau für die Adresse.
 - Die DWD-Messstation kann weit weg sein; dafür gibt es die Nachbarschaftswerte.
-- Meldungen für den Kreis (MoWaS und andere) kommen kreisweise aus NINA; angezeigt werden nur die, deren Warngebiet das Zuhause trifft (gut 1 km Rand zählt mit). Lässt sich das Gebiet nicht laden, gilt der ganze Kreis. DWD-Warnungen gelten für die Gemeinde.
+- Meldungen für den Kreis (MoWaS und andere) kommen kreisweise aus NINA; angezeigt werden nur die, deren Warngebiet das Zuhause trifft (gut 1 km Rand zählt mit). Lässt sich das Gebiet einer neuen Meldung nicht laden, wartet die Integration bis zu 5 Minuten darauf und zeigt die Meldung danach für den ganzen Kreis; Meldungen der höchsten Stufe (*Extreme*) erscheinen ohne Wartezeit sofort für den ganzen Kreis. DWD-Warnungen gelten für die Gemeinde.
 - Kein Regenradar, keine Luftqualität. *Regen in* hat die Auflösung der stündlichen Vorhersage.
 - Pollen gelten für die Pollenregion des DWD (27 Regionen), der UV-Index für den nächsten von 38 Orten. Liegt der Ort außerhalb der Pollenregionen oder weiter als 200 km von einem UV-Ort, bleiben diese Sensoren unbekannt (die Integration merkt sich das und fragt nicht stündlich nach). Heute und morgen folgen dem deutschen Kalendertag der DWD-Dateien.
 - Aktualisiert der DWD eine Warnung, bekommt sie oft eine neue Kennung: Das ergibt dann ein Ende- und ein Neu-Ereignis.

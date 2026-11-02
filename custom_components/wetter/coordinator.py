@@ -389,8 +389,10 @@ class WarningsCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             # Area of this version (or after a restart) not loadable: keep the decision for this message
             return self._hits[wid]
         # Brand-new message without area: wait a few retries (usually the next one works), then warn for the
-        # whole district rather than stay silent
-        if now - self._unknown_since.setdefault(wid, now) < NINA_AREA_WAIT:
+        # whole district rather than stay silent. The highest CAP level ("Extreme", e.g. MoWaS danger to life)
+        # never waits: a warning too many beats a late one.
+        extreme = warnings.nina_severity(item, self._details.get(key)) == warnings.SEVERITIES[0]
+        if not extreme and now - self._unknown_since.setdefault(wid, now) < NINA_AREA_WAIT:
             return False
         self._hits[wid] = True
         return True

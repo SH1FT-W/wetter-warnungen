@@ -91,11 +91,22 @@ def item_key(item: dict[str, Any]) -> str:
     return f"{item.get('id')}#{payload.get('version', '')}"
 
 
+def _nina_info(detail: dict[str, Any] | None) -> dict[str, Any]:
+    """German info block of a NINA full text (else the first one, else empty)."""
+    infos = (detail or {}).get("info") or []
+    return next((i for i in infos if str(i.get("language", "")).lower().startswith("de")), infos[0] if infos else {})
+
+
+def nina_severity(item: dict[str, Any], detail: dict[str, Any] | None) -> str:
+    """Severity of a NINA message: CAP `severity` of the full text, else the dashboard entry's."""
+    data = ((item.get("payload") or {}).get("data")) or {}
+    return severity(_nina_info(detail).get("severity") or data.get("severity"))
+
+
 def from_nina(item: dict[str, Any], detail: dict[str, Any] | None) -> dict[str, Any]:
     """NINA-Meldung (Dashboard-Eintrag + Volltext, falls geladen) → einheitliche Warnung."""
     data = ((item.get("payload") or {}).get("data")) or {}
-    infos = (detail or {}).get("info") or []
-    info = next((i for i in infos if str(i.get("language", "")).lower().startswith("de")), infos[0] if infos else {})
+    info = _nina_info(detail)
     title = (item.get("i18nTitle") or {}).get("de")
     web = info.get("web")
     areas = [str(a.get("areaDesc")) for a in info.get("area") or [] if isinstance(a, dict) and a.get("areaDesc")]
@@ -106,7 +117,7 @@ def from_nina(item: dict[str, Any], detail: dict[str, Any] | None) -> dict[str, 
         "event": info.get("event"),
         "description": text(info.get("description")),
         "recommended_actions": text(info.get("instruction")),
-        "severity": severity(info.get("severity") or data.get("severity")),
+        "severity": nina_severity(item, detail),
         "sender": info.get("senderName") or (detail or {}).get("sender"),
         "sent": (detail or {}).get("sent") or item.get("sent"),
         "start": info.get("onset") or info.get("effective"),
