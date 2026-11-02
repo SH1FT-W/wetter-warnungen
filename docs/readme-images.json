@@ -65,6 +65,16 @@
         "text": "DWD-Warnungen für deine Gemeinde, dazu MoWaS, KATWARN, BIWAPP, Hochwasser und Polizei für deinen Kreis, alle 2 Minuten abgefragt."
       },
       {
+        "icon": "bell-ring-outline",
+        "title": "Ereignisse für Automationen",
+        "text": "wetter_warning_new und wetter_warning_ended, je Warnung genau einmal, auch über Neustarts hinweg. Kein Ende, solange eine Quelle ausgefallen ist."
+      },
+      {
+        "icon": "flower-pollen-outline",
+        "title": "Pollenflug und UV-Index",
+        "text": "Pollenflug-Gefahrenindex für acht Pollenarten und UV-Index des DWD für deine Region, heute, morgen und übermorgen. In den Optionen abschaltbar."
+      },
+      {
         "icon": "shield-check-outline",
         "title": "Keine falsche Entwarnung",
         "text": "Ist eine Quelle nicht erreichbar, bleiben ihre letzten Warnungen stehen. Abgelaufene Warnungen verschwinden trotzdem pünktlich."
@@ -92,6 +102,16 @@
         "text": "Regenwahrscheinlichkeit für diese Stunde und für heute, Sonneneinstrahlung in W/m² aus der Vorhersage."
       },
       {
+        "icon": "timer-sand",
+        "title": "Regen in X Minuten",
+        "text": "Minuten bis zum nächsten Niederschlag aus der stündlichen Vorhersage, dazu Regen in der nächsten Stunde als An/Aus."
+      },
+      {
+        "icon": "flower-pollen-outline",
+        "title": "Pollen und UV",
+        "text": "Je Pollenart ein Sensor (0 bis 3, morgen und übermorgen als Attribute), UV-Index heute und morgen vom nächsten DWD-Ort."
+      },
+      {
         "icon": "alert-circle-outline",
         "title": "Warnungen",
         "text": "Ein Zähler mit allen Warnungen als Attribut, die schlimmste zuerst, und Warnung 1 bis 5 mit denselben Attributen wie die NINA-Integration."
@@ -112,8 +132,8 @@
       "items": [
         {
           "icon": "weather-cloudy-clock",
-          "title": "Bright Sky",
-          "text": "Vorhersage, Stationswerte und DWD-Warnungen aus der freien Bright-Sky-Schnittstelle für die offenen Daten des DWD, alle 10 Minuten."
+          "title": "Bright Sky und DWD",
+          "text": "Vorhersage, Stationswerte und DWD-Warnungen über Bright Sky alle 10 Minuten. Pollenflug und UV-Index direkt vom Open-Data-Server des DWD, einmal am Tag."
         },
         {
           "icon": "bullhorn-outline",
