@@ -1,6 +1,6 @@
 # Changelog
 
-## Unveröffentlicht
+## 26.11.2 (02.11.2026)
 
 - **Warnungen höchster Stufe sofort:** Eine neue NINA-Meldung der höchsten Stufe (*Extreme*, etwa MoWaS bei Lebensgefahr) erscheint ohne Wartezeit für den ganzen Kreis, wenn sich ihr Warngebiet nicht laden lässt. Bisher wartete auch sie bis zu 5 Minuten auf das Warngebiet. Die Stufe kommt aus dem Volltext, sonst aus der Kreis-Übersicht. Niedrigere Stufen warten wie bisher; trifft das später geladene Warngebiet das Zuhause nicht, verschwindet die Meldung wieder.
 
