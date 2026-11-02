@@ -242,3 +242,48 @@ def daily_forecast(hourly: list[dict[str, Any]], now: datetime, tz: tzinfo, days
             }
         )
     return out
+
+
+def measured_rain(current: dict[str, Any] | None) -> float | None:
+    """Rain of the last hour measured at the station (mm), without any forecast fallback."""
+    return _num((current or {}).get("precipitation_60"))
+
+
+# From this much precipitation in a forecast hour it counts as rain (smallest step of the DWD forecast)
+RAIN_MM = 0.1
+
+
+def rain_in(hourly: list[dict[str, Any]], now: datetime, raining: bool, hours: int) -> dict[str, Any] | None:
+    """Minutes until the next precipitation, from the hourly forecast (resolution one hour).
+
+    - `raining` (rain measured nearby or at the station within the last hour) → 0 minutes.
+    - Otherwise the first forecast hour within `hours` with at least `RAIN_MM`: the rain is assumed to start at the
+      beginning of that hour (Bright Sky stamps the end of the hour). Rain in the running hour → 0 minutes.
+    - No rain within `hours` → None.
+    """
+    if raining:
+        return {
+            "minutes": 0,
+            "start": now.isoformat(),
+            "precipitation": None,
+            "precipitation_probability": None,
+            "source": "measurement",
+        }
+    for hour in hourly:
+        ts = parse_time(hour.get("timestamp"))
+        if ts is None or ts <= now:
+            continue
+        if ts - now > timedelta(hours=hours):
+            break
+        amount = _num(hour.get("precipitation"))
+        if amount is None or amount < RAIN_MM:
+            continue
+        start = max(ts - timedelta(hours=1), now)
+        return {
+            "minutes": int((start - now).total_seconds() // 60),
+            "start": start.isoformat(),
+            "precipitation": amount,
+            "precipitation_probability": _num(hour.get("precipitation_probability")),
+            "source": "forecast",
+        }
+    return None

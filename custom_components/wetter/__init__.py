@@ -1,14 +1,17 @@
-"""Wetter: DWD-Vorhersage (Bright Sky), Werte aus der Nachbarschaft, amtliche Warnungen, Start ohne Warten."""
+"""Wetter: DWD-Vorhersage (Bright Sky), Nachbarschaftswerte, amtliche Warnungen, Pollen/UV, Start ohne Warten."""
 
 from __future__ import annotations
 
+from datetime import datetime
+
 from homeassistant.const import Platform
-from homeassistant.core import HomeAssistant
+from homeassistant.core import HomeAssistant, callback
+from homeassistant.helpers.event import async_track_time_change
 from homeassistant.helpers.start import async_at_started
 from homeassistant.helpers.storage import Store
 
-from .const import DOMAIN
-from .coordinator import WarningsCoordinator, WetterConfigEntry, WetterCoordinator, WetterData
+from .const import CONF_POLLEN_UV, DOMAIN
+from .coordinator import HealthCoordinator, WarningsCoordinator, WetterConfigEntry, WetterCoordinator, WetterData
 
 PLATFORMS: list[Platform] = [Platform.BINARY_SENSOR, Platform.NUMBER, Platform.SENSOR, Platform.WEATHER]
 
@@ -17,12 +20,27 @@ async def async_setup_entry(hass: HomeAssistant, entry: WetterConfigEntry) -> bo
     """Letzten Stand sofort zeigen, Bright Sky und NINA erst nach dem HA-Start fragen."""
     weather = WetterCoordinator(hass, entry)
     warnings = WarningsCoordinator(hass, entry, weather.client)
-    later: list[WetterCoordinator | WarningsCoordinator] = []
+    later: list[WetterCoordinator | WarningsCoordinator | HealthCoordinator] = []
     for coordinator in (weather, warnings):
         if await coordinator.async_restore():
             later.append(coordinator)
         else:
             await coordinator.async_config_entry_first_refresh()
+    health: HealthCoordinator | None = None
+    if entry.options.get(CONF_POLLEN_UV, True):
+        # Pollen and UV never hold up the start and never fail it: always fetched in the background
+        health = HealthCoordinator(hass, entry)
+        await health.async_restore()
+        later.append(health)
+
+        @callback
+        def new_day(_now: datetime) -> None:
+            # today/tomorrow follow the German calendar day: refresh at every full hour, so the switch at
+            # German midnight is on time whatever time zone Home Assistant runs in
+            assert health is not None
+            health.async_update_listeners()
+
+        entry.async_on_unload(async_track_time_change(hass, new_day, minute=0, second=5))
     if later:
 
         async def refresh(_hass: HomeAssistant) -> None:
@@ -30,7 +48,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: WetterConfigEntry) -> bo
                 entry.async_create_background_task(hass, coordinator.async_refresh(), f"{DOMAIN} {coordinator.name}")
 
         entry.async_on_unload(async_at_started(hass, refresh))
-    entry.runtime_data = WetterData(weather=weather, warnings=warnings)
+    entry.runtime_data = WetterData(weather=weather, warnings=warnings, health=health)
     weather.async_track_local()
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     return True
@@ -38,7 +56,11 @@ async def async_setup_entry(hass: HomeAssistant, entry: WetterConfigEntry) -> bo
 
 async def async_remove_entry(hass: HomeAssistant, entry: WetterConfigEntry) -> None:
     """Gespeicherte Stände löschen, wenn die Integration entfernt wird."""
-    for key in (f"{DOMAIN}.{entry.entry_id}", f"{DOMAIN}.{entry.entry_id}.warnings"):
+    for key in (
+        f"{DOMAIN}.{entry.entry_id}",
+        f"{DOMAIN}.{entry.entry_id}.warnings",
+        f"{DOMAIN}.{entry.entry_id}.health",
+    ):
         await Store[dict[str, object]](hass, 1, key).async_remove()
 
 

@@ -52,8 +52,8 @@ def ars_from_warn_cell(cell: Any) -> str | None:
     return digits[1:6] + "0000000"
 
 
-def from_dwd(alert: dict[str, Any]) -> dict[str, Any]:
-    """Bright-Sky-Warnung → einheitliche Warnung."""
+def from_dwd(alert: dict[str, Any], area: Any = None) -> dict[str, Any]:
+    """Bright-Sky-Warnung → einheitliche Warnung (`area`: the municipality Bright Sky warns for)."""
     return {
         "id": str(alert.get("alert_id") or alert.get("id")),
         "provider": "DWD",
@@ -67,6 +67,7 @@ def from_dwd(alert: dict[str, Any]) -> dict[str, Any]:
         "start": alert.get("onset"),
         "expires": alert.get("expires"),
         "more_info_url": None,
+        "affected_areas": str(area) if area else None,
     }
 
 
@@ -97,6 +98,7 @@ def from_nina(item: dict[str, Any], detail: dict[str, Any] | None) -> dict[str, 
     info = next((i for i in infos if str(i.get("language", "")).lower().startswith("de")), infos[0] if infos else {})
     title = (item.get("i18nTitle") or {}).get("de")
     web = info.get("web")
+    areas = [str(a.get("areaDesc")) for a in info.get("area") or [] if isinstance(a, dict) and a.get("areaDesc")]
     return {
         "id": str(item.get("id")),
         "provider": str(data.get("provider") or "NINA").upper(),
@@ -110,6 +112,8 @@ def from_nina(item: dict[str, Any], detail: dict[str, Any] | None) -> dict[str, 
         "start": info.get("onset") or info.get("effective"),
         "expires": info.get("expires"),
         "more_info_url": web if isinstance(web, str) and web.startswith("http") else None,
+        # like the NINA integration: areas of the message, comma separated (known once the full text is loaded)
+        "affected_areas": ", ".join(areas) or None,
     }
 
 
@@ -192,3 +196,21 @@ def sort(warnings: list[dict[str, Any]]) -> list[dict[str, Any]]:
     """Schlimmste zuerst, bei gleicher Stufe die neueste."""
     by_sent = sorted(warnings, key=lambda w: str(w.get("sent") or ""), reverse=True)
     return sorted(by_sent, key=lambda w: _RANK.get(str(w.get("severity")), 0), reverse=True)
+
+
+def event_data(warning: dict[str, Any], area: Any, entry_id: str) -> dict[str, Any]:
+    """Data of the events `wetter_warning_new` / `wetter_warning_ended` for one warning."""
+    provider = str(warning.get("provider") or "")
+    return {
+        "entry_id": entry_id,
+        "id": warning.get("id"),
+        "source": "DWD" if provider == "DWD" else "NINA",
+        "provider": provider,
+        "severity": warning.get("severity"),
+        "headline": warning.get("headline"),
+        "event": warning.get("event"),
+        # area of the warning itself, else the warning area of the location (both sources only report what hits it)
+        "area": warning.get("affected_areas") or (str(area) if area else None),
+        "start": warning.get("start"),
+        "expires": warning.get("expires"),
+    }

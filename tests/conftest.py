@@ -12,7 +12,7 @@ import pytest
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 from pytest_homeassistant_custom_component.test_util.aiohttp import AiohttpClientMocker
 
-from custom_components.wetter.const import API_URL, DOMAIN, NINA_URL
+from custom_components.wetter.const import API_URL, DOMAIN, NINA_URL, POLLEN_REGION_URL, POLLEN_URL, UV_URL
 
 FIXTURES = Path(__file__).parent / "fixtures"
 # Zeitpunkt passend zu den Testdaten (Messung 09:30 UTC)
@@ -75,6 +75,19 @@ async def berlin(hass: HomeAssistant, freezer: Any) -> None:
     await hass.config.async_set_time_zone("Europe/Berlin")
     hass.config.latitude, hass.config.longitude = LAT, LON
     hass.config.language = "de"
+
+
+@pytest.fixture(autouse=True)
+def dwd_health(aioclient_mock: AiohttpClientMocker) -> AiohttpClientMocker:
+    """DWD pollen, UV and pollen region: real answers from 02.11.2026 (format unchanged).
+
+    Changed for the tests: dates set to the test day, and in region 50 (Brandenburg und Berlin) hazel, alder and
+    grasses as well as the UV index of Berlin, so half steps, "-1" and the day shift show up.
+    """
+    aioclient_mock.get(POLLEN_URL, json=load("dwd_pollen.json"))
+    aioclient_mock.get(UV_URL, json=load("dwd_uv.json"))
+    aioclient_mock.get(POLLEN_REGION_URL, json=load("dwd_pollen_region.json"))
+    return aioclient_mock
 
 
 @pytest.fixture

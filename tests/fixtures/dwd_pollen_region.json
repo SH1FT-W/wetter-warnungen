@@ -1,0 +1,43 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "id": "Pollenflug.50.1.2026-11-02 00:00:00",
+      "geometry": null,
+      "properties": {
+        "SENDER": "ZMMF",
+        "SENT": "2026-11-02Z",
+        "STATUS": "ACTUAL",
+        "MSGTYPE": "Alert",
+        "LANGUAGE": "de-DE",
+        "CATEGORY": "Met",
+        "EVENT": "Pollenflug-Gefahrenindex",
+        "EC_II": 1,
+        "EC_AREA_COLOR": "255 255 255",
+        "EFFECTIVE": "2026-11-02Z",
+        "EXPIRES": "2026-11-03Z",
+        "SENDERNAME": "DWD / Nationales Warnzentrum Offenbach",
+        "HEADLINE": "Pollenflug-Gefahrenindex",
+        "PARAMETER_NAME": "Hasel",
+        "PARAMETER_VALUE": "keine",
+        "CELL_ID": 50,
+        "SYSTEM_DATE": "2026-11-02T09:58:07Z",
+        "EC_LICENSE": "Geobasisdaten: Copyright Bundesamt für Kartographie und Geodäsie, Frankfurt am Main",
+        "POLLENINT": 0,
+        "GEN": "Brandenburg und Berlin"
+      },
+      "bbox": [
+        51.3607,
+        11.2682,
+        53.558,
+        14.7647
+      ]
+    }
+  ],
+  "totalFeatures": 24,
+  "numberMatched": 24,
+  "numberReturned": 1,
+  "timeStamp": "2026-11-02T13:44:49.919Z",
+  "crs": null
+}

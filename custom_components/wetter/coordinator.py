@@ -19,15 +19,23 @@ from homeassistant.helpers.storage import Store
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 from homeassistant.util import dt as dt_util
 
-from . import model, netatmo, warnings
-from .api import BrightSkyClient, NinaClient, WetterError
+from . import health, model, netatmo, warnings
+from .api import BrightSkyClient, DwdHealthClient, NinaClient, WetterError
 from .const import (
     DOMAIN,
+    EVENT_WARNING_ENDED,
+    EVENT_WARNING_NEW,
     FORECAST_DAYS,
+    FORECAST_HOURS,
+    HEALTH_INTERVAL,
+    HEALTH_LATE,
+    HEALTH_MAX_AGE,
+    HEALTH_RETRIES,
     LOCAL_KEYS,
     LOCAL_MAX_AGE,
     NINA_AREA_WAIT,
     UPDATE_INTERVAL,
+    WARNING_END_GRACE,
     WARNINGS_INTERVAL,
 )
 
@@ -47,6 +55,8 @@ class WetterData:
 
     weather: WetterCoordinator
     warnings: WarningsCoordinator
+    # None when pollen and UV are switched off in the options
+    health: HealthCoordinator | None = None
 
 
 type WetterConfigEntry = ConfigEntry[WetterData]
@@ -172,6 +182,14 @@ class WetterCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         if "precipitation" in sources:
             # Regen vor Ort ändert auch das Symbol (die Station kann trocken melden, während es hier regnet)
             out["condition"] = self._condition_with_local_rain(out)
+        # Minutes until rain: measured rain of the last hour (nearby, else the station) means it is raining already;
+        # the forecast value that fills a missing station reading does not count as a measurement
+        measured = (
+            out["precipitation"]
+            if "precipitation" in sources
+            else model.measured_rain((self.data or {}).get("current"))
+        )
+        out["rain_in"] = model.rain_in(self.hourly, when, (measured or 0) > 0, FORECAST_HOURS)
         if now is None:
             self._values = out
         return out
@@ -216,6 +234,12 @@ class WarningsCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         self._hits: dict[str, bool] = {}
         # First time a new message was seen without a loadable area
         self._unknown_since: dict[str, datetime] = {}
+        # Warnings already announced by event (id → event data), kept across restarts: each warning exactly once
+        self._announced: dict[str, dict[str, Any]] = {}
+        # Announced warnings missing from the answers since (id → ISO time); they end after WARNING_END_GRACE
+        self._missing: dict[str, str] = {}
+        # Events of the last update, fired after the entities show the new state
+        self._pending: list[tuple[str, dict[str, Any]]] = []
 
     async def async_restore(self) -> bool:
         stored = await self._store.async_load()
@@ -224,6 +248,18 @@ class WarningsCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         hits = stored.get("nina_hits")
         if isinstance(hits, dict):
             self._hits = {str(k): bool(v) for k, v in hits.items()}
+        announced = stored.get("announced")
+        if isinstance(announced, dict):
+            self._announced = {str(k): dict(v) for k, v in announced.items() if isinstance(v, dict)}
+        else:
+            # state of an older version: the warnings shown so far count as announced (no second push after update)
+            shown = warnings.drop_expired([w for w in stored["warnings"] if isinstance(w, dict)], dt_util.utcnow())
+            self._announced = {
+                str(w.get("id")): warnings.event_data(w, stored.get("area"), self.config_entry.entry_id) for w in shown
+            }
+        missing = stored.get("missing")
+        if isinstance(missing, dict):
+            self._missing = {str(k): str(v) for k, v in missing.items()}
         self.async_set_updated_data(stored)
         return True
 
@@ -249,28 +285,65 @@ class WarningsCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         except WetterError as err:
             _LOGGER.debug("DWD-Warnungen nicht erreichbar, behalte die letzten: %s", err)
         else:
-            dwd = [warnings.from_dwd(a) for a in alerts]
             area = location.get("name") or area
+            dwd = [warnings.from_dwd(a, area) for a in alerts]
             ars = warnings.ars_from_warn_cell(location.get("warn_cell_id")) or ars
         others = await self._nina(ars) if ars else []
         stale = [name for name, got in (("DWD", dwd), ("NINA", others)) if got is None]
         merged = (dwd if dwd is not None else self._previous(dwd=True)) + (
             others if others is not None else self._previous(dwd=False)
         )
+        found = warnings.drop_expired(warnings.sort(merged), dt_util.utcnow())
+        announced = self._announce(found, area, stale)
         data = {
-            "warnings": warnings.drop_expired(warnings.sort(merged), dt_util.utcnow()),
+            "warnings": found,
             "area": area,
             "ars": ars,
             "stale": stale,
             "nina_hits": dict(self._hits),
+            "announced": announced,
+            "missing": dict(self._missing),
         }
-        changed = _changed(old, data)
+        # `missing` alone (grace clocks, restarted every run while a source is down) is no change worth a write
+        changed = _changed(old, data, ignore="missing")
         if dwd is None and others is None and not changed:
             # beide Quellen weiter weg und nichts abgelaufen: Ausfall melden (einmal im Log), letzter Stand bleibt
             raise UpdateFailed(translation_domain=DOMAIN, translation_key="warnings_failed")
         if changed:
-            self._store.async_delay_save(lambda: data, 5)
+            # New or ended warnings are written at once, so a restart right after the event never repeats it
+            self._store.async_delay_save(lambda: data, 0 if self._pending else 5)
         return data
+
+    def _announce(self, found: list[dict[str, Any]], area: Any, stale: list[str]) -> dict[str, dict[str, Any]]:
+        """Queue one event per warning that appeared or ended since the last update; returns the new state."""
+        entry_id = self.config_entry.entry_id
+        now = dt_util.utcnow()
+        current = {str(w.get("id")): warnings.event_data(w, area, entry_id) for w in found}
+        self._pending = [(EVENT_WARNING_NEW, data) for wid, data in current.items() if wid not in self._announced]
+        missing: dict[str, str] = {}
+        for wid, data in self._announced.items():
+            if wid in current:
+                continue
+            expires = model.parse_time(data.get("expires"))
+            # while its source is down the grace time starts anew: no all-clear without an answer
+            since = now if data.get("source") in stale else model.parse_time(self._missing.get(wid)) or now
+            if (expires is not None and expires <= now) or now - since >= WARNING_END_GRACE:
+                self._pending.append((EVENT_WARNING_ENDED, data))
+            else:
+                # gone for now: keep it announced (no second "new" if it returns), end it after the grace time
+                missing[wid] = since.isoformat()
+                current[wid] = data
+        self._missing = missing
+        self._announced = current
+        return dict(current)
+
+    @callback
+    def async_update_listeners(self) -> None:
+        """Entities first, then the events: an automation triggered by the event already sees the new state."""
+        super().async_update_listeners()
+        pending, self._pending = self._pending, []
+        for event_type, data in pending:
+            self.hass.bus.async_fire(event_type, data)
 
     async def _nina(self, ars: str) -> list[dict[str, Any]] | None:
         """Nicht-DWD-Meldungen des Kreises mit Volltext, deren Warngebiet das Zuhause trifft; None bei NINA-Ausfall."""
@@ -329,3 +402,108 @@ class WarningsCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             else:
                 # Meldung ohne diese Zusatzdaten anzeigen, beim nächsten Durchlauf erneut versuchen
                 _LOGGER.debug("NINA-%s für %s fehlt: %s", what, item.get("id"), result)
+
+
+class HealthCoordinator(DataUpdateCoordinator[dict[str, Any]]):
+    """Pollen and UV index of the DWD, published once a day.
+
+    The hourly timer downloads only when new files are due (`next_update` passed, or older than `HEALTH_MAX_AGE`);
+    otherwise it just refreshes the entities (a new day shifts today/tomorrow). A failed source keeps its last
+    values; this coordinator never touches weather or warnings.
+    """
+
+    config_entry: WetterConfigEntry
+
+    def __init__(self, hass: HomeAssistant, entry: WetterConfigEntry) -> None:
+        super().__init__(
+            hass, _LOGGER, config_entry=entry, name=f"{DOMAIN} Pollen und UV", update_interval=HEALTH_INTERVAL
+        )
+        self.client = DwdHealthClient(async_get_clientsession(hass))
+        self._store: Store[dict[str, Any]] = Store(hass, 1, f"{DOMAIN}.{entry.entry_id}.health")
+        self._latitude, self._longitude = float(entry.data[CONF_LATITUDE]), float(entry.data[CONF_LONGITUDE])
+        # Location the stored pollen region and UV place belong to (a new location looks both up again)
+        self._where = f"{self._latitude:.4f},{self._longitude:.4f}"
+
+    async def async_restore(self) -> bool:
+        stored = await self._store.async_load()
+        if not isinstance(stored, dict) or stored.get("where") != self._where:
+            return False
+        self.async_set_updated_data(stored)
+        return True
+
+    def _due(self, data: dict[str, Any], now: datetime) -> bool:
+        """Download now? First time, after a failed download, at the latest after 12 h, and from `next_update` of
+        a known part on hourly for HEALTH_LATE (then a missing new file is only retried with the 12 h).
+
+        A location without pollen region or UV place is not retried hourly.
+        """
+        fetched = model.parse_time(data.get("fetched"))
+        if fetched is None or 0 < int(data.get("failures") or 0) < HEALTH_RETRIES or now - fetched >= HEALTH_MAX_AGE:
+            return True
+        for part in (data.get("pollen"), data.get("uv")):
+            next_update = health.parse_dwd_time((part or {}).get("next_update"))
+            if next_update is not None and now >= next_update and fetched < next_update + HEALTH_LATE:
+                return True
+        return False
+
+    async def _async_update_data(self) -> dict[str, Any]:
+        old = self.data if (self.data or {}).get("where") == self._where else {}
+        now = dt_util.utcnow()
+        due = self._due(old, now)
+        # Pollen region: looked up with every download until known; after an error of the service hourly on its
+        # own (small request), without downloading the files again. An empty answer waits for the next download.
+        cell, region_error = old.get("cell"), bool(old.get("region_error"))
+        found = False
+        if cell is None and (due or region_error):
+            try:
+                cell = health.region_cell(await self.client.pollen_region(self._latitude, self._longitude))
+            except WetterError as err:
+                _LOGGER.debug("Pollenregion nicht ermittelt, nächster Versuch später: %s", err)
+                region_error = True
+            else:
+                region_error, found = False, cell is not None
+        if not due and not found:
+            return old if region_error == bool(old.get("region_error")) else {**old, "region_error": region_error}
+        # A failed download or a file without our region/place keeps the last values (they age out by date)
+        pollen, uv = old.get("pollen"), old.get("uv")
+        failed = 0
+        try:
+            raw = await self.client.pollen()
+        except WetterError as err:
+            _LOGGER.debug("Pollenflug nicht erreichbar, behalte den letzten Stand: %s", err)
+            failed += 1
+        else:
+            pollen = (health.pollen_for(raw, cell) if cell is not None else None) or pollen
+        try:
+            raw = await self.client.uv()
+        except WetterError as err:
+            _LOGGER.debug("UV-Index nicht erreichbar, behalte den letzten Stand: %s", err)
+            failed += 1
+        else:
+            uv = health.uv_for(raw, self._latitude, self._longitude) or uv
+        if failed == 2 and not pollen and not uv:
+            raise UpdateFailed(translation_domain=DOMAIN, translation_key="health_failed")
+        data = {
+            "where": self._where,
+            "cell": cell,
+            "pollen": pollen,
+            "uv": uv,
+            "region_error": region_error,
+            # consecutive failed downloads: retried hourly a few times, then only with HEALTH_MAX_AGE
+            "failures": int(old.get("failures") or 0) + 1 if failed else 0,
+            "fetched": now.isoformat(timespec="seconds"),
+        }
+        # downloads are rare: always keep the time, so a restart does not download again at once
+        self._store.async_delay_save(lambda: data, 5)
+        return data
+
+    def pollen(self, key: str) -> list[Any]:
+        """Pollen level `key` for today, tomorrow, day after tomorrow (German calendar days, like the DWD files)."""
+        pollen = (self.data or {}).get("pollen") or {}
+        values = (pollen.get("values") or {}).get(key) or []
+        return health.by_day(values, pollen.get("issued"), dt_util.now(health.DWD_TZ).date())
+
+    def uv(self) -> list[Any]:
+        """UV index for today, tomorrow, day after tomorrow (German calendar days, like the DWD files)."""
+        uv = (self.data or {}).get("uv") or {}
+        return health.by_day(uv.get("values") or [], uv.get("issued"), dt_util.now(health.DWD_TZ).date())

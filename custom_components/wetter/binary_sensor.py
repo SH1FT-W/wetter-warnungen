@@ -10,8 +10,8 @@ from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
 from . import warnings
 from .const import WARNING_SLOTS
-from .coordinator import WarningsCoordinator, WetterConfigEntry
-from .entity import WarningEntity
+from .coordinator import WarningsCoordinator, WetterConfigEntry, WetterCoordinator
+from .entity import WarningEntity, WetterEntity
 
 PARALLEL_UPDATES = 0
 
@@ -20,7 +20,12 @@ async def async_setup_entry(
     hass: HomeAssistant, entry: WetterConfigEntry, async_add_entities: AddConfigEntryEntitiesCallback
 ) -> None:
     coordinator = entry.runtime_data.warnings
-    async_add_entities(WarningSlot(coordinator, n) for n in range(1, WARNING_SLOTS + 1))
+    async_add_entities(
+        [
+            *(WarningSlot(coordinator, n) for n in range(1, WARNING_SLOTS + 1)),
+            RainNextHour(entry.runtime_data.weather),
+        ]
+    )
 
 
 class WarningSlot(WarningEntity, BinarySensorEntity):
@@ -47,3 +52,17 @@ class WarningSlot(WarningEntity, BinarySensorEntity):
         # region immer (auch ohne Warnung): Dashboards zeigen „Aktuell keine Warnungen für …“
         area = warnings.region((self.coordinator.data or {}).get("area"))
         return {**(self._warning() or {}), "region": area}
+
+
+class RainNextHour(WetterEntity, BinarySensorEntity):
+    """On when the sensor "Regen in" is below 60 minutes (rain now, in the running hour, or starting within 60 min)."""
+
+    _attr_translation_key = "rain_next_hour"
+
+    def __init__(self, coordinator: WetterCoordinator) -> None:
+        super().__init__(coordinator, "rain_next_hour")
+
+    @property
+    def is_on(self) -> bool:
+        rain = self.coordinator.values().get("rain_in")
+        return rain is not None and rain["minutes"] < 60

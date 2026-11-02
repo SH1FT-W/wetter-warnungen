@@ -11,7 +11,7 @@ from typing import Any
 
 import aiohttp
 
-from .const import API_URL, NINA_URL
+from .const import API_URL, NINA_URL, POLLEN_REGION_URL, POLLEN_URL, UV_URL
 
 TIMEOUT = aiohttp.ClientTimeout(total=20)
 
@@ -103,3 +103,46 @@ class NinaClient:
         if not isinstance(data, dict):
             raise WetterError(f"NINA: Warngebiet {warning_id} unlesbar")
         return data
+
+
+class DwdHealthClient:
+    """Pollen and UV index from the DWD Open Data server, pollen region from the DWD GeoServer (no key)."""
+
+    def __init__(self, session: aiohttp.ClientSession) -> None:
+        self._session = session
+
+    async def _get(self, url: str, params: dict[str, str] | None = None) -> dict[str, Any]:
+        try:
+            async with self._session.get(url, params=params, timeout=TIMEOUT) as r:
+                if r.status >= 400:
+                    raise WetterError(f"DWD {r.status} für {url}")
+                data = await r.json(content_type=None)
+        except (aiohttp.ClientError, TimeoutError, ValueError) as err:
+            raise WetterError(f"DWD {url}: {err}") from err
+        if not isinstance(data, dict):
+            raise WetterError(f"DWD {url}: unerwartete Antwort")
+        return data
+
+    async def pollen(self) -> dict[str, Any]:
+        """Pollenflug-Gefahrenindex for all regions (s31fg.json)."""
+        return await self._get(POLLEN_URL)
+
+    async def uv(self) -> dict[str, Any]:
+        """UV index for 38 places (uvi.json)."""
+        return await self._get(UV_URL)
+
+    async def pollen_region(self, latitude: float, longitude: float) -> dict[str, Any]:
+        """GeoJSON with the pollen region containing the point (WFS 2.0, EPSG:4326 = latitude first)."""
+        return await self._get(
+            POLLEN_REGION_URL,
+            {
+                "service": "WFS",
+                "version": "2.0.0",
+                "request": "GetFeature",
+                "typeNames": "dwd:Pollenflug",
+                "outputFormat": "application/json",
+                "propertyName": "CELL_ID,GEN",
+                "count": "1",
+                "CQL_FILTER": f"INTERSECTS(THE_GEOM,POINT({latitude:.4f} {longitude:.4f}))",
+            },
+        )

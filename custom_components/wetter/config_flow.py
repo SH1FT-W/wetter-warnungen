@@ -11,6 +11,7 @@ from homeassistant.core import callback
 from homeassistant.data_entry_flow import AbortFlow
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.selector import (
+    BooleanSelector,
     EntitySelector,
     EntitySelectorConfig,
     LocationSelector,
@@ -29,6 +30,7 @@ from .const import (
     CONF_LOCAL_TEMPERATURE,
     CONF_LOCAL_WIND_GUST,
     CONF_LOCAL_WIND_SPEED,
+    CONF_POLLEN_UV,
     DOMAIN,
 )
 
@@ -117,17 +119,20 @@ class WetterOptionsFlow(OptionsFlowWithReload):
 
     async def async_step_init(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
         if user_input is not None:
-            return self.async_create_entry(data={k: v for k, v in user_input.items() if v})
+            # empty sensor fields are dropped; the pollen/UV switch is kept also when off
+            return self.async_create_entry(data={k: v for k, v in user_input.items() if v or isinstance(v, bool)})
         fields: dict[Any, Any] = {}
         # Leere Felder: Sensoren eines Netatmo-Wetterbereichs in der Nähe vorschlagen
         data = self.config_entry.data
+        options = self.config_entry.options
         proposal = (
             {}
-            if self.config_entry.options
+            if any(options.get(key) for key in LOCAL_CLASSES)
             else netatmo.suggest(self.hass, float(data[CONF_LATITUDE]), float(data[CONF_LONGITUDE]))
         )
         for key, device_class in LOCAL_CLASSES.items():
             current = self.config_entry.options.get(key) or proposal.get(key)
             marker = vol.Optional(key, description={"suggested_value": current} if current else None)
             fields[marker] = EntitySelector(EntitySelectorConfig(domain="sensor", device_class=device_class))
+        fields[vol.Optional(CONF_POLLEN_UV, default=bool(options.get(CONF_POLLEN_UV, True)))] = BooleanSelector()
         return self.async_show_form(step_id="init", data_schema=vol.Schema(fields))

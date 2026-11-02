@@ -71,6 +71,39 @@
       },
       "precipitation_probability_today": {
         "default": "mdi:umbrella-outline"
+      },
+      "rain_in": {
+        "default": "mdi:weather-rainy"
+      },
+      "pollen_ambrosia": {
+        "default": "mdi:flower-pollen"
+      },
+      "pollen_mugwort": {
+        "default": "mdi:flower-pollen"
+      },
+      "pollen_birch": {
+        "default": "mdi:tree"
+      },
+      "pollen_alder": {
+        "default": "mdi:tree"
+      },
+      "pollen_ash": {
+        "default": "mdi:tree"
+      },
+      "pollen_hazel": {
+        "default": "mdi:tree"
+      },
+      "pollen_grass": {
+        "default": "mdi:grass"
+      },
+      "pollen_rye": {
+        "default": "mdi:grass"
+      },
+      "uv_index": {
+        "default": "mdi:sun-wireless"
+      },
+      "uv_index_tomorrow": {
+        "default": "mdi:sun-wireless-outline"
       }
     },
     "binary_sensor": {
@@ -79,6 +112,13 @@
         "state": {
           "off": "mdi:shield-check-outline",
           "on": "mdi:alert"
+        }
+      },
+      "rain_next_hour": {
+        "default": "mdi:umbrella-outline",
+        "state": {
+          "off": "mdi:umbrella-closed-outline",
+          "on": "mdi:umbrella"
         }
       }
     },

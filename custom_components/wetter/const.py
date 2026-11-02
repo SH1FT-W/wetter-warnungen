@@ -40,3 +40,26 @@ LOCAL_KEYS: Final = {
 }
 # älter als das gilt ein Nachbarschaftswert als ausgefallen
 LOCAL_MAX_AGE: Final = timedelta(hours=1)
+
+# Pollen and UV index of the DWD (Open Data, updated once a day): own coordinator, rarely fetched
+CONF_POLLEN_UV: Final = "pollen_uv"
+POLLEN_URL: Final = "https://opendata.dwd.de/climate_environment/health/alerts/s31fg.json"
+UV_URL: Final = "https://opendata.dwd.de/climate_environment/health/alerts/uvi.json"
+# DWD GeoServer (WFS): which pollen region contains the location (asked once, then kept in the store)
+POLLEN_REGION_URL: Final = "https://maps.dwd.de/geoserver/dwd/wfs"
+# The timer only checks whether new data is due (`next_update` passed); the files are downloaded only then
+HEALTH_INTERVAL: Final = timedelta(hours=1)
+# Download again at the latest after this, even if `next_update` lies further ahead
+HEALTH_MAX_AGE: Final = timedelta(hours=12)
+# After `next_update` new files are tried hourly for this long (DWD publishes late now and then), then only
+# HEALTH_MAX_AGE applies (file without our region, or no new file at all)
+HEALTH_LATE: Final = timedelta(hours=2)
+# After a failed download retry hourly this many times, then only HEALTH_MAX_AGE applies (a file gone for good)
+HEALTH_RETRIES: Final = 3
+
+# Event names: one event per warning when it appears and when it ends (state in the store, survives restarts)
+EVENT_WARNING_NEW: Final = "wetter_warning_new"
+EVENT_WARNING_ENDED: Final = "wetter_warning_ended"
+# A warning missing from the answers ends only after this long (or at its `expires`): a source that drops it
+# for one run, or a NINA message waiting for its area again, must not cause an all-clear plus a second "new"
+WARNING_END_GRACE: Final = timedelta(minutes=10)

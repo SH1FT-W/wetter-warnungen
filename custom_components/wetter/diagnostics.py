@@ -26,5 +26,7 @@ async def async_get_config_entry_diagnostics(hass: HomeAssistant, entry: WetterC
         "warn_area": (warnings.data or {}).get("area"),
         "warn_stale": (warnings.data or {}).get("stale"),
         "now": coordinator.values(),
+        # pollen region and UV place are coarse (about a federal state), the stored location key is redacted
+        "health": None if entry.runtime_data.health is None else entry.runtime_data.health.data,
     }
-    return async_redact_data(out, {CONF_LATITUDE, CONF_LONGITUDE, "warn_area"})
+    return async_redact_data(out, {CONF_LATITUDE, CONF_LONGITUDE, "warn_area", "where"})

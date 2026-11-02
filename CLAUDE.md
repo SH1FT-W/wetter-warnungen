@@ -34,15 +34,32 @@ manifest-Version. HA/HACS vergleichen per AwesomeVersion: `26.10.x` gilt als neu
   ganz neue Meldung bis `NINA_AREA_WAIT` (5 Min.) zurückhalten, dann Kreis. Fällt eine Quelle aus,
   bleiben ihre letzten Warnungen (keine falsche Entwarnung), Warn-Entitäten bleiben immer verfügbar.
   `binary_sensor.<gerät>_warnung_1..5` mit denselben Attributen wie die NINA-Integration (Casora/Automationen).
+- Ereignisse `wetter_warning_new`/`wetter_warning_ended` (`warnings.event_data`): je Warnungs-ID genau einmal, Stand
+  `announced` im Warnungs-Store (sofort geschrieben), gefeuert in `async_update_listeners` nach den Entitäten.
+  Ende bei `expires` oder nach `WARNING_END_GRACE` (10 Min.) ohne die Warnung (`missing` im Store); Store ohne
+  `announced` (alte Version) → gespeicherte, nicht abgelaufene Warnungen gelten als gemeldet. Ist die Quelle der
+  Warnung ausgefallen (`stale`), beginnt die Frist neu; `missing` allein löst kein Schreiben aus.
+  Beim allerersten Einrichten kommen sie vor dem Anlegen der Entitäten (erste Abfrage läuft vor den Plattformen).
+- `health.py` rein + `HealthCoordinator` (Store `.health`): Pollen `s31fg.json`, UV `uvi.json` von opendata.dwd.de,
+  Pollenregion per WFS (`maps.dwd.de`, Layer `dwd:Pollenflug`, `CELL_ID` = partregion_id bzw. region_id bei -1;
+  `cell` None = noch unbekannt). Takt 1 Std., Download nur: erstes Mal, nach Download-Fehler bis zu `HEALTH_RETRIES`
+  (3) Mal stündlich (`failures`), >12 Std., oder ab `next_update` stündlich für `HEALTH_LATE` (2 Std.). Region bei jedem Download, bis bekannt; nach Fehler des
+  Geodiensts stündlich allein (`region_error`), ohne die Dateien. Leere/umgebaute Antwort behält den alten Stand.
+  Heute/morgen nach Ausgabedatum (Berliner Kalendertag), Entitäten zu jeder vollen Stunde neu
+  (`async_track_time_change`). Nie blockierend beim Start, Option `pollen_uv` (Standard an).
+- „Regen in“ (`model.rain_in`): gemessener Regen der letzten Stunde (Nachbarschaft/Station, nie Vorhersage) → 0, sonst Beginn der ersten
+  Vorhersagestunde ≥0,1 mm in 48 Std.; Binärsensor „Regen in der nächsten Stunde“ = < 60 Min.
 - Bright-Sky-Zeitstempel = Ende der Stunde; `solar` kWh/m² der Stunde → ×1000 = W/m².
 - `number.py` Regler „Nachbarschaft Radius“ nur, wenn beim Laden ein Netatmo-Bereich hinter den Nachbarschaftssensoren
   steht (`coordinator.neighbourhood()`); sonst kein Regler und alter Registry-Eintrag wird entfernt. Schreibt in die
   Optionen der Netatmo-Integration (README erklärt das).
 
 ## Prüfen
-- `~/Software/evenlight/.venv/bin/python -m pytest -q -p no:logging --cov=custom_components` (100 %; HA 2026.9.3);
-  CI-gleich: `uv venv --python 3.14 && uv pip install -r requirements_test.txt pytest-cov`
-- `uvx ruff check . && uvx ruff format --check .`, `uvx mypy@2.3.1 --python-executable ~/Software/evenlight/.venv/bin/python`
+- Eigenes venv im Repo (`.venv`, in .gitignore), anlegen CI-gleich: `uv venv --python 3.14 && uv pip install -r requirements_test.txt pytest-cov`
+- `LC_ALL=en_US TZ=UTC .venv/bin/python -m pytest -q -p no:logging --cov=custom_components` (100 %; HA 2026.9.3)
+- `uvx ruff check . && uvx ruff format --check .`, `uvx mypy@2.3.1 --python-executable .venv/bin/python`
+- Snapshot aller Entitäten `tests/test_snapshot.py` (Stand `tests/snapshots/`): gewollte Änderungen mit
+  `--snapshot-update` übernehmen und den Unterschied ansehen.
 - `python tools/pruefe-uebersetzungen.py` (strings.json = translations/*.json), hassfest per Docker
 - GitHub-Workflow `.github/workflows/pruefung.yml` (Vorlage repo-vorlagen/vorlagen/ci-ha-integration.yml, COV_MIN 98)
   läuft bei Push/PR und montags gegen die neueste HA.

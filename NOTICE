@@ -21,6 +21,11 @@ offenen Daten des DWD. Der Quellcode von Bright Sky steht unter der MIT-Lizenz
 (https://github.com/jdemaeyer/brightsky). Wetter & Warnungen ruft nur die öffentliche
 Schnittstelle auf und enthält keinen Code daraus.
 
+Pollenflug-Gefahrenindex und UV-Index kommen direkt vom Open-Data-Server des DWD
+(https://opendata.dwd.de/climate_environment/health/alerts/), die Pollenregion des Orts vom
+Geodienst des DWD (https://maps.dwd.de); ebenfalls offene Daten des DWD (CC BY 4.0). Die
+Koordinaten der 38 UV-Orte in health.py stammen aus dem Geodienst des DWD (Layer Uv_Stationen).
+
 Home Assistant zeigt den Quellenvermerk als Attribution jeder Entität.
 
 Übrige amtliche Warnungen
@@ -34,7 +39,9 @@ der NINA-App. Die Warnungen bleiben Inhalt der ausgebenden Stellen.
 Testdaten
 ---------
 
-Warntexte, Orte, Koordinaten und Stationen in tests/ sind ausgedacht.
+Warntexte, Orte, Koordinaten und Stationen in tests/ sind ausgedacht. Die Pollen-, UV- und
+Regionsdateien in tests/fixtures/dwd_*.json sind echte DWD-Antworten (Format unverändert), mit
+angepasstem Datum und einzelnen geänderten Werten.
 
 Marken und Zugehörigkeit
 ------------------------

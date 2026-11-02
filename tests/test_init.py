@@ -26,6 +26,7 @@ from custom_components.wetter.const import (
     API_URL,
     CONF_LOCAL_PRECIPITATION,
     CONF_LOCAL_TEMPERATURE,
+    CONF_POLLEN_UV,
     DOMAIN,
     NINA_URL,
 )
@@ -390,7 +391,7 @@ async def test_options_flow(hass: HomeAssistant, brightsky: AiohttpClientMocker,
         result["flow_id"], {CONF_LOCAL_TEMPERATURE: "sensor.umgebung_temperatur"}
     )
     assert result["type"] is FlowResultType.CREATE_ENTRY
-    assert entry.options == {CONF_LOCAL_TEMPERATURE: "sensor.umgebung_temperatur"}
+    assert entry.options == {CONF_LOCAL_TEMPERATURE: "sensor.umgebung_temperatur", CONF_POLLEN_UV: True}
     await hass.async_block_till_done()
     assert hass.states.get("sensor.wetter_temperatur").state == "15.0", "nach dem Neuladen aktiv"
     again = await hass.config_entries.options.async_init(entry.entry_id)

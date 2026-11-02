@@ -35,7 +35,7 @@
   "options": {
     "step": {
       "init": {
-        "title": "Values from the neighbourhood",
+        "title": "Options",
         "description": "Nearby sensors (e.g. a Netatmo weather area) take precedence over the DWD station while they are at most one hour old. Leave empty = DWD.",
         "data": {
           "local_temperature": "Temperature",
@@ -43,7 +43,8 @@
           "local_precipitation": "Precipitation (last hour)",
           "local_pressure": "Pressure (sea level)",
           "local_wind_speed": "Wind speed",
-          "local_wind_gust": "Wind gusts"
+          "local_wind_gust": "Wind gusts",
+          "pollen_uv": "Pollen and UV index"
         },
         "data_description": {
           "local_temperature": "Sensor with the temperature near you, e.g. a Netatmo weather area.",
@@ -51,7 +52,8 @@
           "local_precipitation": "Sensor with the rain of the last hour (mm or mm/h); local rain also changes the weather symbol.",
           "local_pressure": "Only with sea-level pressure (like DWD); Netatmo areas do not provide it reliably.",
           "local_wind_speed": "Only with a freely exposed anemometer; sheltered stations read far too low.",
-          "local_wind_gust": "Like wind speed, for gusts."
+          "local_wind_gust": "Like wind speed, for gusts.",
+          "pollen_uv": "Pollen count and UV index of the DWD (updated once a day). Off removes the entities."
         }
       }
     }
@@ -211,6 +213,179 @@
       },
       "precipitation_probability_today": {
         "name": "Precipitation probability today"
+      },
+      "rain_in": {
+        "name": "Rain in",
+        "state_attributes": {
+          "start": {
+            "name": "Start"
+          },
+          "precipitation": {
+            "name": "Precipitation (mm)"
+          },
+          "precipitation_probability": {
+            "name": "Probability"
+          },
+          "source": {
+            "name": "Source",
+            "state": {
+              "measurement": "Measured",
+              "forecast": "Forecast"
+            }
+          }
+        }
+      },
+      "pollen_ambrosia": {
+        "name": "Ragweed pollen",
+        "state_attributes": {
+          "today": {
+            "name": "Today"
+          },
+          "tomorrow": {
+            "name": "Tomorrow"
+          },
+          "day_after_tomorrow": {
+            "name": "Day after tomorrow"
+          },
+          "region": {
+            "name": "Pollen region"
+          }
+        }
+      },
+      "pollen_mugwort": {
+        "name": "Mugwort pollen",
+        "state_attributes": {
+          "today": {
+            "name": "Today"
+          },
+          "tomorrow": {
+            "name": "Tomorrow"
+          },
+          "day_after_tomorrow": {
+            "name": "Day after tomorrow"
+          },
+          "region": {
+            "name": "Pollen region"
+          }
+        }
+      },
+      "pollen_birch": {
+        "name": "Birch pollen",
+        "state_attributes": {
+          "today": {
+            "name": "Today"
+          },
+          "tomorrow": {
+            "name": "Tomorrow"
+          },
+          "day_after_tomorrow": {
+            "name": "Day after tomorrow"
+          },
+          "region": {
+            "name": "Pollen region"
+          }
+        }
+      },
+      "pollen_alder": {
+        "name": "Alder pollen",
+        "state_attributes": {
+          "today": {
+            "name": "Today"
+          },
+          "tomorrow": {
+            "name": "Tomorrow"
+          },
+          "day_after_tomorrow": {
+            "name": "Day after tomorrow"
+          },
+          "region": {
+            "name": "Pollen region"
+          }
+        }
+      },
+      "pollen_ash": {
+        "name": "Ash pollen",
+        "state_attributes": {
+          "today": {
+            "name": "Today"
+          },
+          "tomorrow": {
+            "name": "Tomorrow"
+          },
+          "day_after_tomorrow": {
+            "name": "Day after tomorrow"
+          },
+          "region": {
+            "name": "Pollen region"
+          }
+        }
+      },
+      "pollen_grass": {
+        "name": "Grass pollen",
+        "state_attributes": {
+          "today": {
+            "name": "Today"
+          },
+          "tomorrow": {
+            "name": "Tomorrow"
+          },
+          "day_after_tomorrow": {
+            "name": "Day after tomorrow"
+          },
+          "region": {
+            "name": "Pollen region"
+          }
+        }
+      },
+      "pollen_hazel": {
+        "name": "Hazel pollen",
+        "state_attributes": {
+          "today": {
+            "name": "Today"
+          },
+          "tomorrow": {
+            "name": "Tomorrow"
+          },
+          "day_after_tomorrow": {
+            "name": "Day after tomorrow"
+          },
+          "region": {
+            "name": "Pollen region"
+          }
+        }
+      },
+      "pollen_rye": {
+        "name": "Rye pollen",
+        "state_attributes": {
+          "today": {
+            "name": "Today"
+          },
+          "tomorrow": {
+            "name": "Tomorrow"
+          },
+          "day_after_tomorrow": {
+            "name": "Day after tomorrow"
+          },
+          "region": {
+            "name": "Pollen region"
+          }
+        }
+      },
+      "uv_index": {
+        "name": "UV index",
+        "state_attributes": {
+          "city": {
+            "name": "Place"
+          }
+        }
+      },
+      "uv_index_tomorrow": {
+        "name": "UV index tomorrow",
+        "state_attributes": {
+          "city": {
+            "name": "Place"
+          }
+        }
       }
     },
     "binary_sensor": {
@@ -255,8 +430,14 @@
           },
           "region": {
             "name": "Warning area"
+          },
+          "affected_areas": {
+            "name": "Affected areas"
           }
         }
+      },
+      "rain_next_hour": {
+        "name": "Rain in the next hour"
       }
     },
     "number": {
@@ -271,6 +452,9 @@
     },
     "warnings_failed": {
       "message": "Warnings could not be loaded from DWD or NINA."
+    },
+    "health_failed": {
+      "message": "Pollen and UV index could not be loaded from the DWD."
     }
   }
 }

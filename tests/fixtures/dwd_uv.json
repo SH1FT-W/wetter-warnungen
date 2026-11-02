@@ -1,0 +1,313 @@
+{
+  "forecast_day": "2026-10-15",
+  "content": [
+    {
+      "city": "Ulm",
+      "forecast": {
+        "dayafter_to": 1,
+        "today": 1,
+        "tomorrow": 1
+      }
+    },
+    {
+      "forecast": {
+        "dayafter_to": 1,
+        "today": 1,
+        "tomorrow": 1
+      },
+      "city": "Wernigerode"
+    },
+    {
+      "forecast": {
+        "tomorrow": 1,
+        "dayafter_to": 1,
+        "today": 1
+      },
+      "city": "Nürnberg"
+    },
+    {
+      "city": "Magdeburg",
+      "forecast": {
+        "tomorrow": 1,
+        "today": 1,
+        "dayafter_to": 1
+      }
+    },
+    {
+      "forecast": {
+        "today": 0,
+        "dayafter_to": 1,
+        "tomorrow": 1
+      },
+      "city": "Osnabrück"
+    },
+    {
+      "forecast": {
+        "dayafter_to": 1,
+        "today": 2,
+        "tomorrow": 2
+      },
+      "city": "Weinbiet"
+    },
+    {
+      "forecast": {
+        "tomorrow": 1,
+        "dayafter_to": 1,
+        "today": 1
+      },
+      "city": "Weimar"
+    },
+    {
+      "city": "Regensburg",
+      "forecast": {
+        "today": 2,
+        "dayafter_to": 1,
+        "tomorrow": 1
+      }
+    },
+    {
+      "forecast": {
+        "tomorrow": 1,
+        "today": 0,
+        "dayafter_to": 1
+      },
+      "city": "Marienleuchte"
+    },
+    {
+      "forecast": {
+        "today": 1,
+        "dayafter_to": 1,
+        "tomorrow": 1
+      },
+      "city": "Seehausen"
+    },
+    {
+      "forecast": {
+        "tomorrow": 1,
+        "today": 2,
+        "dayafter_to": 1
+      },
+      "city": "Stuttgart"
+    },
+    {
+      "city": "List auf Sylt",
+      "forecast": {
+        "tomorrow": 1,
+        "today": 1,
+        "dayafter_to": 1
+      }
+    },
+    {
+      "city": "Freiburg",
+      "forecast": {
+        "tomorrow": 1,
+        "dayafter_to": 1,
+        "today": 2
+      }
+    },
+    {
+      "city": "München",
+      "forecast": {
+        "tomorrow": 1,
+        "dayafter_to": 1,
+        "today": 1
+      }
+    },
+    {
+      "city": "Düsseldorf",
+      "forecast": {
+        "dayafter_to": 1,
+        "today": 1,
+        "tomorrow": 1
+      }
+    },
+    {
+      "city": "Zugspitze",
+      "forecast": {
+        "tomorrow": 1,
+        "dayafter_to": 2,
+        "today": 1
+      }
+    },
+    {
+      "forecast": {
+        "tomorrow": 1,
+        "dayafter_to": 1,
+        "today": 1
+      },
+      "city": "Bremen"
+    },
+    {
+      "forecast": {
+        "dayafter_to": 1,
+        "today": 1,
+        "tomorrow": 1
+      },
+      "city": "Frankfurt/Main"
+    },
+    {
+      "forecast": {
+        "tomorrow": 1,
+        "dayafter_to": 1,
+        "today": 1
+      },
+      "city": "Kahler Asten"
+    },
+    {
+      "forecast": {
+        "tomorrow": 1,
+        "today": 1,
+        "dayafter_to": 1
+      },
+      "city": "Kassel"
+    },
+    {
+      "city": "Kiel",
+      "forecast": {
+        "dayafter_to": 1,
+        "today": 0,
+        "tomorrow": 1
+      }
+    },
+    {
+      "city": "Dresden",
+      "forecast": {
+        "tomorrow": 1,
+        "today": 1,
+        "dayafter_to": 1
+      }
+    },
+    {
+      "city": "Cottbus",
+      "forecast": {
+        "tomorrow": 1,
+        "today": 1,
+        "dayafter_to": 1
+      }
+    },
+    {
+      "forecast": {
+        "tomorrow": 1,
+        "today": 0,
+        "dayafter_to": 1
+      },
+      "city": "Rostock"
+    },
+    {
+      "forecast": {
+        "today": 3,
+        "tomorrow": 2,
+        "dayafter_to": 1
+      },
+      "city": "Berlin"
+    },
+    {
+      "city": "Sankt Peter-Ording",
+      "forecast": {
+        "today": 1,
+        "dayafter_to": 1,
+        "tomorrow": 1
+      }
+    },
+    {
+      "forecast": {
+        "tomorrow": 0,
+        "today": 1,
+        "dayafter_to": 1
+      },
+      "city": "Neubrandenburg"
+    },
+    {
+      "city": "Waren",
+      "forecast": {
+        "today": 1,
+        "dayafter_to": 1,
+        "tomorrow": 0
+      }
+    },
+    {
+      "city": "Bonn",
+      "forecast": {
+        "today": 1,
+        "dayafter_to": 1,
+        "tomorrow": 1
+      }
+    },
+    {
+      "forecast": {
+        "today": 1,
+        "dayafter_to": 1,
+        "tomorrow": 2
+      },
+      "city": "Würzburg"
+    },
+    {
+      "forecast": {
+        "tomorrow": 1,
+        "today": 0,
+        "dayafter_to": 1
+      },
+      "city": "Hamburg"
+    },
+    {
+      "city": "Konstanz",
+      "forecast": {
+        "today": 1,
+        "dayafter_to": 1,
+        "tomorrow": 1
+      }
+    },
+    {
+      "city": "Leipzig",
+      "forecast": {
+        "tomorrow": 1,
+        "today": 1,
+        "dayafter_to": 1
+      }
+    },
+    {
+      "forecast": {
+        "dayafter_to": 1,
+        "today": 1,
+        "tomorrow": 1
+      },
+      "city": "Hannover"
+    },
+    {
+      "forecast": {
+        "tomorrow": 1,
+        "today": 1,
+        "dayafter_to": 1
+      },
+      "city": "Norderney"
+    },
+    {
+      "forecast": {
+        "tomorrow": 1,
+        "today": 1,
+        "dayafter_to": 1
+      },
+      "city": "Großer Arber"
+    },
+    {
+      "forecast": {
+        "today": 1,
+        "dayafter_to": 1,
+        "tomorrow": 1
+      },
+      "city": "Arkona"
+    },
+    {
+      "city": "Hahn",
+      "forecast": {
+        "dayafter_to": 1,
+        "today": 1,
+        "tomorrow": 1
+      }
+    }
+  ],
+  "next_update": "2026-10-16T07:30:00",
+  "name": "UV-Gefahrenindex",
+  "last_update": "2026-10-15T07:30:00",
+  "sender": "Deutscher Wetterdienst - Medizin-Meteorologie"
+}

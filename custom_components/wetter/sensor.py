@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, cast
 
 from homeassistant.components.sensor import (
     SensorDeviceClass,
@@ -15,22 +15,25 @@ from homeassistant.components.sensor import (
 from homeassistant.const import (
     DEGREE,
     PERCENTAGE,
+    UV_INDEX,
     UnitOfArea,
     UnitOfIrradiance,
     UnitOfLength,
     UnitOfPressure,
     UnitOfSpeed,
     UnitOfTemperature,
+    UnitOfTime,
     UnitOfVolumetricFlux,
 )
 from homeassistant.core import HomeAssistant, callback
+from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
-from . import model
+from . import health, model
 from .const import LOCAL_KEYS
-from .coordinator import WarningsCoordinator, WetterConfigEntry, WetterCoordinator
-from .entity import WarningEntity, WetterEntity
+from .coordinator import HealthCoordinator, WarningsCoordinator, WetterConfigEntry, WetterCoordinator
+from .entity import HealthEntity, WarningEntity, WetterEntity
 
 PARALLEL_UPDATES = 0
 
@@ -79,6 +82,11 @@ def _source_attrs(c: WetterCoordinator, now: dict[str, Any]) -> dict[str, Any]:
     return {key: now["local_sources"].get(key, "dwd") for key in LOCAL_KEYS.values()}
 
 
+def _rain_in_attrs(_c: WetterCoordinator, now: dict[str, Any]) -> dict[str, Any]:
+    rain = now.get("rain_in") or {}
+    return {k: rain.get(k) for k in ("start", "precipitation", "precipitation_probability", "source")}
+
+
 SENSORS: tuple[WetterSensorDescription, ...] = (
     _measurement("temperature", SensorDeviceClass.TEMPERATURE, UnitOfTemperature.CELSIUS, local=True),
     _measurement("humidity", SensorDeviceClass.HUMIDITY, PERCENTAGE, local=True),
@@ -117,6 +125,15 @@ SENSORS: tuple[WetterSensorDescription, ...] = (
         translation_key="precipitation_probability_today",
         value_fn=lambda c, _now: c.today().get("precipitation_probability"),
         native_unit_of_measurement=PERCENTAGE,
+        state_class=SensorStateClass.MEASUREMENT,
+    ),
+    WetterSensorDescription(
+        key="rain_in",
+        translation_key="rain_in",
+        value_fn=lambda _c, now: (now.get("rain_in") or {}).get("minutes"),
+        attributes_fn=_rain_in_attrs,
+        device_class=SensorDeviceClass.DURATION,
+        native_unit_of_measurement=UnitOfTime.MINUTES,
         state_class=SensorStateClass.MEASUREMENT,
     ),
     WetterSensorDescription(
@@ -172,11 +189,26 @@ SENSORS: tuple[WetterSensorDescription, ...] = (
 )
 
 
+# Pollen and UV: keys of the entities (unique_id = <entry_id>_<key>)
+HEALTH_KEYS = (*(f"pollen_{key}" for key in health.POLLEN.values()), "uv_index", "uv_index_tomorrow")
+
+
 async def async_setup_entry(
     hass: HomeAssistant, entry: WetterConfigEntry, async_add_entities: AddConfigEntryEntitiesCallback
 ) -> None:
     data = entry.runtime_data
-    async_add_entities([*(WetterSensor(data.weather, d) for d in SENSORS), WarningsSensor(data.warnings)])
+    entities: list[SensorEntity] = [*(WetterSensor(data.weather, d) for d in SENSORS), WarningsSensor(data.warnings)]
+    if data.health is not None:
+        entities += [PollenSensor(data.health, key) for key in health.POLLEN.values()]
+        entities += [UvSensor(data.health, 0), UvSensor(data.health, 1)]
+    else:
+        # switched off in the options: remove the entities instead of leaving them unavailable
+        registry = er.async_get(hass)
+        unique_ids = {f"{entry.entry_id}_{key}" for key in HEALTH_KEYS}
+        for reg in er.async_entries_for_config_entry(registry, entry.entry_id):
+            if reg.domain == "sensor" and reg.unique_id in unique_ids:
+                registry.async_remove(reg.entity_id)
+    async_add_entities(entities)
 
 
 class WetterSensor(WetterEntity, SensorEntity):
@@ -224,3 +256,46 @@ class WarningsSensor(WarningEntity, SensorEntity):
             # Quellen, die zuletzt nicht erreichbar waren (ihre alten Warnungen stehen noch)
             "stale": self.coordinator.stale,
         }
+
+
+class PollenSensor(HealthEntity, SensorEntity):
+    """Pollen level of one kind today (0 … 3 in half steps); tomorrow and the day after as attributes."""
+
+    _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_suggested_display_precision = 1
+
+    def __init__(self, coordinator: HealthCoordinator, key: str) -> None:
+        super().__init__(coordinator, f"pollen_{key}")
+        self._key = key
+        self._attr_translation_key = f"pollen_{key}"
+
+    @property
+    def native_value(self) -> float | None:
+        return cast(float | None, self.coordinator.pollen(self._key)[0])
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        today, tomorrow, after = self.coordinator.pollen(self._key)
+        region = ((self.coordinator.data or {}).get("pollen") or {}).get("region")
+        return {"today": today, "tomorrow": tomorrow, "day_after_tomorrow": after, "region": region}
+
+
+class UvSensor(HealthEntity, SensorEntity):
+    """UV index of the nearest DWD place, today (`day` 0) or tomorrow (`day` 1)."""
+
+    _attr_native_unit_of_measurement = UV_INDEX
+    _attr_state_class = SensorStateClass.MEASUREMENT
+
+    def __init__(self, coordinator: HealthCoordinator, day: int) -> None:
+        key = "uv_index" if day == 0 else "uv_index_tomorrow"
+        super().__init__(coordinator, key)
+        self._day = day
+        self._attr_translation_key = key
+
+    @property
+    def native_value(self) -> int | None:
+        return cast(int | None, self.coordinator.uv()[self._day])
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        return {"city": ((self.coordinator.data or {}).get("uv") or {}).get("city")}
