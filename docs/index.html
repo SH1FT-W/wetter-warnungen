@@ -327,7 +327,7 @@ footer .fine { flex-basis: 100%; line-height: 1.6; }
       <div class="tile reveal d1"><div class="ico w"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11v2a1 1 0 0 0 1 1h3l5 4V6L7 10H4a1 1 0 0 0-1 1zM16 9a4 4 0 0 1 0 6M19 6a8 8 0 0 1 0 12"/></svg></div><h3>Bevölkerungsschutz</h3><p>MoWaS, KATWARN und BIWAPP: Brände, Gefahrstoffe, Trinkwasser, Stromausfälle und mehr, für deinen Kreis.</p><p class="who">warnung.bund.de &middot; NINA</p></div>
       <div class="tile reveal d2"><div class="ico w"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12c2-2 4-2 6 0s4 2 6 0 4-2 6 0M2 18c2-2 4-2 6 0s4 2 6 0 4-2 6 0M12 2v6M9 5l3 3 3-3"/></svg></div><h3>Hochwasser und Polizei</h3><p>Hochwasserwarnungen der Länder (LHP) und Polizeimeldungen, für deinen Kreis.</p><p class="who">warnung.bund.de &middot; NINA</p></div>
     </div>
-    <p class="cap reveal">Ein Sensor <strong>Warnungen</strong> listet alle, die schlimmste zuerst. <strong>Warnung 1 bis 5</strong> tragen dieselben Attribute wie die NINA-Integration, vorhandene Karten und Automationen laufen weiter. Für Automationen gibt es die Ereignisse <strong>wetter_warning_new</strong> und <strong>wetter_warning_ended</strong>, je Warnung genau einmal, auch über Neustarts hinweg.</p>
+    <p class="cap reveal">Ein Sensor <strong>Warnungen</strong> listet alle, die schlimmste zuerst. <strong>Warnung 1 bis 5</strong> tragen die Attribute, die die NINA-Integration bis Home Assistant 2026.10 hatte, vorhandene Karten und Automationen laufen weiter. Für Automationen gibt es die Ereignisse <strong>wetter_warning_new</strong> und <strong>wetter_warning_ended</strong>, je Warnung genau einmal, auch über Neustarts hinweg.</p>
   </div>
 </section>
 
@@ -397,7 +397,7 @@ footer .fine { flex-basis: 100%; line-height: 1.6; }
     </div>
     <div class="faq reveal">
       <details open><summary>Geht das auch außerhalb Deutschlands?</summary><p>Nein. Vorhersage, Stationen und Warnungen kommen vom Deutschen Wetterdienst und dem Warnsystem des Bundes.</p></details>
-      <details><summary>Ersetzt sie die DWD- und NINA-Integration?</summary><p>Dafür ist sie gebaut: Vorhersage, Stationswerte und alle Warnungen in einer Integration. Die Warnplätze tragen dieselben Attribute wie die NINA-Integration.</p></details>
+      <details><summary>Ersetzt sie die DWD- und NINA-Integration?</summary><p>Dafür ist sie gebaut: Vorhersage, Stationswerte und alle Warnungen in einer Integration. Die Warnplätze tragen die Attribute, die die NINA-Integration bis Home Assistant 2026.10 hatte; NINA selbst hat sie mit 2026.11 entfernt.</p></details>
       <details><summary>Wie genau ist die Vorhersage?</summary><p>Sie gilt für den nächsten DWD-Vorhersagepunkt, meist wenige Kilometer entfernt. Kreis-Meldungen gelten für den ganzen Kreis, DWD-Warnungen für deine Gemeinde.</p></details>
       <details><summary>Woher kommen Pollen und UV-Index?</summary><p>Vom Open-Data-Server des DWD, einmal am Tag. Die Pollenregion ergibt sich aus deinem Ort, der UV-Index kommt vom nächsten der 38 DWD-Orte (ohne Bergstationen). Abschalten in den Optionen.</p></details>
       <details><summary>Ersetzt sie die NINA-App?</summary><p>Nein. Nutze sie für Automationen und Dashboards; für deine Sicherheit bleiben die offiziellen Warnwege (NINA-App, Radio, Sirenen).</p></details>

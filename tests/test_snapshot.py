@@ -14,6 +14,7 @@ from pytest_homeassistant_custom_component.common import MockConfigEntry
 from pytest_homeassistant_custom_component.syrupy import HomeAssistantSnapshotExtension
 from pytest_homeassistant_custom_component.test_util.aiohttp import AiohttpClientMocker
 from syrupy.assertion import SnapshotAssertion
+from syrupy.filters import props
 
 from custom_components.wetter.const import CONF_LOCAL_TEMPERATURE, CONF_POLLEN_UV, DOMAIN
 
@@ -22,6 +23,9 @@ from .test_netatmo import _area, _netatmo
 
 # fixed id, so unique_ids and the snapshot stay the same in every run
 ENTRY_ID = "01TESTENTRY0000000000000000"
+# The serializer of HA's own test package (pytest-homeassistant, HA 2026.11+) writes these two fields
+# differently than pytest-homeassistant-custom-component; they say nothing about our entities.
+VOLATILE = props("config_subentry_id", "device_id")
 
 
 @pytest.fixture
@@ -59,7 +63,7 @@ async def test_entities(
     )
     assert entries
     for entry in entries:
-        assert entry == snapshot(name=f"{entry.entity_id}-entry")
+        assert entry == snapshot(name=f"{entry.entity_id}-entry", exclude=VOLATILE)
         assert entry.disabled_by is None
         state = hass.states.get(entry.entity_id)
         assert state is not None, entry.entity_id
@@ -105,5 +109,5 @@ async def test_with_netatmo_area(
         "sensor.wetter_quelle",
     ):
         reg = entity_registry.async_get(entity_id)
-        assert reg == snapshot(name=f"{entity_id}-entry")
+        assert reg == snapshot(name=f"{entity_id}-entry", exclude=VOLATILE)
         assert hass.states.get(entity_id) == snapshot(name=f"{entity_id}-state")

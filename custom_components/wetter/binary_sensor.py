@@ -1,4 +1,4 @@
-"""Warn-Sensoren 1–5 (an = Warnung auf diesem Platz) – gleiche Attribute wie die NINA-Integration."""
+"""Warning slots 1–5 (on = a warning in this slot), with the attributes the NINA integration had up to HA 2026.10."""
 
 from __future__ import annotations
 
