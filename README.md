@@ -10,7 +10,7 @@ Startet sofort. Ohne Konto, ohne Schlüssel, ohne zusätzliche Pakete.</p>
 
 [![Version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FSH1FT-W%2Fwetter-warnungen%2Fmain%2Fcustom_components%2Fwetter%2Fmanifest.json&query=%24.version&label=Version&style=flat-square&color=3D8BFF&labelColor=111111)](https://github.com/SH1FT-W/wetter-warnungen/releases/latest)
 [![Home Assistant](https://img.shields.io/badge/Home%20Assistant-2026.9%2B-3D8BFF?style=flat-square&labelColor=111111&logo=homeassistant&logoColor=white)](https://www.home-assistant.io)
-[![HACS](https://img.shields.io/badge/HACS-benutzerdefiniert-3D8BFF?style=flat-square&labelColor=111111)](https://hacs.xyz)
+[![Marketplace](https://img.shields.io/badge/Marketplace-benutzerdefiniert-3D8BFF?style=flat-square&labelColor=111111)](https://hacs.xyz)
 [![IoT-Klasse](https://img.shields.io/badge/iot-cloud%20polling-3D8BFF?style=flat-square&labelColor=111111)](https://developers.home-assistant.io/docs/creating_integration_manifest/#iot-class)
 [![Quality Scale](https://img.shields.io/badge/Quality%20Scale-Platin%20(selbst%20gepr%C3%BCft)-3D8BFF?style=flat-square&labelColor=111111)](custom_components/wetter/quality_scale.yaml)
 [![Lizenz](https://img.shields.io/badge/Lizenz-Apache%202.0-3D8BFF?style=flat-square&labelColor=111111)](LICENSE)
@@ -98,9 +98,11 @@ Alle Entitäten gehören zu einem Dienst-Gerät je Ort. Die Beispiele gelten fü
 
 **Voraussetzungen:** Home Assistant 2026.9 oder neuer und ein Ort in Deutschland.
 
-### HACS (benutzerdefiniertes Repository)
+### Marketplace (benutzerdefiniertes Repository)
 
-1. In HACS das Drei-Punkte-Menü öffnen, **Benutzerdefinierte Repositories** wählen und `https://github.com/SH1FT-W/wetter-warnungen` mit dem Typ **Integration** hinzufügen.
+Der Marketplace liegt unter Einstellungen → Marketplace. Vor Home Assistant 2026.11 heißt er noch HACS.
+
+1. Im Marketplace das Drei-Punkte-Menü öffnen, **Benutzerdefinierte Repositories** wählen und `https://github.com/SH1FT-W/wetter-warnungen` mit dem Typ **Integration** hinzufügen.
 2. Nach **Wetter & Warnungen** suchen, herunterladen und Home Assistant neu starten.
 
 ### Von Hand
@@ -259,7 +261,7 @@ Wenn du ein [Issue](https://github.com/SH1FT-W/wetter-warnungen/issues) öffnest
 ## Entfernen
 
 1. **Einstellungen > Geräte & Dienste > Wetter & Warnungen > Drei-Punkte-Menü > Löschen.** Dabei werden auch die gespeicherten Stände gelöscht.
-2. Den Ordner `/config/custom_components/wetter` löschen (oder das Repository in HACS entfernen) und Home Assistant neu starten.
+2. Den Ordner `/config/custom_components/wetter` löschen (oder das Repository im Marketplace entfernen) und Home Assistant neu starten.
 
 ## So funktioniert es
 
