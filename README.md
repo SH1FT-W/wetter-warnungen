@@ -98,12 +98,15 @@ Alle Entitäten gehören zu einem Dienst-Gerät je Ort. Die Beispiele gelten fü
 
 **Voraussetzungen:** Home Assistant 2026.9 oder neuer und ein Ort in Deutschland.
 
-### Marketplace (benutzerdefiniertes Repository)
+### Marketplace
 
 Der Marketplace liegt unter Einstellungen → Marketplace. Vor Home Assistant 2026.11 heißt er noch HACS.
 
-1. Im Marketplace das Drei-Punkte-Menü öffnen, **Benutzerdefinierte Repositories** wählen und `https://github.com/SH1FT-W/wetter-warnungen` mit dem Typ **Integration** hinzufügen.
-2. Nach **Wetter & Warnungen** suchen, herunterladen und Home Assistant neu starten.
+[![Im Marketplace öffnen](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=SH1FT-W&repository=wetter-warnungen&category=integration)
+
+1. Im Marketplace nach **Wetter & Warnungen** suchen (oder oben auf **Im Marketplace öffnen** klicken), herunterladen und Home Assistant neu starten.
+
+Noch nicht in der Suche? Dann zuerst als benutzerdefiniertes Repository hinzufügen: im Marketplace das Drei-Punkte-Menü öffnen, **Benutzerdefinierte Repositories** wählen und `https://github.com/SH1FT-W/wetter-warnungen` mit dem Typ **Integration** hinzufügen.
 
 ### Von Hand
 
