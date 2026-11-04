@@ -114,12 +114,12 @@
       {
         "icon": "alert-circle-outline",
         "title": "Warnungen",
-        "text": "Ein Zähler mit allen Warnungen als Attribut, die schlimmste zuerst, und Warnung 1 bis 5 mit denselben Attributen wie die NINA-Integration."
+        "text": "Ein Zähler mit allen Warnungen als Attribut, die schlimmste zuerst, und Warnung 1 bis 5 mit den Attributen, die die NINA-Integration bis Home Assistant 2026.10 hatte."
       },
       {
         "icon": "map-marker-radius-outline",
         "title": "Nachbarschaft",
-        "text": "Woher die aktuellen Werte kommen, dazu Bereich, Fläche, Abstand und ein Radius-Regler für einen Netatmo-Wetterbereich."
+        "text": "Woher die aktuellen Werte kommen, dazu Bereich, Fläche und Abstand eines Netatmo-Wetterbereichs."
       },
       {
         "icon": "stethoscope",
