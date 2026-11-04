@@ -1,6 +1,6 @@
 # Changelog
 
-## Unveröffentlicht
+## 26.11.3 (04.11.2026)
 
 - **Regler „Nachbarschaft Radius“ entfernt.** Er schrieb den Netatmo-Wetterbereich in die Optionen der Netatmo-Integration; deren Config-Eintrag gehört aber Netatmo (Prüfung für den Marketplace, hacs/default#13248). Die Größe des Bereichs stellst du jetzt im Optionsdialog von Netatmo ein. Die Nachbarschaftssensoren (Quelle, Fläche, Abstand) bleiben; Netatmo wird nur noch gelesen. Der alte Regler wird beim Start aus der Entitätenliste entfernt.
 
