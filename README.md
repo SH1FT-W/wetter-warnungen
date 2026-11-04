@@ -10,7 +10,7 @@ Startet sofort. Ohne Konto, ohne Schlüssel, ohne zusätzliche Pakete.</p>
 
 [![Version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FSH1FT-W%2Fwetter-warnungen%2Fmain%2Fcustom_components%2Fwetter%2Fmanifest.json&query=%24.version&label=Version&style=flat-square&color=3D8BFF&labelColor=111111)](https://github.com/SH1FT-W/wetter-warnungen/releases/latest)
 [![Home Assistant](https://img.shields.io/badge/Home%20Assistant-2026.9%2B-3D8BFF?style=flat-square&labelColor=111111&logo=homeassistant&logoColor=white)](https://www.home-assistant.io)
-[![Marketplace](https://img.shields.io/badge/Marketplace-benutzerdefiniert-3D8BFF?style=flat-square&labelColor=111111)](https://hacs.xyz)
+[![Marketplace](https://img.shields.io/badge/Marketplace-Standard-3D8BFF?style=flat-square&labelColor=111111)](https://hacs.xyz)
 [![IoT-Klasse](https://img.shields.io/badge/iot-cloud%20polling-3D8BFF?style=flat-square&labelColor=111111)](https://developers.home-assistant.io/docs/creating_integration_manifest/#iot-class)
 [![Quality Scale](https://img.shields.io/badge/Quality%20Scale-Platin%20(selbst%20gepr%C3%BCft)-3D8BFF?style=flat-square&labelColor=111111)](custom_components/wetter/quality_scale.yaml)
 [![Lizenz](https://img.shields.io/badge/Lizenz-Apache%202.0-3D8BFF?style=flat-square&labelColor=111111)](LICENSE)
@@ -104,8 +104,6 @@ Der Marketplace liegt unter Einstellungen → Marketplace. Vor Home Assistant 20
 [![Im Marketplace öffnen](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=SH1FT-W&repository=wetter-warnungen&category=integration)
 
 1. Im Marketplace nach **Wetter & Warnungen** suchen (oder oben auf **Im Marketplace öffnen** klicken), herunterladen und Home Assistant neu starten.
-
-Noch nicht in der Suche? Dann zuerst als benutzerdefiniertes Repository hinzufügen: im Marketplace das Drei-Punkte-Menü öffnen, **Benutzerdefinierte Repositories** wählen und `https://github.com/SH1FT-W/wetter-warnungen` mit dem Typ **Integration** hinzufügen.
 
 ### Von Hand
 
