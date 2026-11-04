@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from copy import deepcopy
+
 from homeassistant.config_entries import SOURCE_USER
 from homeassistant.const import CONF_LATITUDE, CONF_LOCATION, CONF_LONGITUDE, CONF_NAME
 from homeassistant.core import HomeAssistant
@@ -135,9 +137,15 @@ async def test_neighbourhood_without_netatmo(
     assert netatmo.area_info(hass, ["sensor.kaputt_temperature"], LAT, LON) is None, "Bereich ohne Koordinaten"
 
 
-async def test_radius_slider(hass: HomeAssistant, brightsky: AiohttpClientMocker) -> None:
-    """Regler zeigt den Radius des Bereichs und legt ihn als Quadrat um den Ort neu an (Rest bleibt)."""
-    _netatmo(hass, {"Umgebung": {**_area(LAT, LON, d=0.03), "mode": "avg", "uuid": "abc"}})
+async def test_netatmo_entry_never_written(hass: HomeAssistant, brightsky: AiohttpClientMocker) -> None:
+    """The Netatmo entry belongs to Netatmo: no slider, nothing writes its options (hacs/default#13248).
+
+    Up to 26.11.2 a "Neighbourhood radius" slider rewrote the weather area in Netatmo's options.
+    """
+    area = {**_area(LAT, LON, d=0.03), "mode": "avg", "uuid": "abc"}
+    _netatmo(hass, {"Umgebung": area})
+    netatmo_entry = hass.config_entries.async_entries("netatmo")[0]
+    before = deepcopy((dict(netatmo_entry.data), dict(netatmo_entry.options)))
     entry = MockConfigEntry(
         domain=DOMAIN,
         title="Wetter",
@@ -147,55 +155,19 @@ async def test_radius_slider(hass: HomeAssistant, brightsky: AiohttpClientMocker
     entry.add_to_hass(hass)
     assert await hass.config_entries.async_setup(entry.entry_id)
     await hass.async_block_till_done()
-    radius = hass.states.get("number.wetter_nachbarschaft_radius")
-    assert radius.state == "2.7", "Mittel aus halber Breite (2,0) und halber Höhe (3,3)"
-    assert radius.attributes["unit_of_measurement"] == "km"
-    assert er.async_get(hass).async_get("number.wetter_nachbarschaft_radius").entity_category == "config"
-
-    await hass.services.async_call(
-        "number", "set_value", {"entity_id": "number.wetter_nachbarschaft_radius", "value": 10}, blocking=True
-    )
-    await hass.async_block_till_done()
-    netatmo_entry = hass.config_entries.async_entries("netatmo")[0]
-    area = netatmo_entry.options["weather_areas"]["Umgebung"]
-    assert area["mode"] == "avg" and area["uuid"] == "abc", "eigene Einstellungen des Bereichs bleiben"
-    assert round((area["lat_ne"] - area["lat_sw"]) * 111.2 / 2, 1) == 10.0
-    assert round((area["lat_ne"] + area["lat_sw"]) / 2, 4) == round(LAT, 4), "Mittelpunkt = Ort"
-    assert hass.states.get("number.wetter_nachbarschaft_radius").state == "10.0"
-    assert hass.states.get("sensor.wetter_nachbarschaft_abstand").state in ("0.0", "unknown")
+    assert hass.states.async_entity_ids("number") == []
+    assert not hasattr(netatmo, "set_radius")
+    # The neighbourhood sensors still show the area (read only)
+    assert hass.states.get("sensor.wetter_nachbarschaft_abstand") is not None
+    assert (dict(netatmo_entry.data), dict(netatmo_entry.options)) == before
 
 
-async def test_radius_without_area(hass: HomeAssistant, brightsky: AiohttpClientMocker, entry: MockConfigEntry) -> None:
-    """Ohne Netatmo-Bereich gibt es keinen Regler; ein alter Registry-Eintrag wird aufgeräumt."""
+async def test_old_radius_entity_removed(
+    hass: HomeAssistant, brightsky: AiohttpClientMocker, entry: MockConfigEntry
+) -> None:
+    """The registry entry of the old slider is cleaned up at setup."""
     reg = er.async_get(hass)
     reg.async_get_or_create("number", DOMAIN, f"{entry.entry_id}_neighbourhood_radius", config_entry=entry)
     assert await hass.config_entries.async_setup(entry.entry_id)
     await hass.async_block_till_done()
-    assert hass.states.get("number.wetter_nachbarschaft_radius") is None
     assert reg.async_get_entity_id("number", DOMAIN, f"{entry.entry_id}_neighbourhood_radius") is None
-    assert netatmo.set_radius(hass, {"entry_id": "fehlt", "name": "x"}, LAT, LON, 5) is None
-    gone = MockConfigEntry(domain="netatmo", options={"weather_areas": {}})
-    gone.add_to_hass(hass)
-    netatmo.set_radius(hass, {"entry_id": gone.entry_id, "name": "fehlt"}, LAT, LON, 5)
-    assert gone.options == {"weather_areas": {}}
-
-
-async def test_radius_area_gone(hass: HomeAssistant, brightsky: AiohttpClientMocker) -> None:
-    """Verschwindet der Bereich nach dem Laden, ist der Regler nicht verfügbar und tut nichts."""
-    _netatmo(hass, {"Umgebung": _area(LAT, LON)})
-    entry = MockConfigEntry(
-        domain=DOMAIN,
-        title="Wetter",
-        data={CONF_LATITUDE: LAT, CONF_LONGITUDE: LON},
-        options={CONF_LOCAL_TEMPERATURE: "sensor.umgebung_temperature"},
-    )
-    entry.add_to_hass(hass)
-    assert await hass.config_entries.async_setup(entry.entry_id)
-    await hass.async_block_till_done()
-    netatmo_entry = hass.config_entries.async_entries("netatmo")[0]
-    hass.config_entries.async_update_entry(netatmo_entry, options={"weather_areas": {}})
-    ent = hass.data["entity_components"]["number"].get_entity("number.wetter_nachbarschaft_radius")
-    ent.async_write_ha_state()
-    assert hass.states.get("number.wetter_nachbarschaft_radius").state == "unavailable"
-    await ent.async_set_native_value(5)
-    assert netatmo_entry.options == {"weather_areas": {}}

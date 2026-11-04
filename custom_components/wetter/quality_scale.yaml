@@ -96,7 +96,7 @@ rules:
     comment: Genau ein Dienst-Gerät je Eintrag.
   entity-category:
     status: done
-    comment: Quelle und Nachbarschaft als Diagnose, Radius-Regler als Konfiguration.
+    comment: Quelle und Nachbarschaft als Diagnose.
   entity-device-class: done
   entity-disabled-by-default:
     status: exempt

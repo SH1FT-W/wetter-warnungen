@@ -6,6 +6,7 @@ from datetime import datetime
 
 from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant, callback
+from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers.event import async_track_time_change
 from homeassistant.helpers.start import async_at_started
 from homeassistant.helpers.storage import Store
@@ -13,11 +14,17 @@ from homeassistant.helpers.storage import Store
 from .const import CONF_POLLEN_UV, DOMAIN
 from .coordinator import HealthCoordinator, WarningsCoordinator, WetterConfigEntry, WetterCoordinator, WetterData
 
-PLATFORMS: list[Platform] = [Platform.BINARY_SENSOR, Platform.NUMBER, Platform.SENSOR, Platform.WEATHER]
+PLATFORMS: list[Platform] = [Platform.BINARY_SENSOR, Platform.SENSOR, Platform.WEATHER]
+# Up to 26.11.2: slider that wrote the Netatmo weather area (removed, hacs/default#13248)
+OLD_RADIUS = "neighbourhood_radius"
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: WetterConfigEntry) -> bool:
     """Letzten Stand sofort zeigen, Bright Sky und NINA erst nach dem HA-Start fragen."""
+    # The old radius slider is gone; its registry entry would stay as a "no longer provided" entity
+    reg = er.async_get(hass)
+    if old := reg.async_get_entity_id("number", DOMAIN, f"{entry.entry_id}_{OLD_RADIUS}"):
+        reg.async_remove(old)
     weather = WetterCoordinator(hass, entry)
     warnings = WarningsCoordinator(hass, entry, weather.client)
     later: list[WetterCoordinator | WarningsCoordinator | HealthCoordinator] = []

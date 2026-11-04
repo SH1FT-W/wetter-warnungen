@@ -96,23 +96,3 @@ def area_info(hass: HomeAssistant, entity_ids: list[str], latitude: float, longi
             "radius_km": round((width + height) / 4, 1),
         }
     return None
-
-
-def set_radius(hass: HomeAssistant, info: dict[str, Any], latitude: float, longitude: float, radius_km: float) -> None:
-    """Netatmo-Bereich als Quadrat mit halber Kantenlänge `radius_km` um den Ort neu setzen (Netatmo lädt neu)."""
-    config = hass.config_entries.async_get_entry(str(info["entry_id"]))
-    if config is None:
-        return
-    areas = {k: dict(v) for k, v in (config.options.get("weather_areas") or {}).items() if isinstance(v, dict)}
-    area = areas.get(str(info["name"]))
-    if area is None:
-        return
-    dlat = radius_km / 111.2
-    dlon = radius_km / (111.2 * math.cos(math.radians(latitude)))
-    area.update(
-        lat_ne=round(latitude + dlat, 6),
-        lat_sw=round(latitude - dlat, 6),
-        lon_ne=round(longitude + dlon, 6),
-        lon_sw=round(longitude - dlon, 6),
-    )
-    hass.config_entries.async_update_entry(config, options={**config.options, "weather_areas": areas})

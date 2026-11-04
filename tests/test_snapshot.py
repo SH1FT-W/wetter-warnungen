@@ -104,7 +104,6 @@ async def test_with_netatmo_area(
     ids = sorted(e.entity_id for e in er.async_entries_for_config_entry(entity_registry, ENTRY_ID))
     assert not [i for i in ids if "pollen" in i or "uv_index" in i], "Pollen/UV aus"
     for entity_id in (
-        "number.wetter_nachbarschaft_radius",
         "sensor.wetter_nachbarschaftsbereich",
         "sensor.wetter_quelle",
     ):

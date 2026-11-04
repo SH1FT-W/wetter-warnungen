@@ -37,8 +37,9 @@ Worauf sich dieses Repo bei Home Assistant verlässt. Bei jeder Änderung am Cod
 Integrationen, deren Entitäten oder Attribute dieses Repo liest (Domain, was genau, wo):
 
 - `netatmo` (Kern): Optionen `weather_areas` (`lat_ne/lon_ne/lat_sw/lon_sw`, Modus) des Config-Eintrags; Sensoren
-  mit `unique_id` `<Bereich>-temperature`, `-humidity`, `-rain`. Gelesen und geschrieben in `netatmo.py`
-  (`sensors_for`, `area_info`, `set_radius`). Test `tests/test_netatmo.py::test_setup_fills_options`, `::test_radius_slider`.
+  mit `unique_id` `<Bereich>-temperature`, `-humidity`, `-rain`. Nur gelesen in `netatmo.py` (`suggest`,
+  `area_info`), nie geschrieben (bis 26.11.2 schrieb ein Radius-Regler den Bereich, hacs/default#13248). Test
+  `tests/test_netatmo.py::test_setup_fills_options`, `::test_netatmo_entry_never_written`.
 - Beliebige `sensor`-Entitäten aus den Optionen (Temperatur, Feuchte, Regen): nur `state` und `last_updated`,
   keine integrationsspezifischen Attribute.
 

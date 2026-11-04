@@ -121,11 +121,6 @@
           "on": "mdi:umbrella"
         }
       }
-    },
-    "number": {
-      "neighbourhood_radius": {
-        "default": "mdi:radius-outline"
-      }
     }
   }
 }

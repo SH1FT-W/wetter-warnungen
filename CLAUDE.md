@@ -21,7 +21,7 @@ AwesomeVersion: `26.10.x` gilt als neuer als das alte `1.3.4`. Jede Änderung in
 ## Aufbau
 - `api.py` Bright-Sky-Client ohne HA, `model.py` reine Auswertung (aktuell, stündlich/täglich, „Regen in“),
   `coordinator.py` Wetter + `WarningsCoordinator` + `HealthCoordinator`, `warnings.py` (DWD + NINA) und
-  `health.py` (Pollen/UV von opendata.dwd.de) rein, `netatmo.py` Nachbarschaftswerte, `number.py` Radius-Regler.
+  `health.py` (Pollen/UV von opendata.dwd.de) rein, `netatmo.py` Nachbarschaftswerte. Kein Radius-Regler mehr (Frenck, hacs/default#13248).
 
 ## Warum es so ist (steht nicht im Code)
 - Start ohne Warten: Stand aus dem Store, erste Abfrage erst nach `homeassistant_started`; Pollen/UV nie blockierend.
@@ -33,8 +33,8 @@ AwesomeVersion: `26.10.x` gilt als neuer als das alte `1.3.4`. Jede Änderung in
 - Ereignisse `wetter_warning_new`/`wetter_warning_ended` je Warnungs-ID genau einmal, auch über Neustarts.
 - Bright-Sky-Zeitstempel = Ende der Stunde; `solar` kWh/m² der Stunde → ×1000 = W/m².
 - „Regen in“ = 0 nur bei gemessenem Regen der letzten Stunde (Nachbarschaft/Station), nie aus der Vorhersage.
-- Der Regler „Nachbarschaft Radius“ schreibt in die Optionen der Netatmo-Integration (README erklärt das); ohne
-  Netatmo-Bereich kein Regler.
+- Nie in Config-Einträge anderer Integrationen schreiben (früher Regler „Nachbarschaft Radius“ in die
+  Netatmo-Optionen, von Frenck abgelehnt); die Bereichsgröße stellt man im Optionsdialog von Netatmo ein.
 
 ## Prüfen
 - Eigenes venv im Repo (`.venv`, in .gitignore), anlegen CI-gleich: `uv venv --python 3.14 && uv pip install -r requirements_test.txt pytest-cov`

@@ -1,5 +1,9 @@
 # Changelog
 
+## Unveröffentlicht
+
+- **Regler „Nachbarschaft Radius“ entfernt.** Er schrieb den Netatmo-Wetterbereich in die Optionen der Netatmo-Integration; deren Config-Eintrag gehört aber Netatmo (Prüfung für den Marketplace, hacs/default#13248). Die Größe des Bereichs stellst du jetzt im Optionsdialog von Netatmo ein. Die Nachbarschaftssensoren (Quelle, Fläche, Abstand) bleiben; Netatmo wird nur noch gelesen. Der alte Regler wird beim Start aus der Entitätenliste entfernt.
+
 ## 26.11.2 (02.11.2026)
 
 - **Warnungen höchster Stufe sofort:** Eine neue NINA-Meldung der höchsten Stufe (*Extreme*, etwa MoWaS bei Lebensgefahr) erscheint ohne Wartezeit für den ganzen Kreis, wenn sich ihr Warngebiet nicht laden lässt. Bisher wartete auch sie bis zu 5 Minuten auf das Warngebiet. Die Stufe kommt aus dem Volltext, sonst aus der Kreis-Übersicht. Niedrigere Stufen warten wie bisher; trifft das später geladene Warngebiet das Zuhause nicht, verschwindet die Meldung wieder.

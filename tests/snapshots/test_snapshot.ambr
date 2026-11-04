@@ -2264,66 +2264,6 @@
     'state': 'cloudy',
   })
 # ---
-# name: test_with_netatmo_area[number.wetter_nachbarschaft_radius-entry]
-  EntityRegistryEntrySnapshot({
-    'aliases': list([
-      None,
-    ]),
-    'area_id': None,
-    'capabilities': dict({
-      <NumberEntityCapabilityAttribute.MAX: 'max'>: 20,
-      <NumberEntityCapabilityAttribute.MIN: 'min'>: 1,
-      <NumberEntityCapabilityAttribute.MODE: 'mode'>: <NumberMode.SLIDER: 'slider'>,
-      <NumberEntityCapabilityAttribute.STEP: 'step'>: 0.5,
-    }),
-    'config_entry_id': <ANY>,
-    'device_class': None,
-    'disabled_by': None,
-    'domain': 'number',
-    'entity_category': <EntityCategory.CONFIG: 'config'>,
-    'entity_id': 'number.wetter_nachbarschaft_radius',
-    'has_entity_name': True,
-    'hidden_by': None,
-    'icon': None,
-    'id': <ANY>,
-    'labels': set({
-    }),
-    'name': None,
-    'object_id_base': 'Nachbarschaft Radius',
-    'options': dict({
-    }),
-    'original_device_class': <NumberDeviceClass.DISTANCE: 'distance'>,
-    'original_icon': None,
-    'original_name': 'Nachbarschaft Radius',
-    'platform': 'wetter',
-    'previous_unique_id': None,
-    'suggested_object_id': None,
-    'supported_features': 0,
-    'translation_key': 'neighbourhood_radius',
-    'unique_id': '01TESTENTRY0000000000000000_neighbourhood_radius',
-    'unit_of_measurement': <UnitOfLength.KILOMETERS: 'km'>,
-  })
-# ---
-# name: test_with_netatmo_area[number.wetter_nachbarschaft_radius-state]
-  StateSnapshot({
-    'attributes': ReadOnlyDict({
-      <EntityStateAttribute.ATTRIBUTION: 'attribution'>: 'Deutscher Wetterdienst (über Bright Sky)',
-      <EntityStateAttribute.DEVICE_CLASS: 'device_class'>: 'distance',
-      <EntityStateAttribute.FRIENDLY_NAME: 'friendly_name'>: 'Wetter Nachbarschaft Radius',
-      <NumberEntityCapabilityAttribute.MAX: 'max'>: 20,
-      <NumberEntityCapabilityAttribute.MIN: 'min'>: 1,
-      <NumberEntityCapabilityAttribute.MODE: 'mode'>: <NumberMode.SLIDER: 'slider'>,
-      <NumberEntityCapabilityAttribute.STEP: 'step'>: 0.5,
-      <EntityStateAttribute.UNIT_OF_MEASUREMENT: 'unit_of_measurement'>: <UnitOfLength.KILOMETERS: 'km'>,
-    }),
-    'context': <ANY>,
-    'entity_id': 'number.wetter_nachbarschaft_radius',
-    'last_changed': <ANY>,
-    'last_reported': <ANY>,
-    'last_updated': <ANY>,
-    'state': '2.7',
-  })
-# ---
 # name: test_with_netatmo_area[sensor.wetter_nachbarschaftsbereich-entry]
   EntityRegistryEntrySnapshot({
     'aliases': list([

@@ -439,11 +439,6 @@
       "rain_next_hour": {
         "name": "Regen in der nächsten Stunde"
       }
-    },
-    "number": {
-      "neighbourhood_radius": {
-        "name": "Nachbarschaft Radius"
-      }
     }
   },
   "exceptions": {
