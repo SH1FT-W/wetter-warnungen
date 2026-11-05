@@ -1,5 +1,5 @@
 {
-  "$comment": "Inhalt der README-Bilder. Karten: node sh1ft-w.github.io/theme/v1/readme-images/render.mjs <dieses Repo> cards. Das Titelbild docs/images/readme-title.webp (ein Bild für hell und dunkel) entsteht aus tools/readme-title.html; die Projektseite zeigt dasselbe Bild im Hero.",
+  "$comment": "Inhalt des README-Titelbilds. Rendern mit sh1ft-w.github.io/theme/v1/readme-images (node render.mjs <dieses Repo> title). Das Fenster zeigt docs/images/title-shot-{light,dark}.png: den Abschnitt „Die DWD-Vorhersage. Direkt in Home Assistant.“ der docs/index.html mit der Tabelle Was / Quelle / Wie oft, aufgenommen mit playwright bei 1600 px Breite, Gerätefaktor 2, ?still&theme=light|dark, Ausschnitt x 358, y 1680, 884 × 1090; die Streifen lassen den Einleitungstext aus. Die README hat keine Kartentabellen.",
   "colors": {
     "light": {
       "bg": "#F2F6FC",
@@ -64,17 +64,21 @@
     "shot": {
       "light": "docs/images/title-shot-light.png",
       "dark": "docs/images/title-shot-dark.png",
-      "srcW": 3200,
-      "winW": 3200,
-      "s": 0.28,
+      "srcW": 1768,
+      "winW": 1768,
+      "s": 0.3,
       "strips": [
         [
           0,
-          2000
+          520
+        ],
+        [
+          920,
+          2110
         ]
       ],
       "bar": "Home Assistant › Wetter & Warnungen",
-      "left": 600,
+      "left": 640,
       "top": 70
     }
   }
