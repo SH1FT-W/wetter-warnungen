@@ -57,7 +57,7 @@
         "v"
       ],
       [
-        "HACS"
+        "Marketplace"
       ]
     ],
     "logo": "docs/logo.png",
@@ -80,6 +80,7 @@
       "bar": "Home Assistant › Wetter & Warnungen",
       "left": 640,
       "top": 70
-    }
+    },
+    "layout": "center"
   }
 }
