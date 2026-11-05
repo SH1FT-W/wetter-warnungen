@@ -5,146 +5,150 @@
   <img src="docs/images/readme-title-light.webp" alt="Wetter & Warnungen: Vorhersage und jede amtliche Warnung. Die Funktionsübersicht der Projektseite in einem Fenster." />
 </picture>
 
-<p>Die Vorhersage des <b>Deutschen Wetterdienstes</b>, die nächste Station und <b>alle amtlichen Warnungen</b> in Home Assistant.<br/>
-Startet sofort. Ohne Konto, ohne Schlüssel, ohne zusätzliche Pakete.</p>
-
 [![Version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FSH1FT-W%2Fwetter-warnungen%2Fmain%2Fcustom_components%2Fwetter%2Fmanifest.json&query=%24.version&label=Version&style=flat-square&color=3D8BFF&labelColor=111111)](https://github.com/SH1FT-W/wetter-warnungen/releases/latest)
 [![Home Assistant](https://img.shields.io/badge/Home%20Assistant-2026.9%2B-3D8BFF?style=flat-square&labelColor=111111&logo=homeassistant&logoColor=white)](https://www.home-assistant.io)
 [![Marketplace](https://img.shields.io/badge/Marketplace-Standard-3D8BFF?style=flat-square&labelColor=111111)](https://hacs.xyz)
-[![IoT-Klasse](https://img.shields.io/badge/iot-cloud%20polling-3D8BFF?style=flat-square&labelColor=111111)](https://developers.home-assistant.io/docs/creating_integration_manifest/#iot-class)
-[![Quality Scale](https://img.shields.io/badge/Quality%20Scale-Platin%20(selbst%20gepr%C3%BCft)-3D8BFF?style=flat-square&labelColor=111111)](custom_components/wetter/quality_scale.yaml)
-[![Lizenz](https://img.shields.io/badge/Lizenz-Apache%202.0-3D8BFF?style=flat-square&labelColor=111111)](LICENSE)
 
-<p><a href="https://sh1ft-w.github.io/wetter-warnungen"><b>Website</b></a> &nbsp;·&nbsp; <a href="#funktionen">Funktionen</a> &nbsp;·&nbsp; <a href="#entitaeten">Entitäten</a> &nbsp;·&nbsp; <a href="#installation">Installation</a> &nbsp;·&nbsp; <a href="#optionen">Optionen</a> &nbsp;·&nbsp; <a href="#fehlersuche">Fehlersuche</a> &nbsp;·&nbsp; <a href="CHANGELOG.md">Änderungen</a></p>
+<a href="https://sh1ft-w.github.io/wetter-warnungen"><b>Website</b></a>&emsp;<a href="#installation">Installation</a>&emsp;<a href="#einrichtung">Einrichtung</a>&emsp;<a href="#entitaeten">Entitäten</a>&emsp;<a href="CHANGELOG.md">Änderungen</a>
 
 </div>
 
 <br/>
 
-Wetter &amp; Warnungen holt das Wetter an deinem Zuhause nach Home Assistant: die **Vorhersage des Deutschen Wetterdienstes** (MOSMIX) über [Bright Sky](https://brightsky.dev), die **aktuellen Werte der nächsten DWD-Station** und **alle amtlichen Warnungen**: DWD-Warnungen genau für deine Gemeinde, dazu Bevölkerungsschutz (MoWaS), KATWARN, BIWAPP, Hochwasser und Polizei für deinen Kreis aus dem Warnsystem des Bundes, dieselben Daten wie in der NINA-App.
+Das Wetter an deinem Zuhause in Home Assistant: die **Vorhersage des Deutschen Wetterdienstes**, die Werte der nächsten Station oder deiner eigenen Sensoren und **alle amtlichen Warnungen**, dieselben wie in der NINA-App. Beim Start ist der letzte Stand sofort da. Kein Konto, kein Schlüssel, keine zusätzlichen Python-Pakete.
 
-Schnell und schlank: Beim Start ist der letzte Stand sofort da, frische Daten kommen, sobald Home Assistant fertig gestartet ist. Kein Konto, kein Schlüssel, keine zusätzlichen Python-Pakete. **Nur für Deutschland.**
+**Nur für Deutschland:** alle Quellen sind deutsche Dienste, der Deutsche Wetterdienst und das Warnsystem des Bundes.
 
 > [!NOTE]
-> Wetter &amp; Warnungen ist ein unabhängiges Projekt. Es gehört weder zum Deutschen Wetterdienst, zum Bundesamt für Bevölkerungsschutz und Katastrophenhilfe (BBK) noch zu Bright Sky und wird von ihnen nicht unterstützt. Wetterdaten und DWD-Warnungen: Quelle Deutscher Wetterdienst, CC BY 4.0. Die Warnungen hier ersetzen nicht die offiziellen Warnwege (NINA-App, Radio, Sirenen).
+> Die Warnungen hier ersetzen nicht die offiziellen Warnwege (NINA-App, Radio, Sirenen).
 
-<a id="funktionen"></a>
-## Funktionen
+## Was woher kommt
 
-<!-- cards:features -->
-<table>
-<tr><td width="50%" valign="top"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/icons/weather-partly-rainy-dark.svg"><img src="docs/images/icons/weather-partly-rainy-light.svg" width="22" height="22" align="absmiddle" alt=""></picture> <b>DWD-Vorhersage</b><br>MOSMIX-Vorhersage des Deutschen Wetterdienstes: stündlich für 48 Stunden, täglich für 8 Tage, mit Höchst- und Tiefstwert, Regenmenge, Regenrisiko, Wind, Böen und Bewölkung.</td><td width="50%" valign="top"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/icons/thermometer-dark.svg"><img src="docs/images/icons/thermometer-light.svg" width="22" height="22" align="absmiddle" alt=""></picture> <b>Aktuelle Werte</b><br>Gemessen an der nächsten DWD-Station. Lücken füllt die Vorhersage der laufenden Stunde.</td></tr>
-<tr><td width="50%" valign="top"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/icons/home-thermometer-outline-dark.svg"><img src="docs/images/icons/home-thermometer-outline-light.svg" width="22" height="22" align="absmiddle" alt=""></picture> <b>Eigene Sensoren zuerst</b><br>Temperatur, Luftfeuchte und Regen von einem Sensor in der Nähe (Ecowitt, Davis, Shelly, Netatmo und andere) gehen vor, solange sie höchstens eine Stunde alt sind.</td><td width="50%" valign="top"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/icons/alert-outline-dark.svg"><img src="docs/images/icons/alert-outline-light.svg" width="22" height="22" align="absmiddle" alt=""></picture> <b>Alle amtlichen Warnungen</b><br>DWD-Warnungen für deine Gemeinde, dazu MoWaS, KATWARN, BIWAPP, Hochwasser und Polizei für deinen Kreis, alle 2 Minuten abgefragt.</td></tr>
-<tr><td width="50%" valign="top"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/icons/bell-ring-outline-dark.svg"><img src="docs/images/icons/bell-ring-outline-light.svg" width="22" height="22" align="absmiddle" alt=""></picture> <b>Ereignisse für Automationen</b><br>wetter_warning_new und wetter_warning_ended, je Warnung genau einmal, auch über Neustarts hinweg. Kein Ende, solange eine Quelle ausgefallen ist.</td><td width="50%" valign="top"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/icons/flower-pollen-outline-dark.svg"><img src="docs/images/icons/flower-pollen-outline-light.svg" width="22" height="22" align="absmiddle" alt=""></picture> <b>Pollenflug und UV-Index</b><br>Pollenflug-Gefahrenindex für acht Pollenarten und UV-Index des DWD für deine Region, heute, morgen und übermorgen. In den Optionen abschaltbar.</td></tr>
-<tr><td width="50%" valign="top"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/icons/shield-check-outline-dark.svg"><img src="docs/images/icons/shield-check-outline-light.svg" width="22" height="22" align="absmiddle" alt=""></picture> <b>Keine falsche Entwarnung</b><br>Ist eine Quelle nicht erreichbar, bleiben ihre letzten Warnungen stehen. Abgelaufene Warnungen verschwinden trotzdem pünktlich.</td><td width="50%" valign="top"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/icons/rocket-launch-outline-dark.svg"><img src="docs/images/icons/rocket-launch-outline-light.svg" width="22" height="22" align="absmiddle" alt=""></picture> <b>Startet sofort</b><br>Der letzte Stand kommt aus dem Speicher, frische Daten erst nach dem Start von Home Assistant. Ohne Konto, ohne Schlüssel, ohne zusätzliche Python-Pakete.</td></tr>
-</table>
-<!-- /cards:features -->
+| Was | Quelle | Wie oft |
+|:--|:--|:--|
+| Vorhersage | DWD (MOSMIX) über [Bright Sky](https://brightsky.dev), stündlich für 48 Stunden, täglich für 8 Tage | alle 10 Minuten |
+| Aktuelle Werte | Nächste DWD-Station, oder deine Sensoren in der Nähe, solange sie höchstens eine Stunde alt sind | alle 10 Minuten, eigene Sensoren sofort |
+| DWD-Warnungen | Bright Sky, genau für deine Gemeinde | alle 2 Minuten |
+| Weitere Warnungen | MoWaS, KATWARN, BIWAPP, Hochwasser und Polizei aus dem Warnsystem des Bundes (NINA), nur wenn das Warngebiet dein Zuhause trifft | alle 2 Minuten |
+| Pollen und UV | Open-Data-Server des DWD: acht Pollenarten für deine Region, UV-Index vom nächsten DWD-Ort | einmal am Tag |
+| Regen in X Minuten | Aus der stündlichen Vorhersage | alle 10 Minuten |
 
-- **Vorhersage** des Deutschen Wetterdienstes (MOSMIX) über Bright Sky: stündlich für 48 Stunden, täglich für 8 Tage (Höchst- und Tiefstwert, Regenmenge, Regenrisiko, Wind, Böen, Bewölkung).
-- **Aktuelle Werte** der nächsten DWD-Station. Temperatur, Luftfeuchte und Regen können stattdessen von **eigenen Sensoren in der Nähe** kommen, zum Beispiel von einer Wetterstation oder einem Netatmo-Wetterbereich, solange diese Werte frisch sind.
-- **Alle amtlichen Warnungen**: DWD genau für die Gemeinde, dazu Bevölkerungsschutz (MoWaS), KATWARN, BIWAPP, Hochwasser (LHP) und Polizei für den Kreis aus dem Warnsystem des Bundes (NINA). Kreis-Meldungen erscheinen nur, wenn ihr Warngebiet das Zuhause wirklich trifft (gut 1 km Rand eingerechnet).
-- **Keine falsche Entwarnung**: Ist eine Quelle nicht erreichbar, bleiben ihre letzten Warnungen stehen. Abgelaufene Warnungen verschwinden trotzdem pünktlich.
-- **Ereignisse für Automationen**: `wetter_warning_new` und `wetter_warning_ended`, je Warnung genau einmal, auch über Neustarts hinweg.
-- **Regen in X Minuten**: Minuten bis zum nächsten Niederschlag aus der stündlichen Vorhersage, dazu „Regen in der nächsten Stunde“ (an/aus).
-- **Pollenflug und UV-Index** des DWD für deine Region, heute, morgen und übermorgen; in den Optionen abschaltbar.
-- **Start ohne Warten**: letzter Stand sofort aus dem Speicher, frische Daten erst, wenn Home Assistant fertig gestartet ist.
-- Kein Konto, kein Schlüssel, keine zusätzlichen Python-Pakete. Deutsch und Englisch.
+Ist eine Quelle nicht erreichbar, bleiben ihre letzten Warnungen stehen: **keine falsche Entwarnung**. Abgelaufene Warnungen verschwinden trotzdem pünktlich.
 
-<a id="entitaeten"></a>
-## Entitäten
-
-<!-- cards:entities -->
-<table>
-<tr><td width="50%" valign="top"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/icons/weather-partly-cloudy-dark.svg"><img src="docs/images/icons/weather-partly-cloudy-light.svg" width="22" height="22" align="absmiddle" alt=""></picture> <b>Wetter-Entität</b><br>Aktuelles Wetter mit Vorhersage stündlich (48 Std.) und täglich (8 Tage) über weather.get_forecasts.</td><td width="50%" valign="top"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/icons/thermometer-lines-dark.svg"><img src="docs/images/icons/thermometer-lines-light.svg" width="22" height="22" align="absmiddle" alt=""></picture> <b>Messwerte</b><br>Temperatur, Luftfeuchte, Taupunkt, Druck, Wind, Böen, Windrichtung, Niederschlag, Sichtweite, Bewölkung und Wetterzustand.</td></tr>
-<tr><td width="50%" valign="top"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/icons/umbrella-outline-dark.svg"><img src="docs/images/icons/umbrella-outline-light.svg" width="22" height="22" align="absmiddle" alt=""></picture> <b>Regen und Sonne</b><br>Regenwahrscheinlichkeit für diese Stunde und für heute, Sonneneinstrahlung in W/m² aus der Vorhersage.</td><td width="50%" valign="top"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/icons/timer-sand-dark.svg"><img src="docs/images/icons/timer-sand-light.svg" width="22" height="22" align="absmiddle" alt=""></picture> <b>Regen in X Minuten</b><br>Minuten bis zum nächsten Niederschlag aus der stündlichen Vorhersage, dazu Regen in der nächsten Stunde als An/Aus.</td></tr>
-<tr><td width="50%" valign="top"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/icons/flower-pollen-outline-dark.svg"><img src="docs/images/icons/flower-pollen-outline-light.svg" width="22" height="22" align="absmiddle" alt=""></picture> <b>Pollen und UV</b><br>Je Pollenart ein Sensor (0 bis 3, morgen und übermorgen als Attribute), UV-Index heute und morgen vom nächsten DWD-Ort.</td><td width="50%" valign="top"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/icons/alert-circle-outline-dark.svg"><img src="docs/images/icons/alert-circle-outline-light.svg" width="22" height="22" align="absmiddle" alt=""></picture> <b>Warnungen</b><br>Ein Zähler mit allen Warnungen als Attribut, die schlimmste zuerst, und Warnung 1 bis 5 mit den Attributen, die die NINA-Integration bis Home Assistant 2026.10 hatte.</td></tr>
-<tr><td width="50%" valign="top"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/icons/map-marker-radius-outline-dark.svg"><img src="docs/images/icons/map-marker-radius-outline-light.svg" width="22" height="22" align="absmiddle" alt=""></picture> <b>Nachbarschaft</b><br>Woher die aktuellen Werte kommen, dazu Bereich, Fläche und Abstand eines Netatmo-Wetterbereichs.</td><td width="50%" valign="top"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/icons/stethoscope-dark.svg"><img src="docs/images/icons/stethoscope-light.svg" width="22" height="22" align="absmiddle" alt=""></picture> <b>Diagnose</b><br>Herunterladen mit geschwärzten Koordinaten und geschwärztem Warngebiet.</td></tr>
-</table>
-<!-- /cards:entities -->
-
-Alle Entitäten gehören zu einem Dienst-Gerät je Ort. Die Beispiele gelten für den vorgegebenen Namen **Wetter** auf einer deutschen Installation (`weather.wetter`, `sensor.wetter_temperatur`, …).
-
-| Entität | Inhalt |
-|---|---|
-| `weather.wetter` | Aktuelles Wetter und Vorhersage stündlich (48 Std.) und täglich (8 Tage) über `weather.get_forecasts` |
-| Temperatur, Relative Luftfeuchtigkeit, Taupunkt, Druck | Aktuelle Werte; Attribut `source` (`dwd` oder der Nachbarschaftssensor) |
-| Gefühlte Temperatur | Aus Temperatur, Luftfeuchte und Wind gerechnet (Steadman-Formel wie bei Open-Meteo), auch in der Vorhersage; Nachbarschaftswerte zählen mit |
-| Windgeschwindigkeit, Windböen, Windrichtung | km/h bzw. Grad |
-| Niederschlag | mm/h der letzten Stunde |
-| Regenwahrscheinlichkeit, Regenwahrscheinlichkeit heute | % für die laufende Stunde bzw. für heute (6-Stunden-Wahrscheinlichkeit der DWD-Vorhersage, wie in der Tagesvorhersage) |
-| Sonneneinstrahlung | W/m², Vorhersage der laufenden Stunde (die Station misst sie nicht) |
-| Sichtweite, Bewölkungsgrad, Wetterzustand | |
-| Nachbarschaftsbereich, Nachbarschaft Fläche, Nachbarschaft Abstand (Diagnose) | Netatmo-Wetterbereich hinter den eingetragenen Sensoren: Name (Attribute Breite und Höhe), Fläche in km², Abstand seines Mittelpunkts zum Ort. Die Zahl der Stationen gibt Netatmo nicht heraus. |
-| Quelle (Diagnose) | *Nachbarschaft*, *Gemischt* oder *DWD*: woher die aktuellen Werte gerade kommen, je Wert im Attribut |
-| Warnungen | Anzahl der gültigen Warnungen; Attribute `area` (Warngebiet), `highest_severity`, `warnings` (alle Warnungen, die schlimmste zuerst) und `stale` (Quellen, die zuletzt nicht erreichbar waren) |
-| Warnung 1 … 5 | An = Warnung auf diesem Platz (nach Schwere sortiert). Attribute wie bei der NINA-Integration bis Home Assistant 2026.10 (NINA hat sie mit 2026.11 entfernt, hier bleiben sie): `headline`, `description`, `recommended_actions`, `severity` (Minor … Extreme), `provider`, `sender`, `sent`, `start`, `expires`, `more_info_url`, `id`, `affected_areas` (Gebiet der Warnung: bei DWD die Gemeinde, bei NINA das Gebiet aus der Meldung), dazu immer `region` (Warngebiet kurz, z. B. für „keine Warnungen für …“) |
-| Regen in | Minuten bis zum nächsten Niederschlag, siehe [Regen in X Minuten](#regen). Attribute `start` (Beginn), `precipitation` (mm der Stunde), `precipitation_probability`, `source` (`measurement` oder `forecast`) |
-| Regen in der nächsten Stunde | An, wenn *Regen in* unter 60 Minuten liegt |
-| Pollen Ambrosia, Beifuß, Birke, Erle, Esche, Gräser, Hasel, Roggen | Pollenflug-Gefahrenindex des DWD für heute, 0 (keine) bis 3 (hohe Belastung) in halben Stufen (0,5 = „keine bis geringe Belastung“). Attribute `today`, `tomorrow`, `day_after_tomorrow`, `region` (Pollenregion des DWD) |
-| UV-Index, UV-Index morgen | UV-Index des DWD für den nächsten der 38 Vorhersageorte (Attribut `city`; Bergstationen wie Zugspitze zählen nicht) |
-
-**Aktualisierung:**
-
-- Wetter alle **10 Minuten**: aktuelle Messung und stündliche Vorhersage (zusammen etwa 80 KB, etwa 0,1 s).
-- Warnungen alle **2 Minuten**: DWD-Warnungen der Gemeinde (Bright Sky) und Meldungen für den Kreis (NINA). Volltexte und Warngebiete nur für neue oder geänderte Meldungen.
-- Gespeichert wird der Stand nur, wenn sich Messung, Vorhersage oder Warnungen geändert haben.
-- Nachbarschaftswerte sofort bei jeder Änderung des Sensors.
-- Pollen und UV-Index: der DWD veröffentlicht sie einmal am Tag. Die Integration prüft stündlich und lädt nur, wenn neue Dateien fällig sind (Zeitpunkt `next_update` aus der Datei, spätestens nach 12 Stunden); um Mitternacht (deutsche Zeit) rückt „morgen“ auf „heute“. Erscheint zum angekündigten Zeitpunkt keine neue Datei, versucht sie es noch zwei Stunden lang stündlich, danach alle 12 Stunden. Ein Ausfall des DWD-Servers lässt die letzten Werte stehen und berührt Wetter und Warnungen nicht.
-- Beim Start: letzter gespeicherter Stand sofort, Abfragen erst nach dem Start von Home Assistant.
+**Neu in 26.11:** Pollenflug und UV-Index, *Regen in X Minuten* und Ereignisse je Warnung; Warnungen der höchsten Stufe erscheinen sofort. Alle Änderungen stehen im [Changelog](CHANGELOG.md).
 
 <a id="installation"></a>
 ## Installation
 
-**Voraussetzungen:** Home Assistant 2026.9 oder neuer und ein Ort in Deutschland.
-
-### Marketplace
-
-Der Marketplace liegt unter Einstellungen → Marketplace. Vor Home Assistant 2026.11 heißt er noch HACS.
-
 [![Im Marketplace öffnen](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=SH1FT-W&repository=wetter-warnungen&category=integration)
 
-1. Im Marketplace nach **Wetter & Warnungen** suchen (oder oben auf **Im Marketplace öffnen** klicken), herunterladen und Home Assistant neu starten.
+Unter **Einstellungen > Marketplace** (vor Home Assistant 2026.11 heißt er HACS) nach **Wetter & Warnungen** suchen, herunterladen und Home Assistant neu starten.
 
-### Von Hand
+<details>
+<summary>Von Hand installieren</summary>
 
 1. Das [neueste Release](https://github.com/SH1FT-W/wetter-warnungen/releases/latest) herunterladen.
 2. Den Ordner `custom_components/wetter` nach `/config/custom_components/` kopieren und Home Assistant neu starten.
 
+</details>
+
+<a id="einrichtung"></a>
 ## Einrichtung
 
-**Einstellungen > Geräte & Dienste > Integration hinzufügen > Wetter & Warnungen.**
+Du brauchst Home Assistant 2026.9 oder neuer und einen Ort in Deutschland.
 
-| Feld | Bedeutung |
-|---|---|
-| Name | Name des Geräts; die Entitäten heißen danach, z. B. „Wetter“ ergibt `weather.wetter` |
-| Ort | Punkt für Vorhersage und Warnungen, vorbelegt mit dem Zuhause. Bright Sky nimmt den nächsten DWD-Vorhersagepunkt und die nächste Messstation. |
+1. **Integration hinzufügen.** **Einstellungen > Geräte & Dienste > Integration hinzufügen > Wetter & Warnungen.** Der **Name** gibt den Entitäten ihren Namen („Wetter“ ergibt `weather.wetter`), der **Ort** ist mit dem Zuhause vorbelegt. Die Integration fragt einmal bei Bright Sky nach, ob es dort Daten gibt. Jeder Ort lässt sich nur einmal einrichten.
+2. **Werte aus der Nachbarschaft (optional).** Unter **Konfigurieren** nimmt jedes Feld einen vorhandenen Sensor, egal von welchem Hersteller (Ecowitt, Davis, Shelly, Netatmo und andere). Leer bedeutet DWD-Station. Gut geeignet sind Temperatur, Luftfeuchte und Niederschlag der letzten Stunde; Luftdruck nur, wenn er auf Meereshöhe umgerechnet ist, Wind nur von frei stehenden Windmessern. Einen Netatmo-Wetterbereich trägt die Integration selbst ein; andere Sensoren schlägt sie nicht vor, weil sie nicht weiß, ob ein Thermometer draußen hängt.
+3. **Pollenflug und UV-Index** sind an. Der Schalter in den Optionen entfernt sie, dann fragt die Integration den DWD-Server dafür nicht mehr.
 
-Vor dem Anlegen fragt die Integration einmal bei Bright Sky nach, ob es für den Ort Daten gibt. Derselbe Ort lässt sich nur einmal einrichten. Den Ort später ändern: **Drei-Punkte-Menü > Neu konfigurieren** (Entitäten, Optionen und Verlauf bleiben).
+Den Ort später ändern: **Drei-Punkte-Menü > Neu konfigurieren**. Entitäten, Optionen und Verlauf bleiben.
 
-<a id="optionen"></a>
-## Optionen: Werte aus der Nachbarschaft
+<a id="entitaeten"></a>
+## Entitäten
 
-**Einstellungen > Geräte & Dienste > Wetter & Warnungen > Konfigurieren.** Jedes Feld nimmt einen vorhandenen Sensor, **egal von welchem Hersteller**: eigene Wetterstation (Ecowitt, Davis, Shelly, Netatmo-Außenmodul, …), ein Außenthermometer oder ein Netatmo-Wetterbereich. Leer = DWD-Station.
+Alle gehören zu einem Dienst-Gerät je Ort. Die IDs gelten für den Namen **Wetter** auf einer deutschen Installation.
 
-**Automatisch:** Gibt es in der Netatmo-Integration einen Wetterbereich (öffentliche Stationen, *Netatmo > Konfigurieren*), trägt Wetter &amp; Warnungen beim Einrichten dessen Temperatur, Luftfeuchte und Niederschlag selbst ein und schlägt sie in leeren Optionen vor (bei mehreren Bereichen den nächstgelegenen). Andere Sensoren schlägt die Integration nicht vor: Sie kann nicht sicher erkennen, ob ein Thermometer draußen hängt.
+| Entität | Zeigt |
+|:--|:--|
+| `weather.wetter` | Aktuelles Wetter, Vorhersage über `weather.get_forecasts` |
+| `sensor.wetter_temperatur` und weitere | Temperatur, gefühlte Temperatur, Luftfeuchte, Taupunkt, Druck, Wind, Böen, Windrichtung, Niederschlag, Sichtweite, Bewölkung, Wetterzustand. Attribut `source`: DWD oder dein Sensor |
+| Regenwahrscheinlichkeit, Regenwahrscheinlichkeit heute | % für die laufende Stunde und für heute |
+| Sonneneinstrahlung | W/m², Vorhersage der laufenden Stunde |
+| `sensor.wetter_warnungen` | Anzahl der gültigen Warnungen. Attribute `area`, `highest_severity`, `warnings` (die schlimmste zuerst), `stale` (Quellen, die zuletzt nicht erreichbar waren) |
+| Warnung 1 bis 5 | An = Warnung auf diesem Platz, nach Schwere sortiert. Dieselben Attribute wie die NINA-Integration bis Home Assistant 2026.10 |
+| `sensor.wetter_regen_in` | Minuten bis zum nächsten Niederschlag; dazu `binary_sensor.wetter_regen_in_der_nachsten_stunde` |
 
-| Option | Geeignet | Hinweis |
-|---|---|---|
-| Temperatur | ja | |
-| Luftfeuchtigkeit | ja | |
-| Niederschlag (letzte Stunde) | ja | Regen vor Ort ändert auch das Wettersymbol (Regen oder bewölkt, Gewitter ohne Regen zeigt Gewitter); Schnee, Schneeregen und Hagel bleiben, die misst ein Regenmesser nicht zuverlässig |
-| Luftdruck | selten | Nur Druck auf Meereshöhe; Netatmo-Bereiche liefern den nicht zuverlässig |
-| Windgeschwindigkeit / Böen | selten | Nur frei stehende Windmesser; geschützte Stationen messen viel zu wenig |
+<details>
+<summary>Pollen, UV, Diagnose und die Attribute der Warnungen</summary>
 
-Ein Nachbarschaftswert gilt, solange er höchstens eine Stunde alt und lesbar ist. Sonst nimmt die Integration wieder den DWD-Wert und wechselt sofort zurück, sobald der Sensor wieder liefert.
+| Entität | Zeigt |
+|:--|:--|
+| Pollen Ambrosia, Beifuß, Birke, Erle, Esche, Gräser, Hasel, Roggen | Gefahrenindex des DWD für heute, 0 (keine) bis 3 (hohe Belastung) in halben Stufen. Attribute `today`, `tomorrow`, `day_after_tomorrow`, `region` |
+| UV-Index, UV-Index morgen | Für den nächsten der 38 DWD-Orte, Bergstationen ausgenommen (Attribut `city`) |
+| Quelle (Diagnose) | *Nachbarschaft*, *Gemischt* oder *DWD*, je Wert im Attribut |
+| Nachbarschaftsbereich, Fläche, Abstand (Diagnose) | Der Netatmo-Wetterbereich hinter deinen Sensoren: Name, Fläche in km², Abstand seines Mittelpunkts zum Ort |
 
-### Pollenflug und UV-Index
+**Warnung 1 bis 5:** `headline`, `description`, `recommended_actions`, `severity` (Minor bis Extreme), `provider`, `sender`, `sent`, `start`, `expires`, `more_info_url`, `id`, `affected_areas` (bei DWD die Gemeinde, bei NINA das Gebiet aus der Meldung) und immer `region`. NINA hat diese Attribute mit 2026.11 entfernt, hier bleiben sie.
 
-Der Schalter **Pollenflug und UV-Index** ist an. Aus entfernt die Pollen- und UV-Entitäten, die Integration fragt den DWD-Server dafür dann nicht mehr.
+**Regen in:** Attribute `start`, `precipitation` (mm der Stunde), `precipitation_probability`, `source` (`measurement` oder `forecast`).
+
+</details>
 
 ## Beispiele
 
-Push bei jeder neuen Warnung (Vergleich der Warnliste nach Kennung, Umsortieren löst nichts aus):
+Genau eine Nachricht je neuer Warnung, auch nach einem Neustart nicht doppelt:
+
+```yaml
+triggers:
+  - trigger: event
+    event_type: wetter_warning_new
+actions:
+  - action: notify.notify
+    data:
+      title: "{{ trigger.event.data.headline }}"
+      message: "{{ trigger.event.data.area }} ({{ trigger.event.data.source }}, Stufe {{ trigger.event.data.severity }})"
+mode: queued
+```
+
+`wetter_warning_new` und `wetter_warning_ended` tragen `id`, `source` (`DWD` oder `NINA`), `provider`, `severity`, `headline`, `event`, `area`, `start`, `expires` und `entry_id`. Das Ende kommt mit dem Ablauf der Warnung oder, wenn sie 10 Minuten lang in keiner Antwort mehr vorkam; ist eine Quelle nicht erreichbar, kommt kein Ende.
+
+<details>
+<summary>Wäsche rein, wenn Regen kommt</summary>
+
+```yaml
+triggers:
+  - trigger: state
+    entity_id: binary_sensor.wetter_regen_in_der_nachsten_stunde
+    to: "on"
+actions:
+  - action: notify.notify
+    data:
+      message: "Regen in etwa {{ states('sensor.wetter_regen_in') }} Minuten."
+```
+
+</details>
+
+<details>
+<summary>Höchstwert und Regenrisiko heute als Ansage</summary>
+
+```yaml
+- action: weather.get_forecasts
+  target:
+    entity_id: weather.wetter
+  data:
+    type: daily
+  response_variable: vorhersage
+- action: tts.speak
+  data:
+    message: >-
+      Heute bis {{ vorhersage['weather.wetter'].forecast[0].temperature | round }} Grad,
+      Regenrisiko {{ vorhersage['weather.wetter'].forecast[0].precipitation_probability }} Prozent.
+```
+
+</details>
+
+<details>
+<summary>Push bei jeder neuen Warnung ohne Ereignis, aus der Warnliste</summary>
 
 ```yaml
 triggers:
@@ -168,79 +172,28 @@ actions:
 mode: queued
 ```
 
-Einfacher mit dem Ereignis: genau eine Nachricht je Warnung, auch nach einem Neustart nicht doppelt:
+</details>
 
-```yaml
-triggers:
-  - trigger: event
-    event_type: wetter_warning_new
-actions:
-  - action: notify.notify
-    data:
-      title: "{{ trigger.event.data.headline }}"
-      message: "{{ trigger.event.data.area }} ({{ trigger.event.data.source }}, Stufe {{ trigger.event.data.severity }})"
-mode: queued
-```
+## Deine Daten
 
-Die Ereignisse `wetter_warning_new` und `wetter_warning_ended` tragen `id`, `source` (`DWD` oder `NINA`), `provider` (`DWD`, `MOWAS`, `KATWARN` …), `severity`, `headline`, `event`, `area`, `start`, `expires` und `entry_id` (bei mehreren eingerichteten Orten). Das Ende-Ereignis hat dieselben Daten wie beim Erscheinen. Es kommt, sobald die Warnung abgelaufen ist (`expires`) oder 10 Minuten lang in keiner Antwort mehr vorkam; fehlt sie nur kurz, gibt es weder Ende noch ein zweites Neu. Ist eine Quelle nicht erreichbar, gibt es kein Ende-Ereignis (keine falsche Entwarnung); abgelaufene Warnungen enden trotzdem. Beim allerersten Einrichten kommen die Ereignisse für die gerade gültigen Warnungen, bevor die Entitäten angelegt sind; danach immer erst, wenn die Entitäten den neuen Stand zeigen.
+- **Kein Konto, kein Schlüssel.** Alle Quellen sind öffentlich.
+- **Die Koordinaten des Orts** gehen an Bright Sky und einmalig an den Geodienst des DWD (für die Pollenregion), auf vier Nachkommastellen gerundet.
+- **Die Diagnose schwärzt** Koordinaten und Warngebiet. Die Warntexte selbst können Orte nennen.
 
-Wäsche rein, wenn Regen kommt:
+## Gut zu wissen
 
-```yaml
-triggers:
-  - trigger: state
-    entity_id: binary_sensor.wetter_regen_in_der_nachsten_stunde
-    to: "on"
-actions:
-  - action: notify.notify
-    data:
-      message: "Regen in etwa {{ states('sensor.wetter_regen_in') }} Minuten."
-```
-
-Höchstwert und Regenrisiko heute als Ansage:
-
-```yaml
-- action: weather.get_forecasts
-  target:
-    entity_id: weather.wetter
-  data:
-    type: daily
-  response_variable: vorhersage
-- action: tts.speak
-  data:
-    message: >-
-      Heute bis {{ vorhersage['weather.wetter'].forecast[0].temperature | round }} Grad,
-      Regenrisiko {{ vorhersage['weather.wetter'].forecast[0].precipitation_probability }} Prozent.
-```
-
-Typische Einsätze: Jalousien bei starker Sonne (*Sonneneinstrahlung* über 300 W/m²), Bewässerung aussetzen bei Regenrisiko, Warn-Kachel im Dashboard (*Warnung 1* an), Tagesübersicht per Sprachausgabe.
-
-<a id="regen"></a>
-### Regen in X Minuten
-
-Die DWD-Vorhersage ist **stündlich**. Daraus folgt:
-
-- Regnet es (gemessener Niederschlag der letzten Stunde über 0: vor Ort aus den Optionen, sonst an der DWD-Station), steht *Regen in* auf **0**. Misst die Station keinen Regen, zählt nur die Vorhersage.
-- Sonst zählt die erste Vorhersagestunde in den nächsten 48 Stunden mit mindestens **0,1 mm**. Der Regen wird **am Anfang dieser Stunde** angenommen: Ist es 9:40 und die Stunde 11 bis 12 Uhr ist die erste nasse, steht dort 80. Regen in der laufenden Stunde ergibt 0.
-- Kein Regen in 48 Stunden: *unbekannt*, *Regen in der nächsten Stunde* ist aus.
-- Genauer als eine Stunde ist der Wert nicht; er zählt alle 10 Minuten (mit dem Wetter) herunter. Ein Regenradar nutzt die Integration nicht.
-
-## Grenzen
-
-- Die Vorhersage gilt für den nächsten DWD-Vorhersagepunkt (meist wenige Kilometer entfernt), nicht genau für die Adresse.
-- Die DWD-Messstation kann weit weg sein; dafür gibt es die Nachbarschaftswerte.
-- Meldungen für den Kreis (MoWaS und andere) kommen kreisweise aus NINA; angezeigt werden nur die, deren Warngebiet das Zuhause trifft (gut 1 km Rand zählt mit). Lässt sich das Gebiet einer neuen Meldung nicht laden, wartet die Integration bis zu 5 Minuten darauf und zeigt die Meldung danach für den ganzen Kreis; Meldungen der höchsten Stufe (*Extreme*) erscheinen ohne Wartezeit sofort für den ganzen Kreis. DWD-Warnungen gelten für die Gemeinde.
-- Kein Regenradar, keine Luftqualität. *Regen in* hat die Auflösung der stündlichen Vorhersage.
-- Pollen gelten für die Pollenregion des DWD (27 Regionen), der UV-Index für den nächsten von 38 Orten. Liegt der Ort außerhalb der Pollenregionen oder weiter als 200 km von einem UV-Ort, bleiben diese Sensoren unbekannt (die Integration merkt sich das und fragt nicht stündlich nach). Heute und morgen folgen dem deutschen Kalendertag der DWD-Dateien.
-- Aktualisiert der DWD eine Warnung, bekommt sie oft eine neue Kennung: Das ergibt dann ein Ende- und ein Neu-Ereignis.
-- **Nur Deutschland** (DWD und Warnsystem des Bundes).
+- Die Vorhersage gilt für den nächsten DWD-Vorhersagepunkt, meist wenige Kilometer entfernt. Die Messstation kann weit weg sein; dafür gibt es die Werte aus der Nachbarschaft.
+- *Regen in* ist nur so genau wie die stündliche Vorhersage: Regen gilt ab Beginn der ersten Stunde mit mindestens 0,1 mm. Kein Regenradar, keine Luftqualität.
+- Lässt sich das Warngebiet einer neuen Kreis-Meldung nicht laden, wartet die Integration bis zu 5 Minuten und zeigt sie dann für den ganzen Kreis. Meldungen der höchsten Stufe (*Extreme*) erscheinen sofort.
+- Aktualisiert der DWD eine Warnung, bekommt sie oft eine neue Kennung. Das ergibt ein Ende- und ein Neu-Ereignis.
+- Liegt der Ort außerhalb der 27 Pollenregionen oder weiter als 200 km von einem UV-Ort, bleiben diese Sensoren unbekannt.
 
 <a id="fehlersuche"></a>
-## Fehlersuche
+<details>
+<summary>Fehlersuche</summary>
 
-- **Werte bleiben auf DWD, obwohl Nachbarschaftssensoren eingetragen sind:** Sensor *Quelle* ansehen. Ist der Nachbarschaftssensor `nicht verfügbar` oder älter als eine Stunde, gilt DWD. Netatmo-Wetterbereiche brauchen nach einem Neustart oft einige Minuten.
-- **Keine Meldungen für den Kreis:** Attribut `area` des Sensors *Warnungen* prüfen; der Kreis wird aus der DWD-Warnzelle der Gemeinde abgeleitet.
-- **Diagnose:** **Drei-Punkte-Menü > Diagnose herunterladen**. Koordinaten und Warngebiet sind geschwärzt; die Warntexte selbst können Orte nennen.
+- **Werte bleiben auf DWD, obwohl Sensoren eingetragen sind.** Sensor *Quelle* ansehen. Ist dein Sensor nicht verfügbar oder älter als eine Stunde, gilt DWD. Netatmo-Wetterbereiche brauchen nach einem Neustart oft einige Minuten.
+- **Keine Meldungen für den Kreis.** Attribut `area` des Sensors *Warnungen* prüfen; der Kreis wird aus der DWD-Warnzelle der Gemeinde abgeleitet.
 - **Debug-Protokoll:** **Drei-Punkte-Menü > Debug-Protokollierung aktivieren** oder:
 
   ```yaml
@@ -249,26 +202,33 @@ Die DWD-Vorhersage ist **stündlich**. Daraus folgt:
       custom_components.wetter: debug
   ```
 
-Wenn du ein [Issue](https://github.com/SH1FT-W/wetter-warnungen/issues) öffnest, häng bitte die Diagnose an.
+Wenn du ein [Issue](https://github.com/SH1FT-W/wetter-warnungen/issues) öffnest, häng bitte die Diagnose an (**Drei-Punkte-Menü > Diagnose herunterladen**).
 
-## Entfernen
+</details>
 
-1. **Einstellungen > Geräte & Dienste > Wetter & Warnungen > Drei-Punkte-Menü > Löschen.** Dabei werden auch die gespeicherten Stände gelöscht.
-2. Den Ordner `/config/custom_components/wetter` löschen (oder das Repository im Marketplace entfernen) und Home Assistant neu starten.
+<details>
+<summary>Entfernen</summary>
 
-## So funktioniert es
+1. **Einstellungen > Geräte & Dienste > Wetter & Warnungen > Drei-Punkte-Menü > Löschen.** Die gespeicherten Stände werden mitgelöscht.
+2. Das Repository im Marketplace entfernen (oder `/config/custom_components/wetter` löschen) und Home Assistant neu starten.
 
-<!-- cards:how -->
-<table>
-<tr><td width="33%" valign="top"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/icons/weather-cloudy-clock-dark.svg"><img src="docs/images/icons/weather-cloudy-clock-light.svg" width="22" height="22" align="absmiddle" alt=""></picture> <b>Bright Sky und DWD</b><br>Vorhersage, Stationswerte und DWD-Warnungen über Bright Sky alle 10 Minuten. Pollenflug und UV-Index direkt vom Open-Data-Server des DWD, einmal am Tag.</td><td width="33%" valign="top"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/icons/bullhorn-outline-dark.svg"><img src="docs/images/icons/bullhorn-outline-light.svg" width="22" height="22" align="absmiddle" alt=""></picture> <b>Warnsystem des Bundes</b><br>Die übrigen amtlichen Warnungen für deinen Kreis von warnung.bund.de, dieselben Daten wie in der NINA-App, alle 2 Minuten.</td><td width="33%" valign="top"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/icons/home-outline-dark.svg"><img src="docs/images/icons/home-outline-light.svg" width="22" height="22" align="absmiddle" alt=""></picture> <b>Deine Nachbarschaft</b><br>Sensoren aus den Optionen gehen vor, solange sie frisch sind. Sonst gilt der Wert des DWD.</td></tr>
-</table>
-<!-- /cards:how -->
+</details>
 
-Vorhersage, aktuelle Werte und DWD-Warnungen kommen von [Bright Sky](https://brightsky.dev), einer freien JSON-Schnittstelle für die offenen Daten des Deutschen Wetterdienstes. Pollenflug und UV-Index kommen direkt vom Open-Data-Server des DWD ([opendata.dwd.de](https://opendata.dwd.de/climate_environment/health/alerts/)), die Pollenregion des Orts einmalig vom Geodienst des DWD ([maps.dwd.de](https://maps.dwd.de)). Die übrigen Warnungen kommen aus der öffentlichen Warn-Schnittstelle des BBK ([warnung.bund.de](https://warnung.bund.de)); der Kreis ergibt sich aus der DWD-Warnzelle der Gemeinde, DWD-Meldungen aus NINA werden übersprungen, weil sie schon von Bright Sky kommen. Datenquellen und ihre Bedingungen stehen in [`NOTICE`](NOTICE).
+<details>
+<summary>So funktioniert es</summary>
 
-Die Domain ist `wetter`, der Ordner `custom_components/wetter`. Interne Notizen stehen in [`CLAUDE.md`](CLAUDE.md).
+- **Start ohne Warten.** Der letzte Stand kommt aus dem Speicher, die erste Abfrage erst, wenn Home Assistant fertig gestartet ist. Gespeichert wird nur, wenn sich etwas geändert hat.
+- **Warnungen.** DWD-Meldungen aus NINA werden übersprungen, weil sie schon gemeindegenau von Bright Sky kommen. Kreis-Meldungen werden gegen ihr Warngebiet geprüft, gut 1 km Rand zählt mit. Volltexte und Warngebiete lädt die Integration nur für neue oder geänderte Meldungen.
+- **Regen in.** Bei gemessenem Regen der letzten Stunde (dein Sensor oder die Station) steht 0, sonst zählt die erste nasse Vorhersagestunde der nächsten 48 Stunden. Ohne Regen in 48 Stunden: unbekannt.
+- **Pollen und UV.** Der DWD veröffentlicht einmal am Tag. Die Integration prüft stündlich und lädt nur, wenn neue Dateien fällig sind; um Mitternacht rückt morgen auf heute. Ein Ausfall des DWD-Servers lässt die letzten Werte stehen.
+- **Gefühlte Temperatur** rechnet die Integration selbst (Steadman-Formel wie Open-Meteo), der DWD liefert sie nicht.
 
-## Entwicklung
+Datenquellen und ihre Bedingungen stehen in [`NOTICE`](NOTICE). Domain und Ordner heißen `wetter`.
+
+</details>
+
+<details>
+<summary>Entwicklung</summary>
 
 ```bash
 .venv/bin/python -m pytest -q -p no:logging --cov=custom_components   # fiktive Daten in tests/fixtures
@@ -277,8 +237,12 @@ uvx mypy@2.3.1 --python-executable .venv/bin/python
 .venv/bin/python tools/pruefe-uebersetzungen.py    # strings.json gegen translations/*.json
 ```
 
-Testpakete mit `uv venv && uv pip install -r requirements_test.txt pytest-cov` installieren. Die Tests fragen weder Bright Sky noch die Warn-Schnittstelle oder den DWD-Server ab. Ein Snapshot-Test (`tests/test_snapshot.py`, Stand in `tests/snapshots/`) hält Registry-Einträge und Zustände aller Entitäten fest; gewollte Änderungen mit `--snapshot-update` übernehmen. Dieselben Prüfungen laufen auf GitHub Actions bei jedem Push und Pull Request und wöchentlich gegen das neueste Home Assistant, dazu HACS-Prüfung und hassfest. Selbsteinschätzung der [Integration Quality Scale](https://developers.home-assistant.io/docs/core/integration-quality-scale/): [`quality_scale.yaml`](custom_components/wetter/quality_scale.yaml).
+Testpakete: `uv venv && uv pip install -r requirements_test.txt pytest-cov`. Die Tests fragen keinen Server ab. Der Snapshot-Test (`tests/test_snapshot.py`) hält alle Entitäten fest; gewollte Änderungen mit `--snapshot-update` übernehmen. GitHub Actions prüft bei jedem Push und wöchentlich gegen das neueste Home Assistant, dazu HACS-Prüfung und hassfest. Quality Scale: Platin, [selbst geprüft](custom_components/wetter/quality_scale.yaml).
+
+</details>
 
 ## Lizenz
 
-[Apache License 2.0](LICENSE), Copyright 2026 SH1FT-W. Wetterdaten: Deutscher Wetterdienst (CC BY 4.0), siehe [`NOTICE`](NOTICE).
+[Apache License 2.0](LICENSE), Copyright 2026 SH1FT-W. Wetterdaten und DWD-Warnungen: Quelle Deutscher Wetterdienst, CC BY 4.0, siehe [`NOTICE`](NOTICE).
+
+<sub>Wetter &amp; Warnungen ist ein unabhängiges Projekt. Es gehört weder zum Deutschen Wetterdienst, zum Bundesamt für Bevölkerungsschutz und Katastrophenhilfe (BBK) noch zu Bright Sky und wird von ihnen nicht unterstützt.</sub>
