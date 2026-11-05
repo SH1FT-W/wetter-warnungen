@@ -7,7 +7,7 @@ und NINA. **Domain und Ordner bleiben `wetter`** (bestehende Installationen); nu
 - Repo ist **öffentlich**: nichts Persönliches ins Repo (keine Namen, echten Koordinaten, Gemeinden, Warnzellen,
   Stationen, Entity-IDs aus echten Installationen, Heimnetz-Details, lokalen Pfade). Testdaten bleiben fiktiv
   (Musterstadt, Teststation).
-- **Alles auf Deutsch** (nur für Deutschland): README, Projektseite, README-Karten, Titelbild, CHANGELOG, Commit-Texte.
+- **Alles auf Deutsch** (nur für Deutschland): README, Projektseite, Titelbild, CHANGELOG, Commit-Texte.
   GitHub-Release-Notizen englisch (globale Regel). Keine Gedankenstriche als Satzzeichen in GitHub-Texten.
 - Lokal committen ok, Push und Releases nur nach Rückfrage.
 - Echte Installationen (Prod) nur auf ausdrücklichen Wunsch des Besitzers anfassen, nie selbst hineinkopieren.
@@ -47,8 +47,7 @@ AwesomeVersion: `26.10.x` gilt als neuer als das alte `1.3.4`. Jede Änderung in
 - GitHub Actions: `.github/workflows/pruefung.yml` (Vorlage repo-vorlagen/vorlagen/ci-ha-integration.yml, COV_MIN 98)
   bei Push/PR und montags gegen die neueste HA; `.github/workflows/hacs.yml` (HACS-Prüfung, läuft nur im
   öffentlichen Repo).
-- README-Bilder: Titelbild und Karten aus `docs/readme-images.json` mit `theme/v1/readme-images/render.mjs <repo>`
+- README-Bilder: Titelbild aus `docs/readme-images.json` mit `theme/v1/readme-images/render.mjs <repo>`
   aus sh1ft-w.github.io: Titel als `docs/images/readme-title-{light,dark}.webp` (2560 × 1280, Fenster zeigt
   `docs/images/title-shot-*.png`, den Funktionsblock der Projektseite mit 2× aufgenommen) plus `readme-title-social.png`
-  für die GitHub-Vorschau; die Karten stehen als Markdown-Tabellen zwischen `<!-- cards:… -->` im README, Icons in
-  `docs/images/icons/`. Die Projektseite `docs/index.html` (nur Deutsch) zeigt das Titelbild im Hero, Versionszeile liest die manifest.json.
+  für die GitHub-Vorschau; README-Aufbau nach `repo-vorlagen/readme-muster.md`, ohne Kartentabellen. Die Projektseite `docs/index.html` (nur Deutsch) zeigt das Titelbild im Hero, Versionszeile liest die manifest.json.
