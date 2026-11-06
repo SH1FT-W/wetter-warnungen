@@ -61,7 +61,7 @@ async def test_entities(hass: HomeAssistant, brightsky: AiohttpClientMocker, ent
     assert hass.states.get("sensor.wetter_niederschlag").attributes["unit_of_measurement"] == "mm/h"
     hour = next(h for h in load("weather.json")["weather"] if h["timestamp"] == "2026-10-15T10:00:00+00:00")
     assert hass.states.get("sensor.wetter_regenwahrscheinlichkeit").state == str(
-        float(hour["precipitation_probability"])
+        model._prob(hour["precipitation_probability"])
     )
     assert hass.states.get("sensor.wetter_regenwahrscheinlichkeit").attributes["unit_of_measurement"] == "%"
     daily = await hass.services.async_call(

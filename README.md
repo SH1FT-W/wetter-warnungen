@@ -72,7 +72,7 @@ Alle gehören zu einem Dienst-Gerät je Ort. Die IDs gelten für den Namen **Wet
 |:--|:--|
 | `weather.wetter` | Aktuelles Wetter, Vorhersage über `weather.get_forecasts` |
 | `sensor.wetter_temperatur` und weitere | Temperatur, gefühlte Temperatur, Luftfeuchte, Taupunkt, Druck, Wind, Böen, Windrichtung, Niederschlag, Sichtweite, Bewölkung, Wetterzustand. Attribut `source`: DWD oder dein Sensor |
-| Regenwahrscheinlichkeit, Regenwahrscheinlichkeit heute | % für die laufende Stunde und für heute |
+| Regenwahrscheinlichkeit, Regenwahrscheinlichkeit heute | % für die laufende Stunde und für heute, unter 5 % gilt 0 % |
 | Sonneneinstrahlung | W/m², Vorhersage der laufenden Stunde |
 | `sensor.wetter_warnungen` | Anzahl der gültigen Warnungen. Attribute `area`, `highest_severity`, `warnings` (die schlimmste zuerst), `stale` (Quellen, die zuletzt nicht erreichbar waren) |
 | Warnung 1 bis 5 | An = Warnung auf diesem Platz, nach Schwere sortiert. Dieselben Attribute wie die NINA-Integration bis Home Assistant 2026.10 |

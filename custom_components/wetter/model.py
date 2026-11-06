@@ -85,6 +85,16 @@ def _num(value: Any) -> float | None:
     return float(value) if isinstance(value, int | float) and not isinstance(value, bool) else None
 
 
+# Below this chance (%) the DWD value is noise: MOSMIX almost never says 0, mostly 1 to 2 % on dry hours
+MIN_PRECIP_PROBABILITY = 5
+
+
+def _prob(value: Any) -> float | None:
+    """Precipitation probability in %, values below `MIN_PRECIP_PROBABILITY` count as 0."""
+    prob = _num(value)
+    return 0.0 if prob is not None and prob < MIN_PRECIP_PROBABILITY else prob
+
+
 def hour_at(hourly: list[dict[str, Any]], when: datetime) -> dict[str, Any] | None:
     """Die Vorhersage-Stunde, die `when` enthält (Bright Sky stempelt das Ende der Stunde)."""
     best: dict[str, Any] | None = None
@@ -144,7 +154,7 @@ def now_values(current: dict[str, Any] | None, hourly: list[dict[str, Any]], now
         "solar": None if solar is None else round(solar * 1000, 0),
         "condition": condition(icon, precipitation),
         # Wahrscheinlichkeit für Niederschlag in der laufenden Stunde (DWD MOSMIX, ≥ 0,1 mm)
-        "precipitation_probability": _num(fc.get("precipitation_probability")),
+        "precipitation_probability": _prob(fc.get("precipitation_probability")),
         "observed_at": obs.get("timestamp"),
     }
 
@@ -163,7 +173,7 @@ def _forecast_hour(hour: dict[str, Any], ts: datetime) -> dict[str, Any]:
         "native_dew_point": dew_point,
         "humidity": humidity,
         "native_precipitation": _num(hour.get("precipitation")),
-        "precipitation_probability": _num(hour.get("precipitation_probability")),
+        "precipitation_probability": _prob(hour.get("precipitation_probability")),
         "native_pressure": _num(hour.get("pressure_msl")),
         "native_wind_speed": wind_speed,
         "native_wind_gust_speed": _num(hour.get("wind_gust_speed")),
@@ -235,7 +245,7 @@ def daily_forecast(hourly: list[dict[str, Any]], now: datetime, tz: tzinfo, days
                 "native_temperature": max(temps) if temps else None,
                 "native_templow": min(temps) if temps else None,
                 "native_precipitation": round(sum(rain), 1) if rain else None,
-                "precipitation_probability": max(prob) if prob else None,
+                "precipitation_probability": _prob(max(prob)) if prob else None,
                 "native_wind_speed": max(wind) if wind else None,
                 "native_wind_gust_speed": max(gust) if gust else None,
                 "cloud_coverage": round(sum(clouds) / len(clouds)) if clouds else None,
@@ -283,7 +293,7 @@ def rain_in(hourly: list[dict[str, Any]], now: datetime, raining: bool, hours: i
             "minutes": int((start - now).total_seconds() // 60),
             "start": start.isoformat(),
             "precipitation": amount,
-            "precipitation_probability": _num(hour.get("precipitation_probability")),
+            "precipitation_probability": _prob(hour.get("precipitation_probability")),
             "source": "forecast",
         }
     return None

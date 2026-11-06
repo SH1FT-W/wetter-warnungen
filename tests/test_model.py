@@ -106,7 +106,7 @@ def test_hourly_forecast() -> None:
     assert fc[0]["datetime"] == "2026-10-15T09:00:00+00:00", "ab der laufenden Stunde"
     first = next(h for h in HOURLY if h["timestamp"] == "2026-10-15T09:00:00+00:00")
     assert fc[0]["native_temperature"] == first["temperature"]
-    assert fc[0]["precipitation_probability"] == first["precipitation_probability"]
+    assert fc[0]["precipitation_probability"] == model._prob(first["precipitation_probability"])
     assert all(f["humidity"] is not None for f in fc), "Feuchte aus dem Taupunkt, wenn sie fehlt"
     assert all(f["native_apparent_temperature"] is not None for f in fc), "gefühlt aus Temperatur, Feuchte, Wind"
     assert model.hourly_forecast([{"timestamp": "x"}, *HOURLY], NOW, 1)[0]["datetime"] == fc[0]["datetime"]
@@ -124,8 +124,8 @@ def test_daily_forecast() -> None:
     assert fc[0]["native_temperature"] == max(h["temperature"] for h in today)
     assert fc[0]["native_templow"] == min(h["temperature"] for h in today)
     assert fc[0]["native_precipitation"] == round(sum(h["precipitation"] for h in today), 1)
-    assert fc[0]["precipitation_probability"] == max(
-        p for h in today if (p := h["precipitation_probability_6h"]) is not None
+    assert fc[0]["precipitation_probability"] == model._prob(
+        max(p for h in today if (p := h["precipitation_probability_6h"]) is not None)
     ), "6-Std.-Wahrscheinlichkeit wie beim DWD"
     assert fc[0]["cloud_coverage"] == round(sum(h["cloud_cover"] for h in today) / len(today))
     assert all(f["condition"] in model.ALL_CONDITIONS for f in fc)
@@ -152,3 +152,22 @@ def test_daily_forecast_skips_bad_and_past_hours() -> None:
     ]
     fc = model.daily_forecast(hours, NOW, UTC, 3)
     assert [f["native_temperature"] for f in fc] == [10.0], "gestern und kaputte Stempel fallen weg"
+
+
+def test_low_precipitation_probability_counts_as_zero() -> None:
+    """Below 5 % the DWD chance is noise (MOSMIX rarely says 0), so it is shown as 0 % everywhere."""
+    hours = [
+        {"timestamp": f"2026-10-15T{h:02d}:00:00+00:00", "precipitation": 0.0, "precipitation_probability": p}
+        for h, p in ((10, 1), (11, 4), (12, 5), (13, 4.9))
+    ]
+    hours[0]["precipitation_probability_6h"] = 3
+    assert model.now_values({}, hours, NOW)["precipitation_probability"] == 0
+    probs = [f["precipitation_probability"] for f in model.hourly_forecast(hours, NOW, 4)]
+    assert probs == [0, 0, 5, 0], "from 5 % on the value stays exact"
+    assert model.daily_forecast(hours, NOW, BERLIN, 1)[0]["precipitation_probability"] == 0, "6-h chance 3 % → 0"
+    rain = model.rain_in([{**hours[1], "precipitation": 0.2}], NOW, False, 48)
+    assert rain is not None and rain["precipitation_probability"] == 0
+    assert (
+        model.hourly_forecast([{**hours[0], "precipitation_probability": None}], NOW, 1)[0]["precipitation_probability"]
+        is None
+    ), "missing stays unknown"
