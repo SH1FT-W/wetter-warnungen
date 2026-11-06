@@ -1,6 +1,6 @@
 # Changelog
 
-## Unveröffentlicht
+## 26.11.5 (06.11.2026)
 
 - **Regenwahrscheinlichkeit erst ab 5 %:** Der DWD gibt für trockene Stunden fast nie 0 % an, sondern meist 1 bis 2 %. Werte unter 5 % zeigt die Integration jetzt als 0 %: bei *Regenwahrscheinlichkeit*, *Regenwahrscheinlichkeit heute*, in der stündlichen und täglichen Vorhersage der Wetter-Entität und im Attribut von *Regen in*. Ab 5 % bleibt der Wert genau.
 
