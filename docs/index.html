@@ -14,21 +14,18 @@
 <meta property="og:locale" content="de_DE">
 <meta property="og:image" content="https://sh1ft-w.github.io/wetter-warnungen/images/readme-title-social.png">
 <link rel="icon" href="logo.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800;900&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<!-- Shared SH1FT-W design (tokens, glass navigation, light/dark, DE/EN, reveal) -->
-<link rel="stylesheet" href="https://sh1ft-w.github.io/theme/v1/theme.css">
-<script src="https://sh1ft-w.github.io/theme/v1/theme.js"></script>
+<!-- Shared SH1FT-W design, version 2 (tokens, Archivo, navigation, light/dark, DE/EN, the lanes) -->
+<link rel="stylesheet" href="https://sh1ft-w.github.io/theme/v2/theme.css">
+<script src="https://sh1ft-w.github.io/theme/v2/theme.js"></script>
 <style>
 /* Wetter-Palette: heller Himmel bei Tag, Nachthimmel im Dunkeln, Akzent #3D8BFF, Warnungen in Bernstein */
 :root {
   --accent: #3D8BFF; --accent-ink: #1F6FE0; --on-accent: #ffffff;
-  --sea: #2F7FF5; --sea-tint: rgba(61,139,255,0.11); --sea-glow: rgba(61,139,255,0.32); --aqua: #7CB2FF; --amber: #F5A524; --amber-tint: rgba(245,165,36,0.14);
+  --sea: #2F7FF5; --sea-tint: rgba(61,139,255,0.11); --aqua: #7CB2FF; --amber: #F5A524; --amber-tint: rgba(245,165,36,0.14);
   --ch-w: #8FA3B1; --ch-b: #2F7FD8; --ch-g: #2FA36A; --ch-r: #E0584A;
-  --font: "Inter", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
-  --display: "Archivo", "Inter", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
-  --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --font: "Archivo", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --display: "Archivo", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --mono: ui-monospace, "SF Mono", Menlo, monospace;
   --bg: #F2F6FC; --bg-2: #E3ECF8; --card: #FFFFFF; --card-2: #EEF3FA;
   --ink: #0B1424; --ink-2: #455569; --ink-3: rgba(11,20,36,0.56);
   --line: rgba(5,20,50,0.11); --chip: rgba(5,20,50,0.06);
@@ -39,7 +36,7 @@
 }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
   --accent: #3D8BFF; --accent-ink: #7CB2FF; --on-accent: #ffffff;
-  --sea: #2F7DFF; --sea-tint: rgba(61,139,255,0.14); --sea-glow: rgba(61,139,255,0.30);
+  --sea: #2F7DFF; --sea-tint: rgba(61,139,255,0.14);
   --ch-w: #DCE6EC;
   --bg: #07101E; --bg-2: #0C182B; --card: #0F1D33; --card-2: #15253F;
   --ink: #EAF1FA; --ink-2: rgba(214,226,242,0.84); --ink-3: rgba(214,226,242,0.54);
@@ -49,7 +46,7 @@
 } }
 :root[data-theme="dark"] {
   --accent: #3D8BFF; --accent-ink: #7CB2FF; --on-accent: #ffffff;
-  --sea: #2F7DFF; --sea-tint: rgba(61,139,255,0.14); --sea-glow: rgba(61,139,255,0.30);
+  --sea: #2F7DFF; --sea-tint: rgba(61,139,255,0.14);
   --ch-w: #DCE6EC;
   --bg: #07101E; --bg-2: #0C182B; --card: #0F1D33; --card-2: #15253F;
   --ink: #EAF1FA; --ink-2: rgba(214,226,242,0.84); --ink-3: rgba(214,226,242,0.54);
@@ -75,7 +72,7 @@ code, .k { font-family: var(--mono); font-variant-numeric: tabular-nums; }
 .btn {
   display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 48px; padding: 0 24px; border-radius: 999px;
   font-family: inherit; font-size: 15px; font-weight: 600; line-height: 1; background: var(--sea); color: var(--on-accent); border: 0; cursor: pointer;
-  box-shadow: 0 12px 28px -12px var(--sea-glow); transition: transform .2s ease, filter .2s ease;
+  transition: transform .2s ease, filter .2s ease;
 }
 .btn:hover { text-decoration: none; filter: brightness(1.1); transform: translateY(-1px); }
 .btn.ghost { background: var(--card); color: var(--ink); box-shadow: var(--shadow); }
@@ -99,9 +96,6 @@ section.tint { background: var(--bg-2); }
 
 /* Hero */
 .hero { padding: clamp(56px, 9vw, 112px) 0 clamp(64px, 8vw, 104px); text-align: center; overflow: hidden; }
-.hero .glow { position: absolute; inset: -20% -10% auto; height: 90%; pointer-events: none;
-  background: radial-gradient(40% 36% at 30% 30%, rgba(61,139,255,0.20), transparent 70%), radial-gradient(36% 34% at 72% 24%, rgba(255,190,80,0.12), transparent 70%);
-  filter: blur(50px); }
 .hero .wrap { position: relative; }
 .hero .lead { max-width: 660px; margin-left: auto; margin-right: auto; }
 .cta { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-top: 34px; }
@@ -109,9 +103,6 @@ section.tint { background: var(--bg-2); }
 .pill { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 999px; background: var(--card); box-shadow: var(--shadow); font-weight: 600; color: var(--ink-2); font-size: 13px; }
 .pill i { width: 7px; height: 7px; border-radius: 50%; background: var(--aqua); display: inline-block; }
 
-/* Bühne: nur das Titelbild */
-.stage { position: relative; margin: clamp(48px, 7vw, 84px) auto 0; max-width: 1100px; }
-.stage .photo { display: block; width: 100%; height: auto; aspect-ratio: 2 / 1; border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); }
 /* Bento: Gerade neu */
 .bento { display: grid; grid-template-columns: repeat(12, 1fr); gap: 16px; }
 .b { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); padding: 26px 28px 28px; min-width: 0; }
@@ -248,6 +239,38 @@ footer .fine { flex-basis: 100%; line-height: 1.6; }
   .tbl td { border: 0; padding: 2px 0; }
   .tbl td:first-child { white-space: normal; }
 }
+
+/* ---- theme v2 ---- */
+:root { --lane-a: #2F7FF5; --lane-b: #7CB2FF; --radius: 20px; --radius-lg: 28px; --max: 1200px; }
+body { font-family: var(--font); }
+h1 { font-size: clamp(44px, 6vw, 84px); line-height: 1; font-weight: 800; font-stretch: 118%; font-style: italic; letter-spacing: -0.025em; }
+h2 { font-size: clamp(30px, 3.8vw, 48px); line-height: 1.08; font-weight: 750; font-stretch: 112%; letter-spacing: -0.02em; }
+h3 { font-stretch: 106%; }
+h1 em, h2 em { color: inherit !important; font-style: inherit; }
+.center { text-align: left; } .center .lead { margin-left: 0; margin-right: 0; }
+.head { max-width: 50em; }
+.eyebrow { text-transform: none; letter-spacing: 0; font-size: 16px; font-weight: 650; margin-bottom: 12px; }
+.eyebrow::before { display: none; }
+.cap { text-align: left; }
+.btn { border-radius: 12px; }
+.btn.ghost { background: var(--chip); box-shadow: none; }
+.pill { box-shadow: none; background: var(--chip); border-radius: 8px; }
+.b, .tile, .panel, .prof, .tbl, .faq details, .flow .lane { box-shadow: none; border: 1px solid var(--line); }
+.b .tag, .tg, .tbl thead th, .tbl .grp td { text-transform: none; letter-spacing: 0; font-size: 13px; }
+.b .tag, .tg { border-radius: 6px; }
+.tile .ico, .shield .ico { border-radius: 10px; }
+.hero { text-align: left; padding: clamp(48px, 7vw, 96px) 0 clamp(56px, 7vw, 96px); overflow: hidden; }
+.hero .wrap { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: clamp(24px, 4vw, 64px); align-items: center; }
+.hero .mark { width: 64px; height: 64px; border-radius: 15px; margin-bottom: 26px; }
+.hero .lead { margin-left: 0; max-width: 34em; }
+.hero .cta, .hero .meta { justify-content: flex-start; }
+.hero .s-lanes { margin-right: calc(-1 * var(--gutter) - 14vw); }
+.s-track b { color: #fff; font: italic 800 clamp(20px, 2.5vw, 34px)/1 var(--font); font-stretch: 116%; letter-spacing: -0.015em; white-space: nowrap; }
+@media (max-width: 900px) { .hero .wrap { grid-template-columns: 1fr; } .hero .s-lanes { margin: 8px calc(-1 * var(--gutter) - 8vw) 0 44px; } }
+.hero h1 { font-size: clamp(40px, 5vw, 68px); }
+@media (max-width: 900px) { .nav-links { display: none; } .nav > .iconbtn { margin-left: auto; } .nav > .btn, .nav .btn { margin-left: 0; } }
+@media (max-width: 480px) { .nav .brand { font-size: 14px; gap: 6px; white-space: nowrap; } .nav { gap: 6px; } .nav > .btn.small { padding: 0 10px; } }
+@media (max-width: 760px) { .tbl td:first-child { white-space: normal; } }
 </style>
 </head>
 <body>
@@ -271,25 +294,24 @@ footer .fine { flex-basis: 100%; line-height: 1.6; }
 </div>
 
 <section class="hero" id="top">
-  <div class="glow" aria-hidden="true"></div>
   <div class="wrap">
-    <p class="eyebrow reveal">Wetter für Deutschland in Home Assistant</p>
-    <h1 class="reveal d1">Wetter und<br><em>jede amtliche Warnung.</em></h1>
-    <p class="lead reveal d2">Wetter &amp; Warnungen holt <strong>die Vorhersage des Deutschen Wetterdienstes, die nächste Station und alle amtlichen Warnungen</strong> nach Home Assistant: DWD für deine Gemeinde, MoWaS, KATWARN, BIWAPP, Hochwasser und Polizei für deinen Kreis. Startet sofort, ohne Konto, ohne Schlüssel.</p>
-    <div class="cta reveal d3">
-      <a class="btn" href="#install">Über den Marketplace installieren</a>
-      <a class="btn ghost" href="https://github.com/SH1FT-W/wetter-warnungen#readme">Zur Anleitung</a>
+    <div>
+      <img class="mark" src="logo.png" alt="" width="64" height="64">
+      <h1>Wetter und jede amtliche Warnung.</h1>
+      <p class="lead reveal d2">Wetter &amp; Warnungen holt <strong>die Vorhersage des Deutschen Wetterdienstes, die nächste Station und alle amtlichen Warnungen</strong> nach Home Assistant: DWD für deine Gemeinde, MoWaS, KATWARN, BIWAPP, Hochwasser und Polizei für deinen Kreis. Startet sofort, ohne Konto, ohne Schlüssel.</p>
+      <div class="cta reveal d3">
+        <a class="btn" href="#install">Über den Marketplace installieren</a>
+        <a class="btn ghost" href="https://github.com/SH1FT-W/wetter-warnungen#readme">Zur Anleitung</a>
+      </div>
+      <p class="meta reveal d3">
+        <span class="pill"><i></i><span id="hl-version">Version 26.11.3</span></span>
+        Home Assistant 2026.9 oder neuer &middot; Deutsch und Englisch &middot; Apache 2.0
+      </p>
     </div>
-    <p class="meta reveal d3">
-      <span class="pill"><i></i><span id="hl-version">Version 26.11.3</span></span>
-      Home Assistant 2026.9 oder neuer &middot; Deutsch und Englisch &middot; Apache 2.0
-    </p>
-
-    <div class="stage reveal d3">
-      <picture>
-        <source media="(prefers-color-scheme: dark)" srcset="images/readme-title-dark.webp">
-        <img class="photo" src="images/readme-title-light.webp" width="2560" height="1280" alt="Wetter & Warnungen: Vorhersage und jede amtliche Warnung.">
-      </picture>
+    <div class="s-lanes" aria-hidden="true">
+      <div class="s-lane"><div class="s-track"><b>DWD-Vorhersage</b></div></div>
+      <div class="s-lane"><div class="s-track"><b>Amtliche Warnungen</b></div></div>
+      <div class="s-lane"><div class="s-track"><b>Ohne Konto</b></div></div>
     </div>
   </div>
 </section>

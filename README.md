@@ -2,14 +2,14 @@
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/images/readme-title-dark.webp" />
-  <img src="docs/images/readme-title-light.webp" alt="Wetter & Warnungen: Vorhersage und jede amtliche Warnung." />
+  <img src="docs/images/readme-title-light.webp" alt="Wetter &amp; Warnungen: Wetter fürs Zuhause in Home Assistant. DWD-Vorhersage. Amtliche Warnungen. Ohne Konto." />
 </picture>
 
 [![Version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FSH1FT-W%2Fwetter-warnungen%2Fmain%2Fcustom_components%2Fwetter%2Fmanifest.json&query=%24.version&label=Version&style=flat-square&color=3D8BFF&labelColor=111111)](https://github.com/SH1FT-W/wetter-warnungen/releases/latest)
 [![Home Assistant](https://img.shields.io/badge/Home%20Assistant-2026.9%2B-3D8BFF?style=flat-square&labelColor=111111&logo=homeassistant&logoColor=white)](https://www.home-assistant.io)
 [![Marketplace](https://img.shields.io/badge/Marketplace-Standard-3D8BFF?style=flat-square&labelColor=111111)](https://hacs.xyz)
 
-<a href="https://sh1ft-w.github.io/wetter-warnungen"><b>Website</b></a>&emsp;<a href="#installation">Installation</a>&emsp;<a href="#einrichtung">Einrichtung</a>&emsp;<a href="#entitaeten">Entitäten</a>&emsp;<a href="CHANGELOG.md">Änderungen</a>
+<a href="https://sh1ft-w.github.io/wetter-warnungen"><b>Website</b></a>&emsp;<a href="#loslegen">Loslegen</a>&emsp;<a href="#entitaeten">Entitäten</a>&emsp;<a href="#beispiele">Beispiele</a>&emsp;<a href="CHANGELOG.md">Änderungen</a>
 
 </div>
 
@@ -22,7 +22,7 @@ Das Wetter an deinem Zuhause in Home Assistant: die **Vorhersage des Deutschen W
 > [!NOTE]
 > Die Warnungen hier ersetzen nicht die offiziellen Warnwege (NINA-App, Radio, Sirenen).
 
-## Was woher kommt
+## Was du bekommst
 
 | Was | Quelle | Wie oft |
 |:--|:--|:--|
@@ -37,12 +37,19 @@ Ist eine Quelle nicht erreichbar, bleiben ihre letzten Warnungen stehen: **keine
 
 **Neu in 26.11:** Pollenflug und UV-Index, *Regen in X Minuten* und Ereignisse je Warnung; Warnungen der höchsten Stufe erscheinen sofort. Alle Änderungen stehen im [Changelog](CHANGELOG.md).
 
-<a id="installation"></a>
-## Installation
+<a id="loslegen"></a><a id="installation"></a><a id="einrichtung"></a>
+## Loslegen
 
 [![Im Marketplace öffnen](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=SH1FT-W&repository=wetter-warnungen&category=integration)
 
-Unter **Einstellungen > Marketplace** (vor Home Assistant 2026.11 heißt er HACS) nach **Wetter & Warnungen** suchen, herunterladen und Home Assistant neu starten.
+Du brauchst Home Assistant 2026.9 oder neuer und einen Ort in Deutschland.
+
+1. **Installieren.** Unter **Einstellungen > Marketplace** (vor Home Assistant 2026.11 heißt er HACS) nach **Wetter & Warnungen** suchen, herunterladen und Home Assistant neu starten.
+2. **Integration hinzufügen.** **Einstellungen > Geräte & Dienste > Integration hinzufügen > Wetter & Warnungen.** Der **Name** gibt den Entitäten ihren Namen („Wetter“ ergibt `weather.wetter`), der **Ort** ist mit dem Zuhause vorbelegt. Die Integration fragt einmal bei Bright Sky nach, ob es dort Daten gibt. Jeder Ort lässt sich nur einmal einrichten.
+3. **Werte aus der Nachbarschaft (optional).** Unter **Konfigurieren** nimmt jedes Feld einen vorhandenen Sensor, egal von welchem Hersteller (Ecowitt, Davis, Shelly, Netatmo und andere). Leer bedeutet DWD-Station. Gut geeignet sind Temperatur, Luftfeuchte und Niederschlag der letzten Stunde; Luftdruck nur, wenn er auf Meereshöhe umgerechnet ist, Wind nur von frei stehenden Windmessern. Einen Netatmo-Wetterbereich trägt die Integration selbst ein; andere Sensoren schlägt sie nicht vor, weil sie nicht weiß, ob ein Thermometer draußen hängt.
+4. **Pollenflug und UV-Index** sind an. Der Schalter in den Optionen entfernt sie, dann fragt die Integration den DWD-Server dafür nicht mehr.
+
+Den Ort später ändern: **Drei-Punkte-Menü > Neu konfigurieren**. Entitäten, Optionen und Verlauf bleiben.
 
 <details>
 <summary>Von Hand installieren</summary>
@@ -51,17 +58,6 @@ Unter **Einstellungen > Marketplace** (vor Home Assistant 2026.11 heißt er HACS
 2. Den Ordner `custom_components/wetter` nach `/config/custom_components/` kopieren und Home Assistant neu starten.
 
 </details>
-
-<a id="einrichtung"></a>
-## Einrichtung
-
-Du brauchst Home Assistant 2026.9 oder neuer und einen Ort in Deutschland.
-
-1. **Integration hinzufügen.** **Einstellungen > Geräte & Dienste > Integration hinzufügen > Wetter & Warnungen.** Der **Name** gibt den Entitäten ihren Namen („Wetter“ ergibt `weather.wetter`), der **Ort** ist mit dem Zuhause vorbelegt. Die Integration fragt einmal bei Bright Sky nach, ob es dort Daten gibt. Jeder Ort lässt sich nur einmal einrichten.
-2. **Werte aus der Nachbarschaft (optional).** Unter **Konfigurieren** nimmt jedes Feld einen vorhandenen Sensor, egal von welchem Hersteller (Ecowitt, Davis, Shelly, Netatmo und andere). Leer bedeutet DWD-Station. Gut geeignet sind Temperatur, Luftfeuchte und Niederschlag der letzten Stunde; Luftdruck nur, wenn er auf Meereshöhe umgerechnet ist, Wind nur von frei stehenden Windmessern. Einen Netatmo-Wetterbereich trägt die Integration selbst ein; andere Sensoren schlägt sie nicht vor, weil sie nicht weiß, ob ein Thermometer draußen hängt.
-3. **Pollenflug und UV-Index** sind an. Der Schalter in den Optionen entfernt sie, dann fragt die Integration den DWD-Server dafür nicht mehr.
-
-Den Ort später ändern: **Drei-Punkte-Menü > Neu konfigurieren**. Entitäten, Optionen und Verlauf bleiben.
 
 <a id="entitaeten"></a>
 ## Entitäten
@@ -94,6 +90,7 @@ Alle gehören zu einem Dienst-Gerät je Ort. Die IDs gelten für den Namen **Wet
 
 </details>
 
+<a id="beispiele"></a>
 ## Beispiele
 
 Genau eine Nachricht je neuer Warnung, auch nach einem Neustart nicht doppelt:
@@ -246,3 +243,11 @@ Testpakete: `uv venv && uv pip install -r requirements_test.txt pytest-cov`. Die
 [Apache License 2.0](LICENSE), Copyright 2026 SH1FT-W. Wetterdaten und DWD-Warnungen: Quelle Deutscher Wetterdienst, CC BY 4.0, siehe [`NOTICE`](NOTICE).
 
 <sub>Wetter &amp; Warnungen ist ein unabhängiges Projekt. Es gehört weder zum Deutschen Wetterdienst, zum Bundesamt für Bevölkerungsschutz und Katastrophenhilfe (BBK) noch zu Bright Sky und wird von ihnen nicht unterstützt.</sub>
+
+<br/>
+
+<div align="center">
+<a href="https://sh1ft-w.github.io"><img src="https://sh1ft-w.github.io/readme/footer.png" width="640" alt="Alle SH1FT-W-Projekte"></a>
+<br/>
+<sub>Mehr Open Source für Home Assistant und den Mac auf <a href="https://sh1ft-w.github.io">sh1ft-w.github.io</a></sub>
+</div>

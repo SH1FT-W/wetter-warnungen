@@ -1,5 +1,5 @@
 {
-  "$comment": "Inhalt des README-Titelbilds. Rendern mit sh1ft-w.github.io/theme/v1/readme-images (node render.mjs <dieses Repo> title). Das Fenster zeigt docs/images/title-shot-{light,dark}.png: den Abschnitt „Die DWD-Vorhersage. Direkt in Home Assistant.“ der docs/index.html mit der Tabelle Was / Quelle / Wie oft, aufgenommen mit playwright bei 1600 px Breite, Gerätefaktor 2, ?still&theme=light|dark, Ausschnitt x 358, y 1680, 884 × 1090; die Streifen lassen den Einleitungstext aus. Die README hat keine Kartentabellen.",
+  "$comment": "Content of the README title. Render with sh1ft-w.github.io/theme/v2/readme-images (node render.mjs <this repo>): banner 1280 x 440 light and dark, social preview 1280 x 640. Used fields: title.name, title.line, title.lanes, title.logo, colors.*.bg/ink/ink2, colors.light.accent. The other fields are from the v1 title and no longer read.",
   "colors": {
     "light": {
       "bg": "#F2F6FC",
@@ -81,6 +81,12 @@
       "left": 640,
       "top": 70
     },
-    "layout": "center"
+    "layout": "center",
+    "line": "Wetter fürs Zuhause in Home Assistant.",
+    "lanes": [
+      "DWD-Vorhersage",
+      "Amtliche Warnungen",
+      "Ohne Konto"
+    ]
   }
 }
