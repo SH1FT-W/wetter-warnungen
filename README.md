@@ -250,4 +250,6 @@ Testpakete: `uv venv && uv pip install -r requirements_test.txt pytest-cov`. Die
 <a href="https://sh1ft-w.github.io"><img src="https://sh1ft-w.github.io/readme/footer.png" width="640" alt="Alle SH1FT-W-Projekte"></a>
 <br/>
 <sub>Mehr Open Source für Home Assistant und den Mac auf <a href="https://sh1ft-w.github.io">sh1ft-w.github.io</a></sub>
+<br/>
+<sub>Gefällt dir das Projekt? <a href="https://buymeacoffee.com/sh1ft_w">Spendier mir einen Kaffee</a></sub>
 </div>
