@@ -16,7 +16,7 @@ und NINA. **Domain und Ordner bleiben `wetter`** (bestehende Installationen); nu
 
 **Versionen** über `tools/next-version` (globale Regeln). Commit-Text `<version>: <was>`. HA/HACS vergleichen per
 AwesomeVersion: `26.10.x` gilt als neuer als das alte `1.3.4`. Jede Änderung in `CHANGELOG.md` unter
-„Unveröffentlicht“ eintragen, beim Release in die Versionsüberschrift.
+`## Unreleased` eintragen (Überschrift englisch, Einträge deutsch), beim Release in die Versionsüberschrift.
 
 ## Aufbau
 - `api.py` Bright-Sky-Client ohne HA, `model.py` reine Auswertung (aktuell, stündlich/täglich, „Regen in“),
