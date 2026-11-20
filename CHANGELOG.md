@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 26.11.6 (20.11.2026)
 
 - **Nachbarschaftswerte in jeder Einheit:** Sensoren aus der Nachbarschaft werden jetzt in die Einheiten der Integration umgerechnet (Wind in km/h, Luftdruck in hPa, Temperatur in °C, Regen in mm). Bisher übernahm die Integration die Zahl unverändert: ein Windmesser in m/s zeigte 5 km/h statt 18 km/h, ein Luftdruck in kPa 101 hPa statt 1013 hPa, und die gefühlte Temperatur stimmte dann auch nicht. Sensoren ohne Einheit gelten wie bisher als passend; eine Einheit, die nicht passt, wird verworfen, dann gilt der DWD-Wert.
 
