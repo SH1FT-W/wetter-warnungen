@@ -114,34 +114,28 @@ def _other_place(stored: dict[str, Any], where: str) -> bool:
 
 
 class _Saving(DataUpdateCoordinator[dict[str, Any]]):
-    """Store written with a delay; a write still pending at unload is done right then.
+    """Store written with a delay; at unload the last state is written and awaited, after that nothing.
 
-    Otherwise the timer of an unloaded coordinator could write its old state after the reloaded one (e.g. the
-    old place's warnings over the new place's after a move).
+    Otherwise a pending or running write of the unloaded coordinator could land after the reloaded one read or
+    wrote the file (e.g. the old place's warnings over the new place's after a move, or a just announced warning
+    announced again).
     """
 
     _store: Store[dict[str, Any]]
-    _unsaved: dict[str, Any] | None = None
     _closed = False
 
     def _save(self, data: dict[str, Any], delay: float) -> None:
         if self._closed:
             # an update still running at unload: its state must not land over the reloaded entry's
             return
-        self._unsaved = data
-
-        def pending() -> dict[str, Any]:
-            self._unsaved = None
-            return data
-
-        self._store.async_delay_save(pending, delay)
+        self._store.async_delay_save(lambda: data, delay)
 
     async def async_shutdown(self) -> None:
-        await super().async_shutdown()
         self._closed = True
-        if (data := self._unsaved) is not None:
-            self._unsaved = None
-            await self._store.async_save(data)
+        await super().async_shutdown()
+        if self.data is not None:
+            # cancels a pending delayed write and waits behind one already running (same store, same lock)
+            await self._store.async_save(self.data)
 
 
 @dataclass(slots=True)
@@ -403,7 +397,9 @@ class WarningsCoordinator(_Saving):
             area = location.get("name") or area
             dwd = [warnings.from_dwd(a, area) for a in alerts]
             ars = warnings.ars_from_warn_cell(location.get("warn_cell_id")) or ars
-        others = await self._nina(ars) if ars else []
+        # Without district NINA cannot be asked. Only when DWD answered is that final ("no NINA warnings"); with DWD
+        # down (e.g. first update after a move) NINA counts as down too, so its warnings get no false all-clear.
+        others = await self._nina(ars) if ars else (None if dwd is None else [])
         stale = [name for name, got in (("DWD", dwd), ("NINA", others)) if got is None]
         merged = (dwd if dwd is not None else self._previous(dwd=True)) + (
             others if others is not None else self._previous(dwd=False)
@@ -458,6 +454,9 @@ class WarningsCoordinator(_Saving):
         """Entities first, then the events: an automation triggered by the event already sees the new state."""
         super().async_update_listeners()
         pending, self._pending = self._pending, []
+        if self._closed:
+            # update finished after unload: its state is not saved, the reloaded entry decides about the events
+            return
         for event_type, data in pending:
             self.hass.bus.async_fire(event_type, data)
 

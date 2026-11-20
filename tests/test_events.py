@@ -349,3 +349,71 @@ async def test_update_running_at_unload_saves_nothing(
     async_fire_time_changed(hass, dt_util.utcnow() + timedelta(seconds=10))
     await hass.async_block_till_done()
     assert hass_storage[f"{DOMAIN}.{entry.entry_id}.warnings"]["data"] == saved
+
+
+async def test_unload_waits_for_a_running_write(
+    hass: HomeAssistant, brightsky: AiohttpClientMocker, entry: MockConfigEntry, hass_storage: dict[str, Any]
+) -> None:
+    """A write already started (its data taken, file not yet written) is not skipped at unload: the last state
+    is on disk before the reloaded entry reads it (else a second "new" for a just announced warning)."""
+    await _setup(hass, entry)
+    async_fire_time_changed(hass, dt_util.utcnow() + timedelta(seconds=10))
+    await hass.async_block_till_done()
+    coordinator = entry.runtime_data.warnings
+
+    def started(_store: Any, func: Any, _delay: float = 0) -> None:
+        func()  # the timer fired and took the data; the file write itself is still to come
+
+    fresh = {**ALERT, "alert_id": "2.49.0.0.276.0.DWD.PVW.NEU"}
+    _alerts(brightsky, [fresh, MINOR, ALERT])
+    with patch("custom_components.wetter.coordinator.Store.async_delay_save", autospec=True, side_effect=started):
+        await coordinator.async_refresh()
+    assert fresh["alert_id"] not in hass_storage[f"{DOMAIN}.{entry.entry_id}.warnings"]["data"]["announced"]
+    assert await hass.config_entries.async_unload(entry.entry_id)
+    assert fresh["alert_id"] in hass_storage[f"{DOMAIN}.{entry.entry_id}.warnings"]["data"]["announced"]
+
+
+async def test_no_events_after_unload(
+    hass: HomeAssistant, brightsky: AiohttpClientMocker, entry: MockConfigEntry
+) -> None:
+    """An update finishing after unload (e.g. homeassistant.update_entity during a reload) fires nothing: its
+    state is not saved, so the reloaded entry would announce the same warning again."""
+    await _setup(hass, entry)
+    coordinator = entry.runtime_data.warnings
+    assert await hass.config_entries.async_unload(entry.entry_id)
+    new = async_capture_events(hass, EVENT_WARNING_NEW)
+    _alerts(brightsky, [{**ALERT, "alert_id": "2.49.0.0.276.0.DWD.PVW.NEU"}, MINOR, ALERT])
+    coordinator.async_set_updated_data(await coordinator._async_update_data())
+    await hass.async_block_till_done()
+    assert new == []
+
+
+async def test_move_with_dwd_down_keeps_nina_warnings(
+    hass: HomeAssistant, brightsky: AiohttpClientMocker, entry: MockConfigEntry, freezer: Any
+) -> None:
+    """DWD down at the first update after a move: the district is unknown, so NINA counts as unknown (stale), not
+    as "no warnings". A NINA warning also covering the new place gets no end plus second "new"."""
+    new = async_capture_events(hass, EVENT_WARNING_NEW)
+    ended = async_capture_events(hass, EVENT_WARNING_ENDED)
+    await _setup(hass, entry)
+    async_fire_time_changed(hass, dt_util.utcnow() + timedelta(seconds=10))
+    await hass.async_block_till_done()
+    assert MOWAS_ID in [e.data["id"] for e in new]
+    brightsky.clear_requests()
+    brightsky.get(f"{API_URL}/current_weather", json=load("current.json"))
+    brightsky.get(f"{API_URL}/weather", json=load("weather.json"))
+    brightsky.get(f"{API_URL}/alerts", exc=TimeoutError)
+    result = await entry.start_reconfigure_flow(hass)
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"], {CONF_LOCATION: {CONF_LATITUDE: 52.53, CONF_LONGITUDE: 13.42}}
+    )
+    assert result["type"] is FlowResultType.ABORT
+    await hass.async_block_till_done(wait_background_tasks=True)
+    assert entry.state is ConfigEntryState.LOADED
+    assert "NINA" in hass.states.get("sensor.wetter_warnungen").attributes.get("stale", [])
+    await _tick(hass, freezer, 11)
+    assert MOWAS_ID not in [e.data["id"] for e in ended], "no all-clear while the district is unknown"
+    _alerts(brightsky, [MINOR, ALERT])  # DWD back: same district, the MoWaS message still covers the home
+    await _tick(hass, freezer)
+    assert [e.data["id"] for e in new].count(MOWAS_ID) == 1
+    assert MOWAS_ID not in [e.data["id"] for e in ended]
