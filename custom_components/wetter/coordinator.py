@@ -103,6 +103,47 @@ def _changed(old: dict[str, Any] | None, new: dict[str, Any], ignore: str | None
     return {k: v for k, v in old.items() if k != ignore} != {k: v for k, v in new.items() if k != ignore}
 
 
+def place(latitude: float, longitude: float) -> str:
+    """Location key kept in every store (precision as sent to Bright Sky): a state of another place is not shown."""
+    return f"{latitude:.4f},{longitude:.4f}"
+
+
+def _other_place(stored: dict[str, Any], where: str) -> bool:
+    """Stored for another location (after a move)? A state without key (older version) counts as this place."""
+    return bool(stored.get("where", where) != where)
+
+
+class _Saving(DataUpdateCoordinator[dict[str, Any]]):
+    """Store written with a delay; a write still pending at unload is done right then.
+
+    Otherwise the timer of an unloaded coordinator could write its old state after the reloaded one (e.g. the
+    old place's warnings over the new place's after a move).
+    """
+
+    _store: Store[dict[str, Any]]
+    _unsaved: dict[str, Any] | None = None
+    _closed = False
+
+    def _save(self, data: dict[str, Any], delay: float) -> None:
+        if self._closed:
+            # an update still running at unload: its state must not land over the reloaded entry's
+            return
+        self._unsaved = data
+
+        def pending() -> dict[str, Any]:
+            self._unsaved = None
+            return data
+
+        self._store.async_delay_save(pending, delay)
+
+    async def async_shutdown(self) -> None:
+        await super().async_shutdown()
+        self._closed = True
+        if (data := self._unsaved) is not None:
+            self._unsaved = None
+            await self._store.async_save(data)
+
+
 @dataclass(slots=True)
 class WetterData:
     """Laufzeitdaten eines Eintrags."""
@@ -116,7 +157,7 @@ class WetterData:
 type WetterConfigEntry = ConfigEntry[WetterData]
 
 
-class WetterCoordinator(DataUpdateCoordinator[dict[str, Any]]):
+class WetterCoordinator(_Saving):
     """Holt Messung und Vorhersage; liefert die zusammengeführten aktuellen Werte."""
 
     config_entry: WetterConfigEntry
@@ -127,6 +168,7 @@ class WetterCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             async_get_clientsession(hass), float(entry.data[CONF_LATITUDE]), float(entry.data[CONF_LONGITUDE])
         )
         self._store: Store[dict[str, Any]] = Store(hass, 1, f"{DOMAIN}.{entry.entry_id}")
+        self._where = place(float(entry.data[CONF_LATITUDE]), float(entry.data[CONF_LONGITUDE]))
         # zusammengeführte Werte, einmal je Aktualisierung gerechnet (alle Entitäten lesen denselben Stand)
         self._values: dict[str, Any] | None = None
         # Option → Entität aus der Nachbarschaft (z. B. Netatmo-Wetterbereich)
@@ -138,6 +180,9 @@ class WetterCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         """Gespeicherten Stand laden; True, wenn es einen gibt (dann startet die Integration ohne Warten)."""
         stored = await self._store.async_load()
         if not isinstance(stored, dict) or not isinstance(stored.get("hourly"), list) or not stored["hourly"]:
+            return False
+        if _other_place(stored, self._where):
+            # moved by reconfigure: the forecast of the old place is not shown, the next save replaces it
             return False
         self.async_set_updated_data(stored)
         return True
@@ -166,10 +211,15 @@ class WetterCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             raise UpdateFailed(
                 translation_domain=DOMAIN, translation_key="update_failed", translation_placeholders={"error": str(err)}
             ) from err
-        data = {"current": current, "hourly": hourly, "fetched": dt_util.utcnow().isoformat(timespec="seconds")}
+        data = {
+            "where": self._where,
+            "current": current,
+            "hourly": hourly,
+            "fetched": dt_util.utcnow().isoformat(timespec="seconds"),
+        }
         if _changed(self.data, data, ignore="fetched"):
             # nur schreiben, wenn sich Messung oder Vorhersage geändert haben, nicht wegen des Zeitstempels allein
-            self._store.async_delay_save(lambda: data, 5)
+            self._save(data, 5)
         return data
 
     @callback
@@ -266,7 +316,7 @@ class WetterCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         return str(cond) if cond else None
 
 
-class WarningsCoordinator(DataUpdateCoordinator[dict[str, Any]]):
+class WarningsCoordinator(_Saving):
     """Amtliche Warnungen: DWD für die Gemeinde (Bright Sky) + alle übrigen Anbieter für den Kreis (NINA).
 
     Fällt eine Quelle aus, bleiben ihre zuletzt bekannten Warnungen stehen, sonst gäbe es eine falsche Entwarnung.
@@ -283,6 +333,7 @@ class WarningsCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         self.nina = NinaClient(async_get_clientsession(hass))
         self._store: Store[dict[str, Any]] = Store(hass, 1, f"{DOMAIN}.{entry.entry_id}.warnings")
         self._latitude, self._longitude = float(entry.data[CONF_LATITUDE]), float(entry.data[CONF_LONGITUDE])
+        self._where = place(self._latitude, self._longitude)
         # Volltexte und Warngebiete der NINA-Meldungen je Kennung+Version (ändern sich nur mit neuer Version)
         self._details: dict[str, dict[str, Any]] = {}
         self._geometry: dict[str, dict[str, Any]] = {}
@@ -304,9 +355,6 @@ class WarningsCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         stored = await self._store.async_load()
         if not isinstance(stored, dict) or not isinstance(stored.get("warnings"), list):
             return False
-        hits = stored.get("nina_hits")
-        if isinstance(hits, dict):
-            self._hits = {str(k): bool(v) for k, v in hits.items()}
         announced = stored.get("announced")
         if isinstance(announced, dict):
             self._announced = {str(k): dict(v) for k, v in announced.items() if isinstance(v, dict)}
@@ -319,6 +367,14 @@ class WarningsCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         missing = stored.get("missing")
         if isinstance(missing, dict):
             self._missing = {str(k): str(v) for k, v in missing.items()}
+        if _other_place(stored, self._where):
+            # Moved by reconfigure: warnings, area, district and NINA decisions of the old place are dropped. Only
+            # the announced warnings stay (with their grace clocks), so each one still gets its end event, and a
+            # warning that also covers the new place gets no second "new".
+            return False
+        hits = stored.get("nina_hits")
+        if isinstance(hits, dict):
+            self._hits = {str(k): bool(v) for k, v in hits.items()}
         self.async_set_updated_data(stored)
         return True
 
@@ -355,6 +411,7 @@ class WarningsCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         found = warnings.drop_expired(warnings.sort(merged), dt_util.utcnow())
         announced = self._announce(found, area, stale)
         data = {
+            "where": self._where,
             "warnings": found,
             "area": area,
             "ars": ars,
@@ -370,7 +427,7 @@ class WarningsCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             raise UpdateFailed(translation_domain=DOMAIN, translation_key="warnings_failed")
         if changed:
             # New or ended warnings are written at once, so a restart right after the event never repeats it
-            self._store.async_delay_save(lambda: data, 0 if self._pending else 5)
+            self._save(data, 0 if self._pending else 5)
         return data
 
     def _announce(self, found: list[dict[str, Any]], area: Any, stale: list[str]) -> dict[str, dict[str, Any]]:
@@ -472,7 +529,7 @@ class WarningsCoordinator(DataUpdateCoordinator[dict[str, Any]]):
                 _LOGGER.debug("NINA-%s für %s fehlt: %s", what, item.get("id"), result)
 
 
-class HealthCoordinator(DataUpdateCoordinator[dict[str, Any]]):
+class HealthCoordinator(_Saving):
     """Pollen and UV index of the DWD, published once a day.
 
     The hourly timer downloads only when new files are due (`next_update` passed, or older than `HEALTH_MAX_AGE`);
@@ -490,7 +547,7 @@ class HealthCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         self._store: Store[dict[str, Any]] = Store(hass, 1, f"{DOMAIN}.{entry.entry_id}.health")
         self._latitude, self._longitude = float(entry.data[CONF_LATITUDE]), float(entry.data[CONF_LONGITUDE])
         # Location the stored pollen region and UV place belong to (a new location looks both up again)
-        self._where = f"{self._latitude:.4f},{self._longitude:.4f}"
+        self._where = place(self._latitude, self._longitude)
 
     async def async_restore(self) -> bool:
         stored = await self._store.async_load()
@@ -562,7 +619,7 @@ class HealthCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             "fetched": now.isoformat(timespec="seconds"),
         }
         # downloads are rare: always keep the time, so a restart does not download again at once
-        self._store.async_delay_save(lambda: data, 5)
+        self._save(data, 5)
         return data
 
     def pollen(self, key: str) -> list[Any]:

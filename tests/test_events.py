@@ -7,7 +7,9 @@ from typing import Any
 from unittest.mock import patch
 
 from homeassistant.config_entries import ConfigEntryState
-from homeassistant.core import Event, HomeAssistant, callback
+from homeassistant.const import CONF_LATITUDE, CONF_LOCATION, CONF_LONGITUDE
+from homeassistant.core import CoreState, Event, HomeAssistant, callback
+from homeassistant.data_entry_flow import FlowResultType
 from homeassistant.util import dt as dt_util
 from pytest_homeassistant_custom_component.common import MockConfigEntry, async_capture_events, async_fire_time_changed
 from pytest_homeassistant_custom_component.test_util.aiohttp import AiohttpClientMocker
@@ -265,3 +267,85 @@ async def test_outage_during_grace_is_reported(
             await _tick(hass, freezer)
     assert save.call_count == 0
     assert not entry.runtime_data.warnings.last_update_success
+
+
+async def test_move_ends_old_warnings(
+    hass: HomeAssistant, brightsky: AiohttpClientMocker, entry: MockConfigEntry, freezer: Any
+) -> None:
+    """After a move the old place's warnings are not shown, but each still gets its end (after the grace time);
+    a warning that also covers the new place stays announced (no second "new")."""
+    new = async_capture_events(hass, EVENT_WARNING_NEW)
+    ended = async_capture_events(hass, EVENT_WARNING_ENDED)
+    await _setup(hass, entry)
+    assert len(new) == 3
+    async_fire_time_changed(hass, dt_util.utcnow() + timedelta(seconds=10))
+    await hass.async_block_till_done()
+    hass.set_state(CoreState.starting)
+    brightsky.clear_requests()
+    brightsky.get(f"{API_URL}/current_weather", json=load("current.json"))
+    brightsky.get(f"{API_URL}/weather", json=load("weather.json"))
+    brightsky.get(f"{API_URL}/alerts", json={"alerts": [ALERT], "location": {"name": "Gemeinde Neustadt"}})
+    result = await entry.start_reconfigure_flow(hass)
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"], {CONF_LOCATION: {CONF_LATITUDE: 52.6, CONF_LONGITUDE: 13.5}}
+    )
+    assert result["type"] is FlowResultType.ABORT
+    await hass.async_block_till_done(wait_background_tasks=True)
+    assert hass.states.get("sensor.wetter_warnungen").state == "1", "only the warning of the new place"
+    assert len(new) == 3 and ended == [], "the storm warning covers both places: no second new"
+
+    hass.set_state(CoreState.running)
+    await _tick(hass, freezer, 11)
+    assert sorted(e.data["id"] for e in ended) == sorted([MINOR["alert_id"], MOWAS_ID])
+    assert len(new) == 3
+
+
+async def test_move_right_after_a_change_saves_new_place(
+    hass: HomeAssistant,
+    brightsky: AiohttpClientMocker,
+    entry: MockConfigEntry,
+    freezer: Any,
+    hass_storage: dict[str, Any],
+) -> None:
+    """A delayed write of the unloaded coordinator must not land over the new place's state (else: second "new"
+    after the next restart)."""
+    new = async_capture_events(hass, EVENT_WARNING_NEW)
+    await _setup(hass, entry)
+    async_fire_time_changed(hass, dt_util.utcnow() + timedelta(seconds=10))
+    await hass.async_block_till_done()
+    # same warnings with another text: a change without event, written with a delay
+    _alerts(brightsky, [{**MINOR, "headline_de": "geändert"}, ALERT])
+    await _tick(hass, freezer)
+    brightsky.clear_requests()
+    brightsky.get(f"{API_URL}/current_weather", json=load("current.json"))
+    brightsky.get(f"{API_URL}/weather", json=load("weather.json"))
+    fresh = {**ALERT, "alert_id": "2.49.0.0.276.0.DWD.PVW.NEU"}
+    brightsky.get(f"{API_URL}/alerts", json={"alerts": [fresh], "location": {"name": "Gemeinde Neustadt"}})
+    result = await entry.start_reconfigure_flow(hass)
+    await hass.config_entries.flow.async_configure(
+        result["flow_id"], {CONF_LOCATION: {CONF_LATITUDE: 52.6, CONF_LONGITUDE: 13.5}}
+    )
+    await hass.async_block_till_done(wait_background_tasks=True)
+    assert [e.data["id"] for e in new][-1] == fresh["alert_id"]
+    async_fire_time_changed(hass, dt_util.utcnow() + timedelta(seconds=10))
+    await hass.async_block_till_done()
+    saved = hass_storage[f"{DOMAIN}.{entry.entry_id}.warnings"]["data"]
+    assert saved["where"] == "52.6000,13.5000"
+    assert fresh["alert_id"] in saved["announced"]
+
+
+async def test_update_running_at_unload_saves_nothing(
+    hass: HomeAssistant, brightsky: AiohttpClientMocker, entry: MockConfigEntry, hass_storage: dict[str, Any]
+) -> None:
+    """An update that finishes after its entry was unloaded (e.g. during a move) writes nothing any more."""
+    await _setup(hass, entry)
+    async_fire_time_changed(hass, dt_util.utcnow() + timedelta(seconds=10))
+    await hass.async_block_till_done()
+    coordinator = entry.runtime_data.warnings
+    saved = dict(hass_storage[f"{DOMAIN}.{entry.entry_id}.warnings"]["data"])
+    assert await hass.config_entries.async_unload(entry.entry_id)
+    _alerts(brightsky, [ALERT])
+    await coordinator._async_update_data()
+    async_fire_time_changed(hass, dt_util.utcnow() + timedelta(seconds=10))
+    await hass.async_block_till_done()
+    assert hass_storage[f"{DOMAIN}.{entry.entry_id}.warnings"]["data"] == saved

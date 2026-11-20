@@ -810,3 +810,113 @@ async def test_extreme_nina_message_severity_from_dashboard(
     brightsky.get(f"{NINA_URL}/warnings/{MOWAS_ID}.geojson", status=500)
     await _setup(hass, entry)
     assert hass.states.get("sensor.wetter_warnungen").state == "1"
+
+
+def _elsewhere(brightsky: AiohttpClientMocker) -> None:
+    """Bright Sky for the new place after a move: other municipality, no warnings, no NINA district."""
+    brightsky.clear_requests()
+    brightsky.get(f"{API_URL}/current_weather", json=load("current.json"))
+    brightsky.get(f"{API_URL}/weather", json=load("weather.json"))
+    brightsky.get(f"{API_URL}/alerts", json={"alerts": [], "location": {"name": "Gemeinde Neustadt"}})
+
+
+async def _saved_then_starting(hass: HomeAssistant, entry: MockConfigEntry, hass_storage: dict[str, Any]) -> None:
+    """Entry ran once and saved its state; HA is starting again, so a restored entry does not fetch yet."""
+    await _setup(hass, entry)
+    async_fire_time_changed(hass, dt_util.utcnow() + timedelta(seconds=10))
+    await hass.async_block_till_done()
+    assert hass_storage[f"{DOMAIN}.{entry.entry_id}"]["data"]["hourly"]
+    assert hass_storage[f"{DOMAIN}.{entry.entry_id}.warnings"]["data"]["area"] == "Gemeinde Musterstadt"
+    hass.set_state(CoreState.starting)
+
+
+async def _reconfigure(hass: HomeAssistant, entry: MockConfigEntry, lat: float, lon: float) -> None:
+    result = await entry.start_reconfigure_flow(hass)
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"], {CONF_LOCATION: {CONF_LATITUDE: lat, CONF_LONGITUDE: lon}}
+    )
+    assert result["type"] is FlowResultType.ABORT and result["reason"] == "reconfigure_successful"
+    await hass.async_block_till_done()
+    assert entry.state is ConfigEntryState.LOADED
+
+
+async def test_move_drops_state_of_old_place(
+    hass: HomeAssistant, brightsky: AiohttpClientMocker, entry: MockConfigEntry, hass_storage: dict[str, Any]
+) -> None:
+    """After a move the saved forecast and warnings of the old place are not shown, not even briefly."""
+    await _saved_then_starting(hass, entry, hass_storage)
+    _elsewhere(brightsky)
+    await _reconfigure(hass, entry, 52.6, 13.5)
+    assert hass.states.get("sensor.wetter_warnungen").state == "0", "no warnings of the old place"
+    assert hass.states.get("binary_sensor.wetter_warnung_4").attributes["region"] == "Neustadt"
+    assert brightsky.call_count == 4, "check in the flow, then weather and warnings fetched at once for the new place"
+
+
+async def test_state_of_older_version_kept_and_tagged(
+    hass: HomeAssistant, brightsky: AiohttpClientMocker, entry: MockConfigEntry, hass_storage: dict[str, Any]
+) -> None:
+    """A state saved by an older version (without place) is shown after the update and gets the place at once."""
+    await _saved_then_starting(hass, entry, hass_storage)
+    keys = (f"{DOMAIN}.{entry.entry_id}", f"{DOMAIN}.{entry.entry_id}.warnings")
+    assert await hass.config_entries.async_unload(entry.entry_id)
+    for key in keys:
+        assert hass_storage[key]["data"].pop("where") == "52.5200,13.4100"
+    calls = brightsky.call_count
+    await _setup(hass, entry)
+    assert brightsky.call_count == calls, "nothing fetched while starting"
+    assert hass.states.get("binary_sensor.wetter_warnung_4").attributes["region"] == "Musterstadt"
+    hass.set_state(CoreState.running)
+    hass.bus.async_fire("homeassistant_started")
+    await hass.async_block_till_done(wait_background_tasks=True)
+    async_fire_time_changed(hass, dt_util.utcnow() + timedelta(seconds=10))
+    await hass.async_block_till_done()
+    for key in keys:
+        assert hass_storage[key]["data"]["where"] == "52.5200,13.4100", "first update after the upgrade saves the place"
+
+
+async def test_same_place_keeps_state(
+    hass: HomeAssistant, brightsky: AiohttpClientMocker, entry: MockConfigEntry, hass_storage: dict[str, Any]
+) -> None:
+    """Reconfigure without a move (also a shift below the stored precision) keeps everything."""
+    await _saved_then_starting(hass, entry, hass_storage)
+    saved = {k: v for k, v in hass_storage.items() if k.startswith(f"{DOMAIN}.")}
+    for lat in (LAT, LAT + 0.00001):
+        _elsewhere(brightsky)
+        await _reconfigure(hass, entry, lat, LON)
+        assert brightsky.call_count == 1, "only the check in the flow, the saved state is shown"
+        assert hass.states.get("binary_sensor.wetter_warnung_4").attributes["region"] == "Musterstadt"
+        assert int(hass.states.get("sensor.wetter_warnungen").state) > 0
+        assert {k: v for k, v in hass_storage.items() if k.startswith(f"{DOMAIN}.")} == saved
+
+
+async def test_reload_keeps_state(
+    hass: HomeAssistant, brightsky: AiohttpClientMocker, entry: MockConfigEntry, hass_storage: dict[str, Any]
+) -> None:
+    """A reload (and so a restart) deletes nothing."""
+    await _saved_then_starting(hass, entry, hass_storage)
+    saved = {k: v for k, v in hass_storage.items() if k.startswith(f"{DOMAIN}.")}
+    _elsewhere(brightsky)
+    assert await hass.config_entries.async_reload(entry.entry_id)
+    await hass.async_block_till_done()
+    assert brightsky.call_count == 0
+    assert hass.states.get("binary_sensor.wetter_warnung_4").attributes["region"] == "Musterstadt"
+    assert {k: v for k, v in hass_storage.items() if k.startswith(f"{DOMAIN}.")} == saved
+
+
+async def test_move_leaves_other_entry_alone(
+    hass: HomeAssistant, brightsky: AiohttpClientMocker, entry: MockConfigEntry, hass_storage: dict[str, Any]
+) -> None:
+    """Only the moved entry loses its saved state."""
+    other = MockConfigEntry(
+        domain=DOMAIN, title="Zweitwohnung", unique_id="50.000,8.000", data={CONF_LATITUDE: 50.0, CONF_LONGITUDE: 8.0}
+    )
+    other.add_to_hass(hass)
+    await _saved_then_starting(hass, entry, hass_storage)
+    theirs = {k: v for k, v in hass_storage.items() if k.startswith(f"{DOMAIN}.{other.entry_id}")}
+    assert len(theirs) == 3
+    _elsewhere(brightsky)
+    await _reconfigure(hass, entry, 52.6, 13.5)
+    async_fire_time_changed(hass, dt_util.utcnow() + timedelta(seconds=10))
+    await hass.async_block_till_done()
+    assert {k: v for k, v in hass_storage.items() if k.startswith(f"{DOMAIN}.{other.entry_id}")} == theirs
+    assert other.state is ConfigEntryState.LOADED

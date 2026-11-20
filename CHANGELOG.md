@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- **Umzug ohne alten Ort:** Nach dem Ändern des Orts (Neu konfigurieren) zeigt die Integration nicht mehr kurz Vorhersage, DWD-Messung und Warnungen des alten Orts aus dem Speicher, sondern fragt gleich für den neuen Ort. Dafür merkt sich jeder gespeicherte Stand seinen Ort (wie schon bei Pollen und UV); ein Stand eines anderen Orts wird verworfen. Warnungen des alten Orts bekommen trotzdem ihr `wetter_warning_ended` (nach den üblichen 10 Minuten), eine Warnung, die auch den neuen Ort betrifft, kein zweites `wetter_warning_new`. Nach einem Umzug wartet der erste Start auf Bright Sky (wie beim ersten Einrichten). Ein noch ausstehender Speichervorgang wird beim Entladen sofort geschrieben, damit er den Stand des neuen Orts nicht später überschreibt. Bei Neu konfigurieren mit demselben Ort und bei jedem Neustart bleibt alles wie bisher; ein Stand aus älteren Versionen gilt als Stand des eingestellten Orts und bekommt den Ort bei der nächsten Abfrage.
+
 ## 26.11.6 (20.11.2026)
 
 - **Nachbarschaftswerte in jeder Einheit:** Sensoren aus der Nachbarschaft werden jetzt in die Einheiten der Integration umgerechnet (Wind in km/h, Luftdruck in hPa, Temperatur in °C, Regen in mm). Bisher übernahm die Integration die Zahl unverändert: ein Windmesser in m/s zeigte 5 km/h statt 18 km/h, ein Luftdruck in kPa 101 hPa statt 1013 hPa, und die gefühlte Temperatur stimmte dann auch nicht. Sensoren ohne Einheit gelten wie bisher als passend; eine Einheit, die nicht passt, wird verworfen, dann gilt der DWD-Wert.
