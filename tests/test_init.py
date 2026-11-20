@@ -24,8 +24,12 @@ from custom_components.wetter import model
 from custom_components.wetter.api import NinaClient, WetterError
 from custom_components.wetter.const import (
     API_URL,
+    CONF_LOCAL_HUMIDITY,
     CONF_LOCAL_PRECIPITATION,
+    CONF_LOCAL_PRESSURE,
     CONF_LOCAL_TEMPERATURE,
+    CONF_LOCAL_WIND_GUST,
+    CONF_LOCAL_WIND_SPEED,
     CONF_POLLEN_UV,
     DOMAIN,
     NINA_URL,
@@ -180,6 +184,51 @@ async def test_local_values_take_precedence(
     await hass.async_block_till_done(wait_background_tasks=True)
     assert brightsky.call_count > calls, "Aktualisierung nach 10 Min. gelaufen"
     assert hass.states.get("sensor.wetter_temperatur").state == str(CURRENT["temperature"]), "veraltet → DWD"
+
+
+@pytest.mark.parametrize(
+    ("option", "key", "unit", "value", "expected"),
+    [
+        (CONF_LOCAL_WIND_SPEED, "wind_speed", "m/s", "5", 18.0),
+        (CONF_LOCAL_WIND_GUST, "wind_gust", "mph", "10", 16.1),
+        (CONF_LOCAL_PRESSURE, "pressure", "kPa", "101.3", 1013.0),
+        (CONF_LOCAL_TEMPERATURE, "temperature", "°F", "50", 10.0),
+        (CONF_LOCAL_PRECIPITATION, "precipitation", "in/h", "0.1", 2.5),
+        (CONF_LOCAL_PRECIPITATION, "precipitation", "in", "0.1", 2.5),
+        (CONF_LOCAL_PRECIPITATION, "precipitation", "mm", "1.2", 1.2),
+        (CONF_LOCAL_HUMIDITY, "humidity", "%", "71", 71.0),
+        (CONF_LOCAL_WIND_SPEED, "wind_speed", "km/h", "12.34", 12.3),
+        (CONF_LOCAL_WIND_SPEED, "wind_speed", None, "12", 12.0),
+        (CONF_LOCAL_WIND_SPEED, "wind_speed", "Fass", "12", None),
+    ],
+)
+async def test_local_values_converted_to_native_units(
+    hass: HomeAssistant,
+    brightsky: AiohttpClientMocker,
+    option: str,
+    key: str,
+    unit: str | None,
+    value: str,
+    expected: float | None,
+) -> None:
+    """Nachbarschaftswerte in anderen Einheiten (Wind in m/s, Druck in kPa) werden umgerechnet, nicht 1:1 übernommen.
+
+    Ohne Einheit gilt der Wert wie bisher als in der Einheit der Integration; eine unbekannte Einheit verwirft ihn.
+    """
+    hass.states.async_set("sensor.nebenan", value, {"unit_of_measurement": unit} if unit else {})
+    entry = MockConfigEntry(
+        domain=DOMAIN,
+        title="Wetter",
+        data={CONF_LATITUDE: LAT, CONF_LONGITUDE: LON},
+        options={option: "sensor.nebenan"},
+    )
+    entry.add_to_hass(hass)
+    await _setup(hass, entry)
+    values = entry.runtime_data.weather.values()
+    if expected is None:
+        assert key not in values["local_sources"], "unbekannte Einheit → DWD-Wert"
+    else:
+        assert values[key] == expected and values["local_sources"][key] == "sensor.nebenan"
 
 
 async def test_local_rain_stops_station_rain(hass: HomeAssistant, aioclient_mock: AiohttpClientMocker) -> None:

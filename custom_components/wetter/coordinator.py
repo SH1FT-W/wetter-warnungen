@@ -11,13 +11,31 @@ import math
 from typing import Any
 
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import CONF_LATITUDE, CONF_LONGITUDE, STATE_UNAVAILABLE, STATE_UNKNOWN
+from homeassistant.const import (
+    ATTR_UNIT_OF_MEASUREMENT,
+    CONF_LATITUDE,
+    CONF_LONGITUDE,
+    STATE_UNAVAILABLE,
+    STATE_UNKNOWN,
+    UnitOfLength,
+    UnitOfPressure,
+    UnitOfSpeed,
+    UnitOfTemperature,
+    UnitOfVolumetricFlux,
+)
 from homeassistant.core import Event, EventStateChangedData, HomeAssistant, callback
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.event import async_track_state_change_event
 from homeassistant.helpers.storage import Store
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 from homeassistant.util import dt as dt_util
+from homeassistant.util.unit_conversion import (
+    BaseUnitConverter,
+    DistanceConverter,
+    PressureConverter,
+    SpeedConverter,
+    TemperatureConverter,
+)
 
 from . import health, model, netatmo, warnings
 from .api import BrightSkyClient, DwdHealthClient, NinaClient, WetterError
@@ -40,6 +58,42 @@ from .const import (
 )
 
 _LOGGER = logging.getLogger(__name__)
+
+_FLUX: set[str | None] = {unit.value for unit in UnitOfVolumetricFlux}
+type _Rule = tuple[type[BaseUnitConverter], str, set[str | None]]
+_WIND: _Rule = (SpeedConverter, UnitOfSpeed.KILOMETERS_PER_HOUR, SpeedConverter.VALID_UNITS - _FLUX)
+# Neighbourhood value → (converter, unit of this integration, accepted units). Humidity (%) is taken as it is.
+# Rain: an amount (mm, in) or a rate (mm/h, in/h), both as mm in the last hour.
+LOCAL_UNITS: dict[str, tuple[_Rule, ...]] = {
+    "temperature": ((TemperatureConverter, UnitOfTemperature.CELSIUS, TemperatureConverter.VALID_UNITS),),
+    "pressure": ((PressureConverter, UnitOfPressure.HPA, PressureConverter.VALID_UNITS),),
+    "wind_speed": (_WIND,),
+    "wind_gust": (_WIND,),
+    "precipitation": (
+        (SpeedConverter, UnitOfVolumetricFlux.MILLIMETERS_PER_HOUR, _FLUX),
+        (
+            DistanceConverter,
+            UnitOfLength.MILLIMETERS,
+            {UnitOfLength.MILLIMETERS, UnitOfLength.CENTIMETERS, UnitOfLength.INCHES},
+        ),
+    ),
+}
+
+
+def _to_native(key: str, value: float, unit: Any) -> float | None:
+    """Neighbourhood value in the unit of this integration; None for a unit that does not fit.
+
+    Without a unit the value counts as already in our unit (as before; template sensors often have none).
+    """
+    rules = LOCAL_UNITS.get(key)
+    if not rules or not unit:
+        return value
+    for converter, native, accepted in rules:
+        if unit == native:
+            return value
+        if unit in accepted:
+            return converter.convert(value, unit, native)
+    return None
 
 
 def _changed(old: dict[str, Any] | None, new: dict[str, Any], ignore: str | None = None) -> bool:
@@ -156,7 +210,10 @@ class WetterCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         except ValueError:
             return None
         # „nan“ oder „inf“ vom Sensor nicht als Messwert übernehmen, dann gilt der DWD-Wert
-        return value if math.isfinite(value) else None
+        if not math.isfinite(value):
+            return None
+        # e.g. wind in m/s or pressure in kPa: converted, never taken 1:1 as km/h or hPa
+        return _to_native(key, value, state.attributes.get(ATTR_UNIT_OF_MEASUREMENT))
 
     def values(self, now: datetime | None = None) -> dict[str, Any]:
         """Aktuelle Werte; Nachbarschaftswerte gehen vor, solange sie frisch sind.

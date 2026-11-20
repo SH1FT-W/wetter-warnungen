@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- **Nachbarschaftswerte in jeder Einheit:** Sensoren aus der Nachbarschaft werden jetzt in die Einheiten der Integration umgerechnet (Wind in km/h, Luftdruck in hPa, Temperatur in °C, Regen in mm). Bisher übernahm die Integration die Zahl unverändert: ein Windmesser in m/s zeigte 5 km/h statt 18 km/h, ein Luftdruck in kPa 101 hPa statt 1013 hPa, und die gefühlte Temperatur stimmte dann auch nicht. Sensoren ohne Einheit gelten wie bisher als passend; eine Einheit, die nicht passt, wird verworfen, dann gilt der DWD-Wert.
+
 ## 26.11.5 (06.11.2026)
 
 - **Regenwahrscheinlichkeit erst ab 5 %:** Der DWD gibt für trockene Stunden fast nie 0 % an, sondern meist 1 bis 2 %. Werte unter 5 % zeigt die Integration jetzt als 0 %: bei *Regenwahrscheinlichkeit*, *Regenwahrscheinlichkeit heute*, in der stündlichen und täglichen Vorhersage der Wetter-Entität und im Attribut von *Regen in*. Ab 5 % bleibt der Wert genau.
