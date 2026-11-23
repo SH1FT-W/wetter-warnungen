@@ -52,6 +52,7 @@ from .const import (
     LOCAL_KEYS,
     LOCAL_MAX_AGE,
     NINA_AREA_WAIT,
+    RADAR_INTERVAL,
     UPDATE_INTERVAL,
     WARNING_END_GRACE,
     WARNINGS_INTERVAL,
@@ -144,6 +145,7 @@ class WetterData:
 
     weather: WetterCoordinator
     warnings: WarningsCoordinator
+    radar: RadarCoordinator
     # None when pollen and UV are switched off in the options
     health: HealthCoordinator | None = None
 
@@ -526,6 +528,35 @@ class WarningsCoordinator(_Saving):
             else:
                 # Meldung ohne diese Zusatzdaten anzeigen, beim nächsten Durchlauf erneut versuchen
                 _LOGGER.debug("NINA-%s für %s fehlt: %s", what, item.get("id"), result)
+
+
+class RadarCoordinator(DataUpdateCoordinator[dict[str, Any]]):
+    """Rain radar of the DWD for the place (Bright Sky): 5-minute steps, measured now and forecast for two hours.
+
+    Not stored: radar data from before a restart is worthless. Never holds up the start; a failed request makes
+    only the radar entities unavailable, weather and warnings go on.
+    """
+
+    config_entry: WetterConfigEntry
+
+    def __init__(self, hass: HomeAssistant, entry: WetterConfigEntry, client: BrightSkyClient) -> None:
+        super().__init__(hass, _LOGGER, config_entry=entry, name=f"{DOMAIN} Regenradar", update_interval=RADAR_INTERVAL)
+        self.client = client
+
+    async def _async_update_data(self) -> dict[str, Any]:
+        now = dt_util.utcnow()
+        try:
+            # one step back, so the running 5-minute step is part of the answer
+            records = await self.client.radar(now - model.RADAR_STEP)
+        except WetterError as err:
+            raise UpdateFailed(
+                translation_domain=DOMAIN, translation_key="radar_failed", translation_placeholders={"error": str(err)}
+            ) from err
+        return {"steps": model.radar_steps(records), "fetched": now.isoformat(timespec="seconds")}
+
+    def outlook(self) -> dict[str, Any] | None:
+        """Intensity now, steps ahead and next precipitation; None before the first answer."""
+        return model.radar_outlook((self.data or {}).get("steps") or [], dt_util.utcnow())
 
 
 class HealthCoordinator(_Saving):

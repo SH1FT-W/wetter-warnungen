@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from datetime import datetime, timedelta
 import json
 from pathlib import Path
 from typing import Any
@@ -61,6 +62,41 @@ MINOR = {
     "headline_de": "Amtliche WARNUNG vor WINDBÖEN",
     "severity": "minor",
 }
+
+
+# First radar step the integration asks for at NOW (one 5-minute step back)
+RADAR_FIRST = "2026-10-15T09:35:00+00:00"
+
+
+def radar_answer(values: list[Any], first: str = RADAR_FIRST) -> dict[str, Any]:
+    """Bright Sky /radar answer (format plain, distance 0) with one value per 5 minutes, in 0.01 mm per 5 minutes.
+
+    Shape as in a real answer from 23.11.2026; place and values are made up.
+    """
+    start = datetime.fromisoformat(first)
+    return {
+        "radar": [
+            {
+                "timestamp": (start + timedelta(minutes=5 * i)).isoformat(),
+                "source": f"RADARCOMP::RV::{first}",
+                "precipitation_5": [[value]],
+            }
+            for i, value in enumerate(values)
+        ],
+        "bbox": [600, 700, 600, 700],
+    }
+
+
+def set_radar(mock: AiohttpClientMocker, values: list[Any] | None = None, **answer: Any) -> None:
+    """Replace the radar answer: `values` per 5-minute step, or `status=`/`exc=`/`json=` for other answers."""
+    mock._mocks[:] = [m for m in mock._mocks if not str(m._url).startswith(f"{API_URL}/radar")]
+    mock.get(f"{API_URL}/radar", **(answer or {"json": radar_answer(values or [0] * 25)}))
+
+
+@pytest.fixture(autouse=True)
+def radar(aioclient_mock: AiohttpClientMocker) -> None:
+    """Rain radar: dry for the next two hours unless a test sets something else."""
+    set_radar(aioclient_mock)
 
 
 @pytest.fixture(autouse=True)

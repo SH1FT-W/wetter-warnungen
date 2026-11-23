@@ -6,7 +6,7 @@ Gemeinde. NINA (warnung.bund.de): alle übrigen amtlichen Warnungen für den Kre
 
 from __future__ import annotations
 
-from datetime import date
+from datetime import date, datetime
 from typing import Any
 
 import aiohttp
@@ -56,6 +56,20 @@ class BrightSkyClient:
         if not isinstance(hours, list) or not hours:
             raise WetterError("Bright Sky: keine Vorhersage für diesen Ort")
         return [h for h in hours if isinstance(h, dict)]
+
+    async def radar(self, first: datetime) -> list[dict[str, Any]]:
+        """Rain radar for the grid cell of the place (1 km): 5-minute steps from `first` for two hours.
+
+        Each record has `timestamp` and `precipitation_5` (a grid of one cell, in 0.01 mm per 5 minutes). A place
+        outside the radar composite answers 404.
+        """
+        data = await self._get(
+            "/radar", {"distance": "0", "format": "plain", "date": first.isoformat(timespec="minutes")}
+        )
+        records = data.get("radar")
+        if not isinstance(records, list) or not records:
+            raise WetterError("Bright Sky: keine Radardaten für diesen Ort")
+        return [r for r in records if isinstance(r, dict)]
 
     async def alerts(self) -> tuple[list[dict[str, Any]], dict[str, Any]]:
         """Aktuelle DWD-Warnungen für die Gemeinde und deren Warnzelle (Name, warn_cell_id)."""

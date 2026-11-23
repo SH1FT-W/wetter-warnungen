@@ -1,4 +1,151 @@
 # serializer version: 1
+# name: test_entities[binary_sensor][binary_sensor.wetter_regen_in_15_minuten-entry]
+  EntityRegistryEntrySnapshot({
+    'aliases': list([
+      None,
+    ]),
+    'area_id': None,
+    'capabilities': None,
+    'config_entry_id': <ANY>,
+    'device_class': None,
+    'disabled_by': None,
+    'domain': 'binary_sensor',
+    'entity_category': None,
+    'entity_id': 'binary_sensor.wetter_regen_in_15_minuten',
+    'has_entity_name': True,
+    'hidden_by': None,
+    'icon': None,
+    'id': <ANY>,
+    'labels': set({
+    }),
+    'name': None,
+    'object_id_base': 'Regen in 15 Minuten',
+    'options': dict({
+    }),
+    'original_device_class': None,
+    'original_icon': None,
+    'original_name': 'Regen in 15 Minuten',
+    'platform': 'wetter',
+    'previous_unique_id': None,
+    'suggested_object_id': None,
+    'supported_features': 0,
+    'translation_key': 'radar_rain_within',
+    'unique_id': '01TESTENTRY0000000000000000_radar_rain_15',
+    'unit_of_measurement': None,
+  })
+# ---
+# name: test_entities[binary_sensor][binary_sensor.wetter_regen_in_15_minuten-state]
+  StateSnapshot({
+    'attributes': ReadOnlyDict({
+      <EntityStateAttribute.ATTRIBUTION: 'attribution'>: 'Deutscher Wetterdienst (über Bright Sky)',
+      <EntityStateAttribute.FRIENDLY_NAME: 'friendly_name'>: 'Wetter Regen in 15 Minuten',
+    }),
+    'context': <ANY>,
+    'entity_id': 'binary_sensor.wetter_regen_in_15_minuten',
+    'last_changed': <ANY>,
+    'last_reported': <ANY>,
+    'last_updated': <ANY>,
+    'state': 'off',
+  })
+# ---
+# name: test_entities[binary_sensor][binary_sensor.wetter_regen_in_30_minuten-entry]
+  EntityRegistryEntrySnapshot({
+    'aliases': list([
+      None,
+    ]),
+    'area_id': None,
+    'capabilities': None,
+    'config_entry_id': <ANY>,
+    'device_class': None,
+    'disabled_by': None,
+    'domain': 'binary_sensor',
+    'entity_category': None,
+    'entity_id': 'binary_sensor.wetter_regen_in_30_minuten',
+    'has_entity_name': True,
+    'hidden_by': None,
+    'icon': None,
+    'id': <ANY>,
+    'labels': set({
+    }),
+    'name': None,
+    'object_id_base': 'Regen in 30 Minuten',
+    'options': dict({
+    }),
+    'original_device_class': None,
+    'original_icon': None,
+    'original_name': 'Regen in 30 Minuten',
+    'platform': 'wetter',
+    'previous_unique_id': None,
+    'suggested_object_id': None,
+    'supported_features': 0,
+    'translation_key': 'radar_rain_within',
+    'unique_id': '01TESTENTRY0000000000000000_radar_rain_30',
+    'unit_of_measurement': None,
+  })
+# ---
+# name: test_entities[binary_sensor][binary_sensor.wetter_regen_in_30_minuten-state]
+  StateSnapshot({
+    'attributes': ReadOnlyDict({
+      <EntityStateAttribute.ATTRIBUTION: 'attribution'>: 'Deutscher Wetterdienst (über Bright Sky)',
+      <EntityStateAttribute.FRIENDLY_NAME: 'friendly_name'>: 'Wetter Regen in 30 Minuten',
+    }),
+    'context': <ANY>,
+    'entity_id': 'binary_sensor.wetter_regen_in_30_minuten',
+    'last_changed': <ANY>,
+    'last_reported': <ANY>,
+    'last_updated': <ANY>,
+    'state': 'off',
+  })
+# ---
+# name: test_entities[binary_sensor][binary_sensor.wetter_regen_in_60_minuten-entry]
+  EntityRegistryEntrySnapshot({
+    'aliases': list([
+      None,
+    ]),
+    'area_id': None,
+    'capabilities': None,
+    'config_entry_id': <ANY>,
+    'device_class': None,
+    'disabled_by': None,
+    'domain': 'binary_sensor',
+    'entity_category': None,
+    'entity_id': 'binary_sensor.wetter_regen_in_60_minuten',
+    'has_entity_name': True,
+    'hidden_by': None,
+    'icon': None,
+    'id': <ANY>,
+    'labels': set({
+    }),
+    'name': None,
+    'object_id_base': 'Regen in 60 Minuten',
+    'options': dict({
+    }),
+    'original_device_class': None,
+    'original_icon': None,
+    'original_name': 'Regen in 60 Minuten',
+    'platform': 'wetter',
+    'previous_unique_id': None,
+    'suggested_object_id': None,
+    'supported_features': 0,
+    'translation_key': 'radar_rain_within',
+    'unique_id': '01TESTENTRY0000000000000000_radar_rain_60',
+    'unit_of_measurement': None,
+  })
+# ---
+# name: test_entities[binary_sensor][binary_sensor.wetter_regen_in_60_minuten-state]
+  StateSnapshot({
+    'attributes': ReadOnlyDict({
+      <EntityStateAttribute.ATTRIBUTION: 'attribution'>: 'Deutscher Wetterdienst (über Bright Sky)',
+      <EntityStateAttribute.FRIENDLY_NAME: 'friendly_name'>: 'Wetter Regen in 60 Minuten',
+    }),
+    'context': <ANY>,
+    'entity_id': 'binary_sensor.wetter_regen_in_60_minuten',
+    'last_changed': <ANY>,
+    'last_reported': <ANY>,
+    'last_updated': <ANY>,
+    'state': 'off',
+  })
+# ---
 # name: test_entities[binary_sensor][binary_sensor.wetter_regen_in_der_nachsten_stunde-entry]
   EntityRegistryEntrySnapshot({
     'aliases': list([
@@ -679,6 +826,60 @@
     'state': 'none',
   })
 # ---
+# name: test_entities[sensor][sensor.wetter_nachster_regen_radar-entry]
+  EntityRegistryEntrySnapshot({
+    'aliases': list([
+      None,
+    ]),
+    'area_id': None,
+    'capabilities': None,
+    'config_entry_id': <ANY>,
+    'device_class': None,
+    'disabled_by': None,
+    'domain': 'sensor',
+    'entity_category': None,
+    'entity_id': 'sensor.wetter_nachster_regen_radar',
+    'has_entity_name': True,
+    'hidden_by': None,
+    'icon': None,
+    'id': <ANY>,
+    'labels': set({
+    }),
+    'name': None,
+    'object_id_base': 'Nächster Regen (Radar)',
+    'options': dict({
+    }),
+    'original_device_class': <SensorDeviceClass.TIMESTAMP: 'timestamp'>,
+    'original_icon': None,
+    'original_name': 'Nächster Regen (Radar)',
+    'platform': 'wetter',
+    'previous_unique_id': None,
+    'suggested_object_id': None,
+    'supported_features': 0,
+    'translation_key': 'radar_next_rain',
+    'unique_id': '01TESTENTRY0000000000000000_radar_next_rain',
+    'unit_of_measurement': None,
+  })
+# ---
+# name: test_entities[sensor][sensor.wetter_nachster_regen_radar-state]
+  StateSnapshot({
+    'attributes': ReadOnlyDict({
+      <EntityStateAttribute.ATTRIBUTION: 'attribution'>: 'Deutscher Wetterdienst (über Bright Sky)',
+      <EntityStateAttribute.DEVICE_CLASS: 'device_class'>: 'timestamp',
+      'end': None,
+      <EntityStateAttribute.FRIENDLY_NAME: 'friendly_name'>: 'Wetter Nächster Regen (Radar)',
+      'length': None,
+      'max': None,
+      'sum': None,
+    }),
+    'context': <ANY>,
+    'entity_id': 'sensor.wetter_nachster_regen_radar',
+    'last_changed': <ANY>,
+    'last_reported': <ANY>,
+    'last_updated': <ANY>,
+    'state': 'unknown',
+  })
+# ---
 # name: test_entities[sensor][sensor.wetter_niederschlag-entry]
   EntityRegistryEntrySnapshot({
     'aliases': list([
@@ -1335,6 +1536,92 @@
     'last_reported': <ANY>,
     'last_updated': <ANY>,
     'state': '1700',
+  })
+# ---
+# name: test_entities[sensor][sensor.wetter_regenradar-entry]
+  EntityRegistryEntrySnapshot({
+    'aliases': list([
+      None,
+    ]),
+    'area_id': None,
+    'capabilities': dict({
+      <SensorEntityCapabilityAttribute.STATE_CLASS: 'state_class'>: <SensorStateClass.MEASUREMENT: 'measurement'>,
+    }),
+    'config_entry_id': <ANY>,
+    'device_class': None,
+    'disabled_by': None,
+    'domain': 'sensor',
+    'entity_category': None,
+    'entity_id': 'sensor.wetter_regenradar',
+    'has_entity_name': True,
+    'hidden_by': None,
+    'icon': None,
+    'id': <ANY>,
+    'labels': set({
+    }),
+    'name': None,
+    'object_id_base': 'Regenradar',
+    'options': dict({
+      'sensor': dict({
+        'suggested_display_precision': 1,
+      }),
+    }),
+    'original_device_class': <SensorDeviceClass.PRECIPITATION_INTENSITY: 'precipitation_intensity'>,
+    'original_icon': None,
+    'original_name': 'Regenradar',
+    'platform': 'wetter',
+    'previous_unique_id': None,
+    'suggested_object_id': None,
+    'supported_features': 0,
+    'translation_key': 'radar_precipitation',
+    'unique_id': '01TESTENTRY0000000000000000_radar_precipitation',
+    'unit_of_measurement': <UnitOfVolumetricFlux.MILLIMETERS_PER_HOUR: 'mm/h'>,
+  })
+# ---
+# name: test_entities[sensor][sensor.wetter_regenradar-state]
+  StateSnapshot({
+    'attributes': ReadOnlyDict({
+      <EntityStateAttribute.ATTRIBUTION: 'attribution'>: 'Deutscher Wetterdienst (über Bright Sky)',
+      <EntityStateAttribute.DEVICE_CLASS: 'device_class'>: 'precipitation_intensity',
+      'forecast': dict({
+        '2026-10-15T09:40:00+00:00': 0.0,
+        '2026-10-15T09:45:00+00:00': 0.0,
+        '2026-10-15T09:50:00+00:00': 0.0,
+        '2026-10-15T09:55:00+00:00': 0.0,
+        '2026-10-15T10:00:00+00:00': 0.0,
+        '2026-10-15T10:05:00+00:00': 0.0,
+        '2026-10-15T10:10:00+00:00': 0.0,
+        '2026-10-15T10:15:00+00:00': 0.0,
+        '2026-10-15T10:20:00+00:00': 0.0,
+        '2026-10-15T10:25:00+00:00': 0.0,
+        '2026-10-15T10:30:00+00:00': 0.0,
+        '2026-10-15T10:35:00+00:00': 0.0,
+        '2026-10-15T10:40:00+00:00': 0.0,
+        '2026-10-15T10:45:00+00:00': 0.0,
+        '2026-10-15T10:50:00+00:00': 0.0,
+        '2026-10-15T10:55:00+00:00': 0.0,
+        '2026-10-15T11:00:00+00:00': 0.0,
+        '2026-10-15T11:05:00+00:00': 0.0,
+        '2026-10-15T11:10:00+00:00': 0.0,
+        '2026-10-15T11:15:00+00:00': 0.0,
+        '2026-10-15T11:20:00+00:00': 0.0,
+        '2026-10-15T11:25:00+00:00': 0.0,
+        '2026-10-15T11:30:00+00:00': 0.0,
+        '2026-10-15T11:35:00+00:00': 0.0,
+      }),
+      <EntityStateAttribute.FRIENDLY_NAME: 'friendly_name'>: 'Wetter Regenradar',
+      'next_end': None,
+      'next_length': None,
+      'next_start': None,
+      <SensorEntityCapabilityAttribute.STATE_CLASS: 'state_class'>: <SensorStateClass.MEASUREMENT: 'measurement'>,
+      <EntityStateAttribute.UNIT_OF_MEASUREMENT: 'unit_of_measurement'>: <UnitOfVolumetricFlux.MILLIMETERS_PER_HOUR: 'mm/h'>,
+    }),
+    'context': <ANY>,
+    'entity_id': 'sensor.wetter_regenradar',
+    'last_changed': <ANY>,
+    'last_reported': <ANY>,
+    'last_updated': <ANY>,
+    'state': '0.0',
   })
 # ---
 # name: test_entities[sensor][sensor.wetter_regenwahrscheinlichkeit-entry]

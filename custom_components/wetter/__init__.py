@@ -12,7 +12,14 @@ from homeassistant.helpers.start import async_at_started
 from homeassistant.helpers.storage import Store
 
 from .const import CONF_POLLEN_UV, DOMAIN
-from .coordinator import HealthCoordinator, WarningsCoordinator, WetterConfigEntry, WetterCoordinator, WetterData
+from .coordinator import (
+    HealthCoordinator,
+    RadarCoordinator,
+    WarningsCoordinator,
+    WetterConfigEntry,
+    WetterCoordinator,
+    WetterData,
+)
 
 PLATFORMS: list[Platform] = [Platform.BINARY_SENSOR, Platform.SENSOR, Platform.WEATHER]
 # Up to 26.11.2: slider that wrote the Netatmo weather area (removed, hacs/default#13248)
@@ -27,7 +34,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: WetterConfigEntry) -> bo
         reg.async_remove(old)
     weather = WetterCoordinator(hass, entry)
     warnings = WarningsCoordinator(hass, entry, weather.client)
-    later: list[WetterCoordinator | WarningsCoordinator | HealthCoordinator] = []
+    # The rain radar never holds up the start and never fails it: always fetched in the background
+    radar = RadarCoordinator(hass, entry, weather.client)
+    later: list[WetterCoordinator | WarningsCoordinator | RadarCoordinator | HealthCoordinator] = [radar]
     for coordinator in (weather, warnings):
         if await coordinator.async_restore():
             later.append(coordinator)
@@ -48,14 +57,13 @@ async def async_setup_entry(hass: HomeAssistant, entry: WetterConfigEntry) -> bo
             health.async_update_listeners()
 
         entry.async_on_unload(async_track_time_change(hass, new_day, minute=0, second=5))
-    if later:
 
-        async def refresh(_hass: HomeAssistant) -> None:
-            for coordinator in later:
-                entry.async_create_background_task(hass, coordinator.async_refresh(), f"{DOMAIN} {coordinator.name}")
+    async def refresh(_hass: HomeAssistant) -> None:
+        for coordinator in later:
+            entry.async_create_background_task(hass, coordinator.async_refresh(), f"{DOMAIN} {coordinator.name}")
 
-        entry.async_on_unload(async_at_started(hass, refresh))
-    entry.runtime_data = WetterData(weather=weather, warnings=warnings, health=health)
+    entry.async_on_unload(async_at_started(hass, refresh))
+    entry.runtime_data = WetterData(weather=weather, warnings=warnings, radar=radar, health=health)
     weather.async_track_local()
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     return True

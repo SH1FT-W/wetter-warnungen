@@ -20,7 +20,7 @@ AwesomeVersion: `26.10.x` gilt als neuer als das alte `1.3.4`. Jede Änderung in
 
 ## Aufbau
 - `api.py` Bright-Sky-Client ohne HA, `model.py` reine Auswertung (aktuell, stündlich/täglich, „Regen in“),
-  `coordinator.py` Wetter + `WarningsCoordinator` + `HealthCoordinator`, `warnings.py` (DWD + NINA) und
+  `coordinator.py` Wetter + `WarningsCoordinator` + `RadarCoordinator` + `HealthCoordinator`, `warnings.py` (DWD + NINA) und
   `health.py` (Pollen/UV von opendata.dwd.de) rein, `netatmo.py` Nachbarschaftswerte. Kein Radius-Regler mehr (Frenck, hacs/default#13248).
 
 ## Warum es so ist (steht nicht im Code)
@@ -33,6 +33,11 @@ AwesomeVersion: `26.10.x` gilt als neuer als das alte `1.3.4`. Jede Änderung in
 - Ereignisse `wetter_warning_new`/`wetter_warning_ended` je Warnungs-ID genau einmal, auch über Neustarts.
 - Bright-Sky-Zeitstempel = Ende der Stunde; `solar` kWh/m² der Stunde → ×1000 = W/m².
 - „Regen in“ = 0 nur bei gemessenem Regen der letzten Stunde (Nachbarschaft/Station), nie aus der Vorhersage.
+- Regenradar (Issue #1): Bright Sky `/radar` mit `distance=0&format=plain&date=<jetzt − 5 Min.>` → 25 Schritte à
+  5 Min. (laufender Schritt + 2 Std. Vorhersage), Wert in 0,01 mm je 5 Min. (×0,12 = mm/h). Ohne `date` beginnt die
+  Antwort eine Stunde früher und reicht nur eine Stunde voraus. `plain` verlangt gzip/br (aiohttp schickt das von
+  selbst, curl nur mit `--compressed`); Ort außerhalb des Radarbilds = 404. Nicht gespeichert, hält den Start nie auf.
+  „Regen in“ und „Regen in der nächsten Stunde“ bleiben bewusst bei Stundenvorhersage + Messung.
 - Nie in Config-Einträge anderer Integrationen schreiben (früher Regler „Nachbarschaft Radius“ in die
   Netatmo-Optionen, von Frenck abgelehnt); die Bereichsgröße stellt man im Optionsdialog von Netatmo ein.
 

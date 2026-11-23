@@ -20,6 +20,11 @@ NINA_AREA_WAIT: Final = timedelta(minutes=5)
 # so viele Warn-Sensoren (wie die Plätze bei NINA)
 WARNING_SLOTS: Final = 5
 
+# Rain radar (RV composite of the DWD via Bright Sky): a new picture every 5 minutes, forecast for two hours
+RADAR_INTERVAL: Final = timedelta(minutes=5)
+# "Rain within … minutes" binary sensors
+RADAR_WITHIN: Final = (15, 30, 60)
+
 FORECAST_DAYS: Final = 8
 FORECAST_HOURS: Final = 48
 

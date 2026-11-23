@@ -104,6 +104,12 @@
       },
       "uv_index_tomorrow": {
         "default": "mdi:sun-wireless-outline"
+      },
+      "radar_precipitation": {
+        "default": "mdi:radar"
+      },
+      "radar_next_rain": {
+        "default": "mdi:weather-rainy"
       }
     },
     "binary_sensor": {
@@ -115,6 +121,13 @@
         }
       },
       "rain_next_hour": {
+        "default": "mdi:umbrella-outline",
+        "state": {
+          "off": "mdi:umbrella-closed-outline",
+          "on": "mdi:umbrella"
+        }
+      },
+      "radar_rain_within": {
         "default": "mdi:umbrella-outline",
         "state": {
           "off": "mdi:umbrella-closed-outline",

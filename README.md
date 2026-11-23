@@ -32,6 +32,7 @@ Das Wetter an deinem Zuhause in Home Assistant: die **Vorhersage des Deutschen W
 | Weitere Warnungen | MoWaS, KATWARN, BIWAPP, Hochwasser und Polizei aus dem Warnsystem des Bundes (NINA), nur wenn das Warngebiet dein Zuhause trifft | alle 2 Minuten |
 | Pollen und UV | Open-Data-Server des DWD: acht Pollenarten für deine Region, UV-Index vom nächsten DWD-Ort | einmal am Tag |
 | Regen in X Minuten | Aus der stündlichen Vorhersage | alle 10 Minuten |
+| Regenradar | Niederschlagsradar des DWD über Bright Sky: dein Ort in 5-Minuten-Schritten für die nächsten zwei Stunden | alle 5 Minuten |
 
 Ist eine Quelle nicht erreichbar, bleiben ihre letzten Warnungen stehen: **keine falsche Entwarnung**. Abgelaufene Warnungen verschwinden trotzdem pünktlich.
 
@@ -73,6 +74,9 @@ Alle gehören zu einem Dienst-Gerät je Ort. Die IDs gelten für den Namen **Wet
 | `sensor.wetter_warnungen` | Anzahl der gültigen Warnungen. Attribute `area`, `highest_severity`, `warnings` (die schlimmste zuerst), `stale` (Quellen, die zuletzt nicht erreichbar waren) |
 | Warnung 1 bis 5 | An = Warnung auf diesem Platz, nach Schwere sortiert. Dieselben Attribute wie die NINA-Integration bis Home Assistant 2026.10 |
 | `sensor.wetter_regen_in` | Minuten bis zum nächsten Niederschlag; dazu `binary_sensor.wetter_regen_in_der_nachsten_stunde` |
+| `sensor.wetter_regenradar` | Niederschlag am Ort laut Radar in mm/h. Attribut `forecast`: die nächsten zwei Stunden in 5-Minuten-Schritten |
+| `sensor.wetter_nachster_regen_radar` | Beginn des nächsten Niederschlags laut Radar, unbekannt ohne Regen in zwei Stunden |
+| Regen in 15, 30 und 60 Minuten | An, wenn es laut Radar regnet oder in dieser Zeit anfängt |
 
 <details>
 <summary>Pollen, UV, Diagnose und die Attribute der Warnungen</summary>
@@ -87,6 +91,8 @@ Alle gehören zu einem Dienst-Gerät je Ort. Die IDs gelten für den Namen **Wet
 **Warnung 1 bis 5:** `headline`, `description`, `recommended_actions`, `severity` (Minor bis Extreme), `provider`, `sender`, `sent`, `start`, `expires`, `more_info_url`, `id`, `affected_areas` (bei DWD die Gemeinde, bei NINA das Gebiet aus der Meldung) und immer `region`. NINA hat diese Attribute mit 2026.11 entfernt, hier bleiben sie.
 
 **Regen in:** Attribute `start`, `precipitation` (mm der Stunde), `precipitation_probability`, `source` (`measurement` oder `forecast`).
+
+**Regenradar:** Attribute `forecast` (Zeit → mm/h), `next_start`, `next_end`, `next_length` (Minuten), benannt wie in der Integration *DWD Precipitation Forecast*, damit Karten von dort weiter passen. `forecast` wird nicht in die Datenbank geschrieben. **Nächster Regen (Radar):** Attribute `end`, `length` (Minuten), `max` (mm/h), `sum` (mm).
 
 </details>
 
@@ -180,7 +186,8 @@ mode: queued
 ## Gut zu wissen
 
 - Die Vorhersage gilt für den nächsten DWD-Vorhersagepunkt, meist wenige Kilometer entfernt. Die Messstation kann weit weg sein; dafür gibt es die Werte aus der Nachbarschaft.
-- *Regen in* ist nur so genau wie die stündliche Vorhersage: Regen gilt ab Beginn der ersten Stunde mit mindestens 0,1 mm. Kein Regenradar, keine Luftqualität.
+- *Regen in* ist nur so genau wie die stündliche Vorhersage: Regen gilt ab Beginn der ersten Stunde mit mindestens 0,1 mm. Keine Luftqualität.
+- Das *Regenradar* sieht zwei Stunden weit und gilt für die Radarzelle deines Orts (1 km). *Regen in 60 Minuten* kommt aus dem Radar, *Regen in der nächsten Stunde* aus der stündlichen Vorhersage und deinem Regenmesser; die beiden können sich unterscheiden. Ist das Radar nicht erreichbar, sind nur seine Entitäten nicht verfügbar.
 - Lässt sich das Warngebiet einer neuen Kreis-Meldung nicht laden, wartet die Integration bis zu 5 Minuten und zeigt sie dann für den ganzen Kreis. Meldungen der höchsten Stufe (*Extreme*) erscheinen sofort.
 - Aktualisiert der DWD eine Warnung, bekommt sie oft eine neue Kennung. Das ergibt ein Ende- und ein Neu-Ereignis.
 - Liegt der Ort außerhalb der 27 Pollenregionen oder weiter als 200 km von einem UV-Ort, bleiben diese Sensoren unbekannt.

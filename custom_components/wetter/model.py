@@ -2,6 +2,7 @@
 
 - `now_values`: aktuelle Werte (Messung der Station, Lücken aus der Vorhersage der laufenden Stunde)
 - `hourly_forecast` / `daily_forecast`: Vorhersage im Format der HA-Wetter-Entität (`native_*`-Schlüssel)
+- `radar_steps` / `radar_outlook`: rain radar in 5-minute steps for the next two hours
 """
 
 from __future__ import annotations
@@ -297,3 +298,73 @@ def rain_in(hourly: list[dict[str, Any]], now: datetime, raining: bool, hours: i
             "source": "forecast",
         }
     return None
+
+
+# Rain radar (RV composite of the DWD): one value per 5 minutes, measured now and forecast for the next two hours
+RADAR_STEP = timedelta(minutes=5)
+# Bright Sky gives 0.01 mm per 5 minutes; times 12 steps per hour, divided by 100 → mm/h
+RADAR_MM_PER_HOUR = 0.12
+
+
+def radar_steps(records: list[dict[str, Any]]) -> list[tuple[datetime, float]]:
+    """Radar records of one grid cell as (time, mm/h), oldest first; unreadable records are skipped."""
+    out: list[tuple[datetime, float]] = []
+    for record in records:
+        ts = parse_time(record.get("timestamp"))
+        cell: Any = record.get("precipitation_5")
+        # `distance=0` answers with a grid of one cell: [[value]]
+        while isinstance(cell, list) and cell:
+            cell = cell[0]
+        value = _num(cell)
+        if ts is None or value is None or value < 0:
+            continue
+        out.append((ts, round(value * RADAR_MM_PER_HOUR, 2)))
+    return sorted(out)
+
+
+def radar_outlook(steps: list[tuple[datetime, float]], now: datetime) -> dict[str, Any] | None:
+    """What the radar says from `now` on: intensity now, the steps ahead and the next precipitation.
+
+    - `intensity`: mm/h of the running 5-minute step.
+    - `forecast`: ISO time → mm/h for the running step and all later ones.
+    - `start`: beginning of the first step with precipitation (in the past by up to 5 minutes when it rains now),
+      `end`: beginning of the first dry step after it (None when it rains to the end of the radar forecast),
+      `length` in minutes, `max` in mm/h and `sum` in mm of that precipitation. All None without precipitation.
+    - None when no step reaches `now` (no data, or data older than the two hours it covers).
+    """
+    ahead = [(ts, value) for ts, value in steps if ts + RADAR_STEP > now]
+    if not ahead:
+        return None
+    out: dict[str, Any] = {
+        "intensity": ahead[0][1],
+        "forecast": {ts.isoformat(): value for ts, value in ahead},
+        "start": None,
+        "end": None,
+        "length": None,
+        "max": None,
+        "sum": None,
+    }
+    wet = next((i for i, (_, value) in enumerate(ahead) if value > 0), None)
+    if wet is None:
+        return out
+    dry = next((i for i in range(wet, len(ahead)) if ahead[i][1] == 0), None)
+    event = [value for _, value in ahead[wet:dry]]
+    start = ahead[wet][0]
+    end = None if dry is None else ahead[dry][0]
+    out.update(
+        start=start,
+        end=end,
+        length=None if end is None else int((end - start).total_seconds() // 60),
+        max=max(event),
+        # mm/h over 5 minutes each
+        sum=round(sum(event) / 12, 2),
+    )
+    return out
+
+
+def rain_within(outlook: dict[str, Any] | None, now: datetime, minutes: int) -> bool | None:
+    """Does the radar see precipitation now or starting within `minutes`? None without radar data."""
+    if outlook is None:
+        return None
+    start = outlook["start"]
+    return start is not None and start - now <= timedelta(minutes=minutes)

@@ -8,7 +8,7 @@ from homeassistant.helpers.device_registry import DeviceEntryType, DeviceInfo
 from homeassistant.helpers.update_coordinator import CoordinatorEntity, DataUpdateCoordinator
 
 from .const import DOMAIN
-from .coordinator import HealthCoordinator, WarningsCoordinator, WetterCoordinator
+from .coordinator import HealthCoordinator, RadarCoordinator, WarningsCoordinator, WetterCoordinator
 
 
 class _Base[C: DataUpdateCoordinator[dict[str, Any]]](CoordinatorEntity[C]):
@@ -48,3 +48,7 @@ class HealthEntity(_Base[HealthCoordinator]):
     """Pollen and UV entity (straight from the DWD Open Data server)."""
 
     _attr_attribution = "Deutscher Wetterdienst"
+
+
+class RadarEntity(_Base[RadarCoordinator]):
+    """Rain radar entity (RV composite of the DWD via Bright Sky)."""

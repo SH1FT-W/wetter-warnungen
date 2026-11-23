@@ -386,6 +386,40 @@
             "name": "Place"
           }
         }
+      },
+      "radar_precipitation": {
+        "name": "Rain radar",
+        "state_attributes": {
+          "forecast": {
+            "name": "Next two hours"
+          },
+          "next_start": {
+            "name": "Next rain starts"
+          },
+          "next_end": {
+            "name": "Next rain ends"
+          },
+          "next_length": {
+            "name": "Length (min)"
+          }
+        }
+      },
+      "radar_next_rain": {
+        "name": "Next rain (radar)",
+        "state_attributes": {
+          "end": {
+            "name": "End"
+          },
+          "length": {
+            "name": "Length (min)"
+          },
+          "max": {
+            "name": "Strongest (mm/h)"
+          },
+          "sum": {
+            "name": "Amount (mm)"
+          }
+        }
       }
     },
     "binary_sensor": {
@@ -438,6 +472,9 @@
       },
       "rain_next_hour": {
         "name": "Rain in the next hour"
+      },
+      "radar_rain_within": {
+        "name": "Rain within {minutes} minutes"
       }
     }
   },
@@ -450,6 +487,9 @@
     },
     "health_failed": {
       "message": "Pollen and UV index could not be loaded from the DWD."
+    },
+    "radar_failed": {
+      "message": "Rain radar could not be loaded: {error}"
     }
   }
 }

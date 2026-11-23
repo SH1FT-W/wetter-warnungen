@@ -386,6 +386,40 @@
             "name": "Ort"
           }
         }
+      },
+      "radar_precipitation": {
+        "name": "Regenradar",
+        "state_attributes": {
+          "forecast": {
+            "name": "Nächste zwei Stunden"
+          },
+          "next_start": {
+            "name": "Nächster Regen ab"
+          },
+          "next_end": {
+            "name": "Nächster Regen bis"
+          },
+          "next_length": {
+            "name": "Dauer (Min.)"
+          }
+        }
+      },
+      "radar_next_rain": {
+        "name": "Nächster Regen (Radar)",
+        "state_attributes": {
+          "end": {
+            "name": "Ende"
+          },
+          "length": {
+            "name": "Dauer (Min.)"
+          },
+          "max": {
+            "name": "Stärkster Regen (mm/h)"
+          },
+          "sum": {
+            "name": "Menge (mm)"
+          }
+        }
       }
     },
     "binary_sensor": {
@@ -438,6 +472,9 @@
       },
       "rain_next_hour": {
         "name": "Regen in der nächsten Stunde"
+      },
+      "radar_rain_within": {
+        "name": "Regen in {minutes} Minuten"
       }
     }
   },
@@ -450,6 +487,9 @@
     },
     "health_failed": {
       "message": "Pollenflug und UV-Index konnten nicht vom DWD geladen werden."
+    },
+    "radar_failed": {
+      "message": "Regenradar konnte nicht geladen werden: {error}"
     }
   }
 }

@@ -30,6 +30,9 @@ Worauf sich dieses Repo bei Home Assistant verlässt. Bei jeder Änderung am Cod
 | `Store.async_delay_save(func, 0)` schreibt praktisch sofort | `coordinator.py` `WarningsCoordinator._async_update_data` | `tests/test_events.py::test_no_repeat_after_restart` |
 | `async_track_time_change(minute, second)` feuert zu jeder vollen Stunde | `__init__.py` `new_day` | `tests/test_health.py::test_fetch_only_when_due_and_shift_at_midnight` |
 | `UV_INDEX` als Einheit, `SensorDeviceClass.DURATION` mit `UnitOfTime.MINUTES` und `MEASUREMENT` | `sensor.py` | `tests/test_snapshot.py` |
+| `SensorDeviceClass.TIMESTAMP` nimmt ein `datetime` mit Zeitzone als Zustand | `sensor.py` `RadarNextRain` | `tests/test_radar.py::test_shower_ahead` |
+| `_unrecorded_attributes` hält ein Attribut (`forecast`) aus dem Recorder | `sensor.py` `RadarSensor` | nicht abgesichert (ohne Wirkung wüchse nur die Datenbank) |
+| Die aiohttp-Session von HA schickt `Accept-Encoding` mit gzip (Bright Sky `/radar` mit `format=plain` verlangt es) | `api.py` `BrightSkyClient.radar` | nicht abgesichert (Fake-Session in den Tests; am 23.11.2026 gegen Bright Sky geprüft) |
 | `BooleanSelector` im Optionsfluss liefert `False` (wird gespeichert, nicht weggefiltert) | `config_flow.py` `WetterOptionsFlow` | `tests/test_health.py::test_switched_off` |
 | `EntityRegistry.async_remove` für abgeschaltete Entitäten beim Laden der Plattform | `sensor.py` `async_setup_entry` | `tests/test_health.py::test_switched_off` |
 | Test: `HomeAssistantSnapshotExtension` aus `pytest_homeassistant_custom_component.syrupy` maskiert Registry-IDs | `tests/test_snapshot.py` | `tests/test_snapshot.py` |

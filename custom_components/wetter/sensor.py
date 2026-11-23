@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import dataclass
+from datetime import datetime
 from typing import Any, cast
 
 from homeassistant.components.sensor import (
@@ -32,8 +33,8 @@ from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
 from . import health, model
 from .const import LOCAL_KEYS
-from .coordinator import HealthCoordinator, WarningsCoordinator, WetterConfigEntry, WetterCoordinator
-from .entity import HealthEntity, WarningEntity, WetterEntity
+from .coordinator import HealthCoordinator, RadarCoordinator, WarningsCoordinator, WetterConfigEntry, WetterCoordinator
+from .entity import HealthEntity, RadarEntity, WarningEntity, WetterEntity
 
 PARALLEL_UPDATES = 0
 
@@ -197,7 +198,12 @@ async def async_setup_entry(
     hass: HomeAssistant, entry: WetterConfigEntry, async_add_entities: AddConfigEntryEntitiesCallback
 ) -> None:
     data = entry.runtime_data
-    entities: list[SensorEntity] = [*(WetterSensor(data.weather, d) for d in SENSORS), WarningsSensor(data.warnings)]
+    entities: list[SensorEntity] = [
+        *(WetterSensor(data.weather, d) for d in SENSORS),
+        WarningsSensor(data.warnings),
+        RadarSensor(data.radar),
+        RadarNextRain(data.radar),
+    ]
     if data.health is not None:
         entities += [PollenSensor(data.health, key) for key in health.POLLEN.values()]
         entities += [UvSensor(data.health, 0), UvSensor(data.health, 1)]
@@ -255,6 +261,71 @@ class WarningsSensor(WarningEntity, SensorEntity):
             "warnings": found,
             # Quellen, die zuletzt nicht erreichbar waren (ihre alten Warnungen stehen noch)
             "stale": self.coordinator.stale,
+        }
+
+
+def _iso(value: datetime | None) -> str | None:
+    return None if value is None else value.isoformat()
+
+
+class RadarSensor(RadarEntity, SensorEntity):
+    """Precipitation at the place right now from the rain radar (mm/h).
+
+    Attributes: the 5-minute steps of the next two hours (`forecast`, time → mm/h) and the next precipitation
+    (`next_start`, `next_end`, `next_length` in minutes), named as in the integration dwd_precipitation_forecast,
+    so dashboards built for it keep working.
+    """
+
+    _attr_translation_key = "radar_precipitation"
+    _attr_device_class = SensorDeviceClass.PRECIPITATION_INTENSITY
+    _attr_native_unit_of_measurement = UnitOfVolumetricFlux.MILLIMETERS_PER_HOUR
+    _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_suggested_display_precision = 1
+    # a new set of 25 values every 5 minutes: shown, but not written to the recorder
+    _unrecorded_attributes = frozenset({"forecast"})
+
+    def __init__(self, coordinator: RadarCoordinator) -> None:
+        super().__init__(coordinator, "radar_precipitation")
+
+    @property
+    def native_value(self) -> float | None:
+        return cast(float | None, (self.coordinator.outlook() or {}).get("intensity"))
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        outlook = self.coordinator.outlook() or {}
+        return {
+            "forecast": outlook.get("forecast") or {},
+            "next_start": _iso(outlook.get("start")),
+            "next_end": _iso(outlook.get("end")),
+            "next_length": outlook.get("length"),
+        }
+
+
+class RadarNextRain(RadarEntity, SensorEntity):
+    """Start of the next precipitation the radar sees within two hours; unknown without any.
+
+    Attributes: `end`, `length` (minutes), `max` (mm/h) and `sum` (mm) of that precipitation.
+    """
+
+    _attr_translation_key = "radar_next_rain"
+    _attr_device_class = SensorDeviceClass.TIMESTAMP
+
+    def __init__(self, coordinator: RadarCoordinator) -> None:
+        super().__init__(coordinator, "radar_next_rain")
+
+    @property
+    def native_value(self) -> datetime | None:
+        return cast(datetime | None, (self.coordinator.outlook() or {}).get("start"))
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        outlook = self.coordinator.outlook() or {}
+        return {
+            "end": _iso(outlook.get("end")),
+            "length": outlook.get("length"),
+            "max": outlook.get("max"),
+            "sum": outlook.get("sum"),
         }
 
 

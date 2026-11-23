@@ -370,8 +370,8 @@ async def test_start_from_saved_state(
     hass.set_state(CoreState.running)
     hass.bus.async_fire("homeassistant_started")
     await hass.async_block_till_done(wait_background_tasks=True)
-    # Messung + Vorhersage, DWD-Warnungen + NINA-Kreis + Volltext und Warngebiet der MoWaS-Meldung
-    assert brightsky.call_count == calls + 6, "nach dem Start frisch"
+    # Messung + Vorhersage, DWD-Warnungen + NINA-Kreis + Volltext und Warngebiet der MoWaS-Meldung, Regenradar
+    assert brightsky.call_count == calls + 7, "nach dem Start frisch"
 
 
 async def test_not_ready_when_bright_sky_down(
