@@ -26,6 +26,10 @@ ENTRY_ID = "01TESTENTRY0000000000000000"
 # The serializer of HA's own test package (pytest-homeassistant, HA 2026.11+) writes these two fields
 # differently than pytest-homeassistant-custom-component; they say nothing about our entities.
 VOLATILE = props("config_subentry_id", "device_id")
+# Since HA 2026.12 (core #191533) the weather units are also registry capabilities and their attribute keys belong to
+# another enum (same values): left out of the registry snapshot, and the weather state is compared with plain text
+# keys, so the units stay covered by the state snapshot on every HA version
+WEATHER_VOLATILE = props("config_subentry_id", "device_id", "capabilities")
 
 
 @pytest.fixture
@@ -63,11 +67,16 @@ async def test_entities(
     )
     assert entries
     for entry in entries:
-        assert entry == snapshot(name=f"{entry.entity_id}-entry", exclude=VOLATILE)
+        exclude = WEATHER_VOLATILE if entry.domain == Platform.WEATHER else VOLATILE
+        assert entry == snapshot(name=f"{entry.entity_id}-entry", exclude=exclude)
         assert entry.disabled_by is None
         state = hass.states.get(entry.entity_id)
         assert state is not None, entry.entity_id
-        assert state == snapshot(name=f"{entry.entity_id}-state")
+        if entry.domain == Platform.WEATHER:
+            plain = {"state": state.state, "attributes": {str(k): v for k, v in state.attributes.items()}}
+            assert plain == snapshot(name=f"{entry.entity_id}-state")
+        else:
+            assert state == snapshot(name=f"{entry.entity_id}-state")
 
 
 async def test_registry_rules(hass: HomeAssistant, loaded: MockConfigEntry, entity_registry: er.EntityRegistry) -> None:

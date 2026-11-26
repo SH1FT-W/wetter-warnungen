@@ -6,7 +6,7 @@
 
 Worauf sich dieses Repo bei Home Assistant verlässt. Bei jeder Änderung am Code mitpflegen.
 
-**Getestet mit:** HA 2026.9.3 (Tests) · **Mindestversion:** siehe `hacs.json` (2026.9.0)
+**Getestet mit:** HA 2026.9.3 (Tests), 2026.12.0b0 (Tests, 26.11.2026) · **Mindestversion:** siehe `hacs.json` (2026.9.0)
 
 ## Annahmen
 
@@ -36,6 +36,7 @@ Worauf sich dieses Repo bei Home Assistant verlässt. Bei jeder Änderung am Cod
 | `BooleanSelector` im Optionsfluss liefert `False` (wird gespeichert, nicht weggefiltert) | `config_flow.py` `WetterOptionsFlow` | `tests/test_health.py::test_switched_off` |
 | `EntityRegistry.async_remove` für abgeschaltete Entitäten beim Laden der Plattform | `sensor.py` `async_setup_entry` | `tests/test_health.py::test_switched_off` |
 | Test: `HomeAssistantSnapshotExtension` aus `pytest_homeassistant_custom_component.syrupy` maskiert Registry-IDs | `tests/test_snapshot.py` | `tests/test_snapshot.py` |
+| Die Einheiten der Wetter-Entität (`native_*_unit`) stehen als Zustandsattribute; seit HA 2026.12 (Core #191533) zusätzlich als `capabilities` in der Entity-Registry, die Attribut-Schlüssel gehören dort zu `WeatherEntityCapabilityAttribute` (gleiche Werte) | `weather.py` | `tests/test_snapshot.py::test_entities[weather]` (Registry ohne `capabilities`, Zustand mit Text-Schlüsseln, auf jeder HA-Version gleich) |
 
 ## Fremde Integrationen
 
